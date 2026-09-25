@@ -78,7 +78,7 @@ class ToolTests(unittest.TestCase):
                 {'op': 'row_copy_choices', 'source': 'gear', 'target': 'element'},
                 {'op': 'row_move_choices', 'source': 'onepick', 'target': 'element'},
                 {'op': 'design_import', 'target': 'gear', 'design': {
-                    'version': '2.10.6',
+                    'version': '2.10.7',
                     'styling': {'rowMargin': '12', 'barTextSize': 99, 'backgroundColor': '#010203FF'},
                 }},
             ]
@@ -109,7 +109,7 @@ class ToolTests(unittest.TestCase):
             {'op': 'row_sort', 'row': 'gear', 'by': 'width-biggest'},
             {'op': 'row_copy_choices', 'source': 'gear', 'target': 'element'},
             {'op': 'row_move_choices', 'source': 'onepick', 'target': 'element'},
-            {'op': 'design_import', 'target': 'global', 'design': {'version': '2.10.6', 'styling': {'rowMargin': 4}}},
+            {'op': 'design_import', 'target': 'global', 'design': {'version': '2.10.7', 'styling': {'rowMargin': 4}}},
         ]
         jsonschema.validate({'operations': operations}, schema)
 
@@ -303,7 +303,7 @@ class ToolTests(unittest.TestCase):
 
     def test_selectable_addon_under_nonselectable_parent_matches_viewer(self):
         project = {
-            'version': '2.10.6',
+            'version': '2.10.7',
             'pointTypes': [],
             'rows': [{
                 'id': 'row_test', 'title': 'Test', 'titleText': '', 'allowedChoices': 0, 'requireds': [],
@@ -328,7 +328,7 @@ class ToolTests(unittest.TestCase):
 
     def test_forced_activation_of_nonselectable_choice_matches_viewer(self):
         project = {
-            'version': '2.10.6', 'pointTypes': [],
+            'version': '2.10.7', 'pointTypes': [],
             'rows': [{'id': 'r', 'title': 'R', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [
                 {'id': 'target', 'title': 'Target', 'text': '', 'isNotSelectable': True, 'requireds': [], 'scores': [], 'addons': []},
                 {'id': 'source', 'title': 'Source', 'text': '', 'requireds': [], 'scores': [], 'addons': [], 'activateOtherChoice': True, 'activateThisChoice': 'target'},
@@ -347,7 +347,7 @@ class ToolTests(unittest.TestCase):
 
     def test_allow_deselect_forced_activation_does_not_lock_target(self):
         project = {
-            'version': '2.10.6', 'pointTypes': [],
+            'version': '2.10.7', 'pointTypes': [],
             'rows': [{'id': 'r', 'title': 'R', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [
                 {'id': 'target', 'title': 'Target', 'text': '', 'isNotSelectable': True, 'requireds': [], 'scores': [], 'addons': []},
                 {'id': 'source', 'title': 'Source', 'text': '', 'requireds': [], 'scores': [], 'addons': [], 'activateOtherChoice': True, 'activateThisChoice': 'target', 'isAllowDeselect': True},
@@ -362,7 +362,7 @@ class ToolTests(unittest.TestCase):
 
     def test_auto_active_allow_deselect_provider_leaves_target_editable(self):
         project = {
-            'version': '2.10.6', 'pointTypes': [],
+            'version': '2.10.7', 'pointTypes': [],
             'rows': [{'id': 'r', 'title': 'R', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [
                 {'id': 'target', 'title': 'Target', 'text': '', 'isNotSelectable': True, 'requireds': [], 'scores': [], 'addons': []},
                 {'id': 'source', 'title': 'Source', 'text': '', 'requireds': [], 'scores': [], 'addons': [],
@@ -379,7 +379,7 @@ class ToolTests(unittest.TestCase):
 
     def test_multiply_by_times_is_one_based(self):
         project = {
-            'version': '2.10.6',
+            'version': '2.10.7',
             'pointTypes': [{'id': 'p', 'name': 'P', 'startingSum': 20, 'belowZeroNotAllowed': True}],
             'rows': [{'id': 'r', 'title': 'R', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [{
                 'id': 'multi', 'title': 'Multi', 'text': '', 'requireds': [], 'addons': [],
@@ -397,7 +397,7 @@ class ToolTests(unittest.TestCase):
 
     def test_negative_points_are_allowed_unless_point_type_forbids_them(self):
         project = {
-            'version': '2.10.6',
+            'version': '2.10.7',
             'pointTypes': [{'id': 'p', 'name': 'P', 'startingSum': 1, 'belowZeroNotAllowed': False}],
             'rows': [{'id': 'r', 'title': 'R', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [{
                 'id': 'x', 'title': 'X', 'text': '', 'requireds': [], 'addons': [],
@@ -413,7 +413,7 @@ class ToolTests(unittest.TestCase):
 
     def test_below_zero_not_allowed_is_semantic_and_transactional(self):
         project = {
-            'version': '2.10.6',
+            'version': '2.10.7',
             'pointTypes': [{'id': 'p', 'name': 'P', 'startingSum': 1, 'belowZeroNotAllowed': True}],
             'rows': [{'id': 'r', 'title': 'R', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [{
                 'id': 'x', 'title': 'X', 'text': '', 'requireds': [], 'addons': [],
@@ -429,7 +429,7 @@ class ToolTests(unittest.TestCase):
 
     def test_point_requirement_can_reject_result_even_when_negative_balance_is_allowed(self):
         project = {
-            'version': '2.10.6',
+            'version': '2.10.7',
             'pointTypes': [{'id': 'p', 'name': 'P', 'startingSum': 1, 'belowZeroNotAllowed': False}],
             'rows': [{'id': 'r', 'title': 'R', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [{
                 'id': 'x', 'title': 'X', 'text': '',
@@ -447,7 +447,7 @@ class ToolTests(unittest.TestCase):
 
     def test_failed_addon_selection_rolls_back_internal_parent_activation(self):
         project = {
-            'version': '2.10.6',
+            'version': '2.10.7',
             'pointTypes': [{'id': 'p', 'name': 'P', 'startingSum': 2, 'belowZeroNotAllowed': True}],
             'rows': [{'id': 'r', 'title': 'R', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [{
                 'id': 'container', 'title': 'Container', 'text': '', 'isNotSelectable': True, 'isCountDisabled': True,
@@ -465,7 +465,7 @@ class ToolTests(unittest.TestCase):
 
     def test_player_view_hides_invisible_choices_and_ignores_images(self):
         project = {
-            'version': '2.10.6',
+            'version': '2.10.7',
             'styling': {'reqFilterVisibleIsOn': True},
             'pointTypes': [],
             'rows': [{'id': 'r', 'title': 'R', 'titleText': 'Description', 'allowedChoices': 0, 'requireds': [], 'objects': [
@@ -487,7 +487,7 @@ class ToolTests(unittest.TestCase):
 
     def test_player_view_selected_ids_do_not_leak_selected_filter_hidden_choices(self):
         project = {
-            'version': '2.10.6',
+            'version': '2.10.7',
             'styling': {'selFilterVisibleIsOn': True},
             'pointTypes': [],
             'rows': [{'id': 'r', 'title': 'R', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [{
@@ -504,7 +504,7 @@ class ToolTests(unittest.TestCase):
 
     def test_verbose_player_view_only_returns_requirements_the_viewer_displays(self):
         project = {
-            'version': '2.10.6',
+            'version': '2.10.7',
             'styling': {'reqFilterVisibleIsOn': False},
             'pointTypes': [],
             'rows': [{'id': 'r', 'title': 'R', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [
@@ -530,7 +530,7 @@ class ToolTests(unittest.TestCase):
 
     def test_verbose_player_view_does_not_leak_forced_provider_ids(self):
         project = {
-            'version': '2.10.6', 'pointTypes': [],
+            'version': '2.10.7', 'pointTypes': [],
             'rows': [{'id': 'r', 'title': 'R', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [
                 {'id': 'target', 'title': 'Target', 'text': '', 'requireds': [], 'scores': [], 'addons': []},
                 {'id': 'hidden_provider', 'title': 'Provider', 'text': '', 'requireds': [], 'scores': [], 'addons': [],
@@ -547,7 +547,7 @@ class ToolTests(unittest.TestCase):
 
     def test_verbose_player_view_never_exposes_row_requirement_text_or_internal_hide_flags(self):
         project = {
-            'version': '2.10.6',
+            'version': '2.10.7',
             'styling': {'reqFilterVisibleIsOn': False},
             'pointTypes': [],
             'rows': [
@@ -573,14 +573,14 @@ class ToolTests(unittest.TestCase):
         self.assertNotIn('objectTitleRemoved', raw)
 
     def test_player_view_semantic_errors_never_echo_unmapped_internal_messages(self):
-        sim = Simulator({'version': '2.10.6', 'pointTypes': [], 'rows': []})
+        sim = Simulator({'version': '2.10.7', 'pointTypes': [], 'rows': []})
         value = sim._player_semantic_errors([{'code': 'future.internal_code', 'message': 'secret_internal_id should never escape'}])
         self.assertEqual(value, [{'code': 'future.internal_code', 'message': 'action is not available'}])
         self.assertNotIn('secret_internal_id', json.dumps(value))
 
     def test_player_view_sanitizes_row_capacity_without_row_id(self):
         project = {
-            'version': '2.10.6', 'pointTypes': [],
+            'version': '2.10.7', 'pointTypes': [],
             'rows': [{
                 'id': 'secret_row_id', 'title': 'Pick one', 'titleText': '', 'allowedChoices': 1, 'requireds': [],
                 'objects': [
@@ -598,7 +598,7 @@ class ToolTests(unittest.TestCase):
 
     def test_player_view_does_not_expose_below_zero_configuration_flag(self):
         project = {
-            'version': '2.10.6',
+            'version': '2.10.7',
             'pointTypes': [{'id': 'p', 'name': 'Budget', 'startingSum': 3, 'belowZeroNotAllowed': True}],
             'rows': [],
         }
@@ -608,7 +608,7 @@ class ToolTests(unittest.TestCase):
 
     def test_player_view_replaces_word_placeholders_like_viewer(self):
         project = {
-            'version': '2.10.6',
+            'version': '2.10.7',
             'pointTypes': [{'id': 'budget_token', 'name': 'Budget', 'startingSum': 7, 'belowZeroNotAllowed': False, 'allowFloat': False}],
             'words': [
                 {'id': 'budget_token', 'replaceText': 'wrong'},
@@ -629,7 +629,7 @@ class ToolTests(unittest.TestCase):
 
     def test_image_hide_codes_are_not_carried_as_gameplay_state(self):
         project = {
-            'version': '2.10.6', 'pointTypes': [],
+            'version': '2.10.7', 'pointTypes': [],
             'rows': [
                 {'id': 'control', 'title': 'Control', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [{
                     'id': 'hider', 'title': 'Hider', 'text': '', 'requireds': [], 'scores': [], 'addons': [],
@@ -646,7 +646,7 @@ class ToolTests(unittest.TestCase):
 
     def test_runtime_content_hiding_is_reflected_in_verbose_player_view(self):
         project = {
-            'version': '2.10.6',
+            'version': '2.10.7',
             'pointTypes': [{'id': 'p', 'name': 'P', 'startingSum': 10, 'belowZeroNotAllowed': False}],
             'rows': [
                 {'id': 'control', 'title': 'Control', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [{
@@ -672,7 +672,7 @@ class ToolTests(unittest.TestCase):
 
     def test_auto_active_defaults_are_applied_and_locked(self):
         project = {
-            'version': '2.10.6', 'pointTypes': [],
+            'version': '2.10.7', 'pointTypes': [],
             'rows': [{'id': 'r', 'title': 'R', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [{
                 'id': 'default', 'title': 'Default', 'text': '', 'requireds': [], 'scores': [], 'addons': [],
                 'isAutoActive': True,
@@ -688,7 +688,7 @@ class ToolTests(unittest.TestCase):
 
     def test_point_bar_visibility_matches_viewer_gate(self):
         project = {
-            'version': '2.10.6',
+            'version': '2.10.7',
             'pointTypes': [
                 {'id': 'shown', 'name': 'Shown', 'startingSum': -2, 'belowZeroNotAllowed': False},
                 {'id': 'gated', 'name': 'Gated', 'startingSum': 4, 'belowZeroNotAllowed': False,
@@ -706,7 +706,7 @@ class ToolTests(unittest.TestCase):
 
     def test_forced_activation_of_already_active_target_registers_provider(self):
         project = {
-            'version': '2.10.6', 'pointTypes': [],
+            'version': '2.10.7', 'pointTypes': [],
             'rows': [{'id': 'r', 'title': 'R', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [
                 {'id': 'target', 'title': 'Target', 'text': '', 'requireds': [], 'scores': [], 'addons': []},
                 {'id': 'source', 'title': 'Source', 'text': '', 'requireds': [], 'scores': [], 'addons': [],
@@ -725,7 +725,7 @@ class ToolTests(unittest.TestCase):
 
     def test_bare_forced_multi_target_does_not_add_a_selection(self):
         project = {
-            'version': '2.10.6', 'pointTypes': [],
+            'version': '2.10.7', 'pointTypes': [],
             'rows': [{'id': 'r', 'title': 'R', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [
                 {'id': 'multi', 'title': 'Multi', 'text': '', 'requireds': [], 'scores': [], 'addons': [],
                  'isSelectableMultiple': True, 'isMultipleUseVariable': True, 'numMultipleTimesPluss': 5},
@@ -740,7 +740,7 @@ class ToolTests(unittest.TestCase):
 
     def test_action_script_stops_after_first_invalid_player_action(self):
         project = {
-            'version': '2.10.6', 'pointTypes': [],
+            'version': '2.10.7', 'pointTypes': [],
             'rows': [{'id': 'r', 'title': 'R', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [
                 {'id': 'blocked', 'title': 'Blocked', 'text': '', 'requireds': [], 'scores': [], 'addons': [], 'isNotSelectable': True},
                 {'id': 'later', 'title': 'Later', 'text': '', 'requireds': [], 'scores': [], 'addons': []},
@@ -757,7 +757,7 @@ class ToolTests(unittest.TestCase):
 
     def test_generate_compact_project_fragment(self):
         fragment = {
-            'version': '2.10.6',
+            'version': '2.10.7',
             'pointTypes': [{'id': 'budget', 'name': 'Budget', 'startingSum': 10, 'belowZeroNotAllowed': True}],
             'rows': [{
                 'id': 'row-main',
