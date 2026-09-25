@@ -9,6 +9,7 @@ from .field_catalog import STYLE_FIELD_GROUPS
 from .model import Entity, ProjectIndex
 from .selectors import select_entities, check_expected_count
 from .image_assets import prepare_image_reference
+from .creator_helpers import import_design
 
 VISUAL_KINDS = {'row', 'backpack_row', 'choice', 'addon', 'selectable_addon'}
 _STYLE_FIELDS = {field for fields in STYLE_FIELD_GROUPS.values() for field in fields}
@@ -16,7 +17,11 @@ _VISUAL_SPEC_KEYS = {
     'image', 'clear_image', 'template', 'width', 'styling', 'copy_from', 'copy_image',
     'replace_styling', 'unset_styling',
 }
-_ITEM_META_KEYS = {'ref', 'id', 'refs', 'where', 'expect', 'allow_empty', 'preset', 'presets', 'source', 'credit', 'notes'}
+_ITEM_META_KEYS = {
+    'ref', 'id', 'refs', 'where', 'expect', 'allow_empty', 'preset', 'presets',
+    'design_group', 'design_groups', 'source', 'credit', 'notes',
+}
+_DESIGN_GROUP_SPEC_KEYS = {'kind', 'name', 'activated_id', 'category', 'styling', 'replace_styling', 'unset_styling'}
 
 
 def _strings(value: Any) -> list[str]:
@@ -74,6 +79,158 @@ def _flatten_styling(value: Any, *, label: str = 'styling') -> dict[str, Any]:
     return out
 
 
+
+
+def _validate_design_group_spec(name: str, spec: Any) -> dict[str, Any]:
+    if not isinstance(spec, dict):
+        raise ValueError(f'design_groups.{name} must be an object')
+    unknown = set(spec) - _DESIGN_GROUP_SPEC_KEYS
+    if unknown:
+        raise ValueError(f'unknown design_groups.{name} field(s): {", ".join(sorted(unknown))}')
+    kind = spec.get('kind')
+    if kind not in {'row', 'choice'}:
+        raise ValueError(f'design_groups.{name}.kind must be "row" or "choice"')
+    if 'styling' in spec:
+        _flatten_styling(spec.get('styling'), label=f'design_groups.{name}.styling')
+    unset = spec.get('unset_styling')
+    if unset is not None:
+        if not isinstance(unset, list) or any(not isinstance(x, str) or not x for x in unset):
+            raise ValueError(f'design_groups.{name}.unset_styling must be an array of non-empty strings')
+        unknown_style = set(unset) - _STYLE_FIELDS
+        if unknown_style:
+            raise ValueError(f'unknown design_groups.{name}.unset_styling field(s): {", ".join(sorted(unknown_style))}')
+    if 'activated_id' in spec and not isinstance(spec.get('activated_id'), str):
+        raise ValueError(f'design_groups.{name}.activated_id must be a string')
+    if 'category' in spec and (not isinstance(spec.get('category'), int) or isinstance(spec.get('category'), bool)):
+        raise ValueError(f'design_groups.{name}.category must be an integer')
+    return spec
+
+
+def _upsert_design_group(project: dict[str, Any], design_id: str, spec: dict[str, Any]) -> dict[str, Any]:
+    _validate_design_group_spec(design_id, spec)
+    if not design_id:
+        raise ValueError('design group IDs must be non-empty strings')
+    entity_kind = 'row_design_group' if spec['kind'] == 'row' else 'choice_design_group'
+    collection_key = 'rowDesignGroups' if spec['kind'] == 'row' else 'objectDesignGroups'
+
+    idx = ProjectIndex(project)
+    matches = idx.find(design_id)
+    same = [ent for ent in matches if ent.kind == entity_kind]
+    if len(same) > 1:
+        raise ValueError(f'design group ID is ambiguous: {design_id}')
+    if matches and not same:
+        raise ValueError(f'design group ID {design_id!r} collides with another project entity')
+
+    changed: list[str] = []
+    created = not same
+    if same:
+        group = same[0].value
+    else:
+        groups = project.setdefault(collection_key, [])
+        if not isinstance(groups, list):
+            raise ValueError(f'project.{collection_key} must be an array')
+        group = {
+            'id': design_id,
+            'name': str(spec.get('name') or design_id),
+            'activatedId': str(spec.get('activated_id') or ''),
+            'elements': [],
+            'backpackElements': [],
+            'groupElements': [],
+            'styling': {},
+            'category': int(spec.get('category', -1)),
+        }
+        groups.append(group)
+        changed.append('created')
+
+    if 'name' in spec:
+        name = str(spec.get('name') or design_id)
+        if group.get('name') != name:
+            group['name'] = name
+            changed.append('name')
+    if 'activated_id' in spec:
+        value = str(spec.get('activated_id') or '')
+        if group.get('activatedId') != value:
+            group['activatedId'] = value
+            changed.append('activatedId')
+    if 'category' in spec:
+        value = int(spec['category'])
+        if group.get('category') != value:
+            group['category'] = value
+            changed.append('category')
+
+    if 'styling' in spec or spec.get('replace_styling') is True or spec.get('unset_styling'):
+        current = group.get('styling') if isinstance(group.get('styling'), dict) else {}
+        final_style = {} if spec.get('replace_styling') is True else copy.deepcopy(current)
+        final_style.update(_flatten_styling(spec.get('styling'), label=f'design_groups.{design_id}.styling'))
+        for key in spec.get('unset_styling') or []:
+            final_style.pop(key, None)
+        if final_style != current:
+            changed.append('styling')
+        info = import_design(project, design_id, {'version': project.get('version'), 'styling': final_style})
+        for key in info.get('private_switches', {}):
+            changed.append(key)
+
+    return {
+        'id': design_id,
+        'kind': entity_kind,
+        'created': created,
+        'changed': list(dict.fromkeys(changed)),
+    }
+
+
+def _design_group_refs(value: Any, *, label: str) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, str):
+        value = [value]
+    if not isinstance(value, list) or any(not isinstance(x, str) or not x.strip() for x in value):
+        raise ValueError(f'{label} must be a non-empty string or array of non-empty strings')
+    return list(dict.fromkeys(x.strip() for x in value))
+
+
+def _assign_design_groups(project: dict[str, Any], ent: Entity, design_ids: list[str]) -> list[str]:
+    if not design_ids:
+        return []
+    if ent.kind in {'row', 'backpack_row'}:
+        target_kind = 'row_design_group'
+        field = 'rowDesignGroups'
+    elif ent.kind == 'choice':
+        target_kind = 'choice_design_group'
+        field = 'objectDesignGroups'
+    else:
+        raise ValueError(
+            f'official Design Groups apply to Rows and Choices, not {ent.kind}; '
+            'style the parent Row/Choice or use private styling only when no reusable scope fits'
+        )
+
+    memberships = ent.value.get(field)
+    if not isinstance(memberships, list):
+        memberships = []
+        ent.value[field] = memberships
+
+    idx = ProjectIndex(project)
+    changed: list[str] = []
+    for design_id in design_ids:
+        group = idx.one(design_id, target_kind)
+        if group is None:
+            other = idx.find(design_id)
+            if other:
+                raise ValueError(f'design group {design_id!r} exists but is not a {target_kind.replace("_", " ")}')
+            raise ValueError(f'design group not found: {design_id}')
+        if design_id not in memberships:
+            memberships.append(design_id)
+            changed.append(field)
+
+        is_backpack = ent.kind == 'backpack_row' or ent.path.startswith('/backpack/')
+        member_field = 'backpackElements' if is_backpack else 'elements'
+        members = group.value.get(member_field)
+        if not isinstance(members, list):
+            members = []
+            group.value[member_field] = members
+        if ent.id not in members:
+            members.append(ent.id)
+            changed.append(f'{target_kind}.{design_id}.{member_field}')
+    return changed
 
 
 def _image_kind(image: str) -> str:
@@ -372,7 +529,7 @@ def apply_visual_manifest(
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     if not isinstance(manifest, dict):
         raise ValueError('visual manifest must be an object')
-    allowed_top = {'format', 'format_version', 'project', 'defaults', 'presets', 'items'}
+    allowed_top = {'format', 'format_version', 'project', 'design_groups', 'defaults', 'presets', 'items'}
     unknown_top = set(manifest) - allowed_top
     if unknown_top:
         raise ValueError(f'unknown visual manifest field(s): {", ".join(sorted(unknown_top))}')
@@ -383,6 +540,16 @@ def apply_visual_manifest(
         raise ValueError(f'unsupported visual manifest format_version: {version}')
 
     updated = copy.deepcopy(project)
+
+    design_group_specs = manifest.get('design_groups') or {}
+    if not isinstance(design_group_specs, dict):
+        raise ValueError('visual manifest design_groups must be an object')
+    design_group_results: list[dict[str, Any]] = []
+    for design_id, spec in design_group_specs.items():
+        if not isinstance(design_id, str) or not design_id.strip():
+            raise ValueError('visual manifest design_groups keys must be non-empty strings')
+        design_group_results.append(_upsert_design_group(updated, design_id.strip(), spec))
+
     presets = manifest.get('presets') or {}
     if not isinstance(presets, dict):
         raise ValueError('visual manifest presets must be an object')
@@ -468,6 +635,11 @@ def apply_visual_manifest(
         item_spec = {k: copy.deepcopy(v) for k, v in raw.items() if k in _VISUAL_SPEC_KEYS}
         combined = _deep_merge(combined, item_spec)
         _validate_visual_spec(combined, label=f'visual manifest items[{n}]')
+        requested_design_groups = raw.get('design_groups', raw.get('design_group'))
+        design_ids = _design_group_refs(
+            requested_design_groups,
+            label=f'visual manifest items[{n}].design_group(s)',
+        ) if requested_design_groups is not None else []
 
         image_compression = None
         if 'image' in combined and str(combined.get('image') or ''):
@@ -490,6 +662,10 @@ def apply_visual_manifest(
             if copy_from:
                 source_ent = _resolve_target(idx, str(copy_from))
             result = _apply_visual_spec(ent, combined, source=source_ent)
+            design_changes = _assign_design_groups(updated, ent, design_ids)
+            if design_changes:
+                result['changed'] = list(dict.fromkeys(result['changed'] + design_changes))
+            result['design_groups'] = list(design_ids)
             result['presets'] = list(requested_presets)
             result['image'] = str(ent.value.get('image') or '')
             if image_compression is not None:
@@ -506,6 +682,7 @@ def apply_visual_manifest(
         'format': 'iccplus-visual-apply-report',
         'format_version': 1,
         'project_changes': list(dict.fromkeys(project_changes)),
+        'design_groups': design_group_results,
         'items': results,
         'source_records': sources,
         'changed_items': sum(1 for x in results if x['changed']),
