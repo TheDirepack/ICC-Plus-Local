@@ -193,7 +193,7 @@ def field_values(raw_values: str | None, fields: list[str] | None, *, field_kind
     allowed = set(FIELD_CATALOG.get(catalog_kind, [])) if catalog_kind else None
     if catalog_kind:
         # --values remains the forward-compatible escape hatch for unknown
-        # future fields, but values for pinned 2.10.6 fields are still type
+        # future fields, but values for pinned 2.10.7 fields are still type
         # checked. A known field should never accept a known-wrong JSON type.
         validate_known_values(catalog_kind, values)
     for item in fields or []:
@@ -1124,7 +1124,7 @@ def cmd_types(a: argparse.Namespace) -> int:
 
 
 def cmd_project_stats(a: argparse.Namespace) -> int:
-    emit({'ok': True, 'source': 'ICC Plus 2.10.6 AppProjectStats.svelte', **project_stats(load(a.project))})
+    emit({'ok': True, 'source': 'ICC Plus 2.10.7 AppProjectStats.svelte', **project_stats(load(a.project))})
     return 0
 
 
@@ -1177,7 +1177,7 @@ def cmd_row_choices(a: argparse.Namespace) -> int:
         order = sort_row_choices(project, source.id, a.by)
         return _finish_structural_write(project, a, {
             'action': 'sort', 'row': source.id, 'by': a.by, 'order': order,
-            'source': 'ICC Plus 2.10.6 AppRowSettings.svelte sortObjects',
+            'source': 'ICC Plus 2.10.7 AppRowSettings.svelte sortObjects',
         })
 
     target = editor.resolve(a.target)
@@ -1210,7 +1210,7 @@ def cmd_row_choices(a: argparse.Namespace) -> int:
 
 
 def cmd_symbols(a: argparse.Namespace) -> int:
-    emit({'ok': True, 'source': 'ICC Plus 2.10.6 Features/AppSymbols.svelte', 'count': len(CREATOR_SYMBOLS), 'symbols': CREATOR_SYMBOLS})
+    emit({'ok': True, 'source': 'ICC Plus 2.10.7 Features/AppSymbols.svelte', 'count': len(CREATOR_SYMBOLS), 'symbols': CREATOR_SYMBOLS})
     return 0
 
 
@@ -1668,7 +1668,7 @@ def identity_report(project: dict[str, Any], *, include_all: bool = False) -> di
     }
     for ent in idx.entities:
         # Ordinary Requirements and non-selectable Addons are structural records in
-        # ICC Plus 2.10.6. Their creator defaults intentionally use id: "", so
+        # ICC Plus 2.10.7. Their creator defaults intentionally use id: "", so
         # they must not make an otherwise valid project fail an identity audit.
         if ent.kind not in identity_kinds:
             continue
@@ -1853,7 +1853,7 @@ def cmd_build_string(a: argparse.Namespace) -> int:
         value = sim.export_build_string()
         out: dict[str, Any] = {
             'ok': True,
-            'format': 'iccplus-2.10.6-build-string',
+            'format': 'iccplus-2.10.7-build-string',
             'build_string': value,
             'entry_count': len(parse_build_string(value)),
         }
@@ -1873,7 +1873,7 @@ def cmd_build_string(a: argparse.Namespace) -> int:
         save_runtime_state(a.state_out, runtime_state)
     out = {
         'ok': True,
-        'format': 'iccplus-2.10.6-build-string',
+        'format': 'iccplus-2.10.7-build-string',
         'entry_count': len(parsed),
         'entries': [entry_to_dict(entry) for entry in parsed],
         'canonical_build_string': sim.export_build_string(),
@@ -2312,7 +2312,7 @@ def add_creator_namespace(sub: argparse._SubParsersAction) -> None:
     r = ct.add_parser('commands', help='List every advertised CLI command recursively, including nested second- and third-level paths')
     add_output_flags(r); r.set_defaults(func=cmd_command_tree)
 
-    r = ct.add_parser('parity', help='Report ICC Plus 2.10.6 Creator actions and scripting equivalents')
+    r = ct.add_parser('parity', help='Report ICC Plus 2.10.7 Creator actions and scripting equivalents')
     r.add_argument('--gaps', action='store_true', help='Return only remaining first-class scripting gaps in features.')
     add_output_flags(r); r.set_defaults(func=cmd_gui_parity)
 
@@ -2321,7 +2321,7 @@ def add_creator_namespace(sub: argparse._SubParsersAction) -> None:
 
     r = ct.add_parser('style-template', help='List, inspect, or apply the eight pinned ICC Plus Creator style templates')
     st = r.add_subparsers(dest='style_action', required=True)
-    x = st.add_parser('list', help='List the eight ICC Plus 2.10.6 style templates'); add_output_flags(x); x.set_defaults(func=cmd_style_template)
+    x = st.add_parser('list', help='List the eight ICC Plus 2.10.7 style templates'); add_output_flags(x); x.set_defaults(func=cmd_style_template)
     x = st.add_parser('show', help='Show one exact pinned style template'); x.add_argument('preset', help='1-based index or exact preset name'); add_output_flags(x); x.set_defaults(func=cmd_style_template)
     x = st.add_parser('apply', help='Apply one pinned style template'); x.add_argument('project'); x.add_argument('preset', help='1-based index or exact preset name'); x.add_argument('-o','--output'); add_safe_write_flags(x); add_output_flags(x); x.set_defaults(func=cmd_style_template)
 
@@ -2381,7 +2381,7 @@ def add_template_namespace(sub: argparse._SubParsersAction) -> None:
 
     r = tt.add_parser('style', help='List, inspect, or apply pinned Creator style templates')
     st = r.add_subparsers(dest='style_action', required=True)
-    x = st.add_parser('list', help='List the eight ICC Plus 2.10.6 style templates'); add_output_flags(x); x.set_defaults(func=cmd_style_template)
+    x = st.add_parser('list', help='List the eight ICC Plus 2.10.7 style templates'); add_output_flags(x); x.set_defaults(func=cmd_style_template)
     x = st.add_parser('show', help='Show one exact pinned style template'); x.add_argument('preset'); add_output_flags(x); x.set_defaults(func=cmd_style_template)
     x = st.add_parser('apply', help='Apply one pinned style template'); x.add_argument('project'); x.add_argument('preset'); x.add_argument('-o','--output'); x.set_defaults(allow_invalid=False); add_output_flags(x); x.set_defaults(func=cmd_style_template)
 
@@ -2472,7 +2472,7 @@ def parser() -> argparse.ArgumentParser:
     q = sub.add_parser('describe', help='List the complete recursive command tree or describe one command path'); q.add_argument('command_name', nargs='*', help='Optional command path, for example: creator style-template apply. Omit to list every advertised command at every depth.'); q.set_defaults(func=cmd_describe)
     q = sub.add_parser('doctor', help='Check local optional tooling, including image encoders'); q.set_defaults(func=cmd_doctor)
     q = sub.add_parser('fields', help='List pinned native ICC Plus fields and optionally their value types'); q.add_argument('kind', choices=catalog_kinds()); q.add_argument('--contains', help='Case-insensitive substring filter for field names'); q.add_argument('--style-group', choices=sorted(STYLE_FIELD_GROUPS), help='Limit kind=styling to one styling subgroup'); q.add_argument('--details', action='store_true', help='Include the pinned TypeScript value shape and default when known.'); q.set_defaults(func=cmd_fields)
-    q = sub.add_parser('schema', help='Emit native ICC Plus or automation protocol JSON Schemas'); q.add_argument('kind', choices=['list', *catalog_kinds(), *protocol_schema_names()]); q.add_argument('--mode', choices=['patch','native'], default='patch', help='For native kinds: patch allows partial updates; native preserves pinned TypeScript requiredness.'); q.add_argument('--allow-unknown', action='store_true', help='For native kinds only, allow fields outside the pinned 2.10.6 catalog.'); q.set_defaults(func=cmd_schema)
+    q = sub.add_parser('schema', help='Emit native ICC Plus or automation protocol JSON Schemas'); q.add_argument('kind', choices=['list', *catalog_kinds(), *protocol_schema_names()]); q.add_argument('--mode', choices=['patch','native'], default='patch', help='For native kinds: patch allows partial updates; native preserves pinned TypeScript requiredness.'); q.add_argument('--allow-unknown', action='store_true', help='For native kinds only, allow fields outside the pinned 2.10.7 catalog.'); q.set_defaults(func=cmd_schema)
     q = sub.add_parser('types', help='Generate type-safe declarations from the pinned field catalog'); q.add_argument('--format', choices=['typescript','python'], default='typescript'); q.add_argument('--mode', choices=['patch','native'], default='patch', help='patch generates partial-update types; native preserves pinned TypeScript requiredness.'); q.add_argument('--kind', action='append', choices=catalog_kinds(), help='Limit output to a kind. Repeat or comma-separate.'); q.add_argument('-o','--output', help='Write declarations to a file instead of stdout.'); q.set_defaults(func=cmd_types)
     q = sub.add_parser('guide', help='Print a compact machine-readable workflow guide'); q.add_argument('topic', nargs='?', choices=guide_topics()); q.set_defaults(func=cmd_guide)
     add_reference_namespace(sub)
@@ -2482,11 +2482,11 @@ def parser() -> argparse.ArgumentParser:
     # Retired grouped surfaces remain parseable for compatibility but are hidden.
     add_creator_namespace(sub)
     add_test_namespace(sub)
-    q = sub.add_parser('gui-parity', help='Report ICC Plus 2.10.6 Creator actions and their scripting equivalents'); q.add_argument('--gaps', action='store_true', help='Return only remaining first-class scripting gaps in features.'); q.set_defaults(func=cmd_gui_parity)
+    q = sub.add_parser('gui-parity', help='Report ICC Plus 2.10.7 Creator actions and their scripting equivalents'); q.add_argument('--gaps', action='store_true', help='Return only remaining first-class scripting gaps in features.'); q.set_defaults(func=cmd_gui_parity)
     q = sub.add_parser('clean-private-styling', help='Mirror Creator Clean All Private Styling'); q.add_argument('project'); q.add_argument('-o','--output'); add_safe_write_flags(q); q.set_defaults(func=cmd_clean_private_styling)
     q = sub.add_parser('style-template', help='List, inspect, or apply the eight pinned ICC Plus Creator style templates')
     st = q.add_subparsers(dest='style_action', required=True)
-    r = st.add_parser('list', help='List the eight ICC Plus 2.10.6 style templates'); add_output_flags(r); r.set_defaults(func=cmd_style_template)
+    r = st.add_parser('list', help='List the eight ICC Plus 2.10.7 style templates'); add_output_flags(r); r.set_defaults(func=cmd_style_template)
     r = st.add_parser('show', help='Show one exact pinned style template'); r.add_argument('preset', help='1-based index or exact preset name'); add_output_flags(r); r.set_defaults(func=cmd_style_template)
     r = st.add_parser('apply', help='Apply one preset like Object.assign(app.styling, preset) in the Creator'); r.add_argument('project'); r.add_argument('preset', help='1-based index or exact preset name'); r.add_argument('-o','--output'); add_safe_write_flags(r); add_output_flags(r); r.set_defaults(func=cmd_style_template)
     q = sub.add_parser('symbols', help='Print the exact symbol list shown by the Creator Symbols panel'); q.set_defaults(func=cmd_symbols)
@@ -2608,7 +2608,7 @@ def parser() -> argparse.ArgumentParser:
     q = sub.add_parser('build-summary', help='Render the Creator Build Form human-readable selected-choice summary')
     q.add_argument('project'); q.add_argument('--state', help='Portable runtime-state/session-response JSON to summarize.'); q.add_argument('--separate-rows', action='store_true', help='Group selections under Row headings like the Creator switch.'); q.add_argument('-o','--output'); q.add_argument('--seed', type=int, default=0); q.add_argument('--allow-project-mismatch', action='store_true'); q.set_defaults(func=cmd_build_summary)
 
-    q = sub.add_parser('build-string', help='Import or export ICC Plus 2.10.6 native Build Form strings')
+    q = sub.add_parser('build-string', help='Import or export ICC Plus 2.10.7 native Build Form strings')
     q.add_argument('project')
     q.add_argument('action', choices=['export', 'import'])
     q.add_argument('value', nargs='?', help='For import: raw Build Form string, @file, file path, or - for stdin.')
