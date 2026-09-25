@@ -317,13 +317,25 @@
           }
         }
       ],
-      "not": {
-        "required": [
-          "image",
-          "clear_image"
-        ]
-      },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "not": {
+            "required": [
+              "image",
+              "clear_image"
+            ]
+          }
+        },
+        {
+          "not": {
+            "required": [
+              "design_group",
+              "design_groups"
+            ]
+          }
+        }
+      ]
     },
     "designGroupSpec": {
       "type": "object",
@@ -360,6 +372,15 @@
             "minLength": 1
           },
           "uniqueItems": true
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "description": "Optional normal ICC Plus Group IDs. Linking a Design Group to a normal Group styles current and future Rows/Choices in that Group without per-entity membership."
         }
       },
       "required": [
