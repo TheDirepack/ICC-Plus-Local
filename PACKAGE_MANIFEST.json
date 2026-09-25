@@ -5,7 +5,7 @@
   "target_source_commit": "1ea9db888cde2286d18d0d5de50933cb8773b739",
   "candidate_role": "LLM-first ICC Plus authoring with official-default hydration, Creator-complete output validation, native Design Group styling, player-safe audit, and source-pinned 2.10.7 compatibility",
   "local_regression": {
-    "normal_tests": "324 passed",
+    "normal_tests": "327 passed",
     "checked_in_examples": "all passed",
     "ci_workflow": ".github/workflows/tests.yml",
     "ci_verified_on_pr": 4,
