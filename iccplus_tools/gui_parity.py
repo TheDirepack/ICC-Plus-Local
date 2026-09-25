@@ -5,7 +5,7 @@ from typing import Any
 from .field_catalog import catalog_kinds
 from .version import __version__
 
-SOURCE_COMMIT = 'a420836248d32043ae45d03f1b93cdcb9e354663'
+SOURCE_COMMIT = '1ea9db888cde2286d18d0d5de50933cb8773b739'
 
 # This inventory describes authoring outcomes and Creator actions. Browser-only
 # presentation controls that do not change project data are called out rather
@@ -20,7 +20,7 @@ _FEATURES: list[dict[str, Any]] = [
     {'feature':'project.ids_from_titles','status':'complete','script':'ids-from-titles PROJECT','source':'Features/AppDefaults.svelte idToTitle','note':'Uses the Creator title conversion and _dup rule, but safely rewrites references instead of leaving stale IDs.'},
     {'feature':'project.viewer_config','status':'complete','script':'update project viewerConfig or typed set path','source':'AppViewerConfig.svelte'},
     {'feature':'project.global_styling','status':'complete','script':'style manifest; fields styling --details','source':'Creator styling dialogs'},
-    {'feature':'project.style_templates','status':'complete','script':'style-template list|show|apply','source':'Features/AppTemplates.svelte','note':'Includes all eight pinned 2.10.6 presets and applies them with Creator-compatible merge semantics.'},
+    {'feature':'project.style_templates','status':'complete','script':'style-template list|show|apply','source':'Features/AppTemplates.svelte','note':'Includes all eight pinned 2.10.7 presets and applies them with Creator-compatible merge semantics.'},
     {'feature':'project.custom_css','status':'complete','script':'style manifest project.customCSS/customCSSAppend','source':'AppCustomCSS.svelte'},
     {'feature':'project.fonts','status':'complete','script':'fonts list|add|remove','source':'AppGlobalSettings.svelte importFont/deleteFont','note':'Edits the same googleFonts/customFonts project arrays. Browser CORS/font loading is verified only in the real Viewer.'},
     {'feature':'project.id_name_csv','status':'complete','script':'id-csv PROJECT','source':'Features/AppIdSearch.svelte exportAsCsv','note':'Matches the Creator BOM CSV and its normal-Row-only scope.'},
@@ -83,7 +83,7 @@ def gui_parity_report() -> dict[str, Any]:
     return {
         'format': 'iccplus-gui-parity',
         'tool_version': __version__,
-        'target': {'icc_plus_version':'2.10.6','source_commit':SOURCE_COMMIT},
+        'target': {'icc_plus_version':'2.10.7','source_commit':SOURCE_COMMIT},
         'scope': 'Creator authoring outcomes and export actions',
         'source_audit': {
             'creator_components_audited': 57,
