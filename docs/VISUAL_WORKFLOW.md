@@ -82,6 +82,25 @@ Define reusable styling once under `design_groups`. The object key is the Design
 
 Use `kind: "row"` for reusable Row treatments. Use `design_groups` on an item when several Design Groups should apply. Existing project Design Groups can be assigned without redefining them.
 
+When an existing normal ICC Plus Group already defines the family, link the Design Group to that Group instead of enumerating every Choice:
+
+```json
+{
+  "design_groups": {
+    "element-card": {
+      "kind": "choice",
+      "groups": ["elements"],
+      "styling": {
+        "text": {"objectTitleAlign": "center"}
+      }
+    }
+  },
+  "items": []
+}
+```
+
+This uses the official `Group.designGroups` / Design Group `groupElements` relationship. Future Choices added to the normal Group inherit the reusable style automatically.
+
 The style command keeps both sides of the official Creator relationship synchronized: the Row/Choice receives the Design Group ID, and the Design Group receives the Row/Choice ID in its member list.
 
 Grouped styling uses the native groups exposed by `reference fields styling`:
