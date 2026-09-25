@@ -20,7 +20,7 @@ _EXTENSIONS = {
 
 
 def _remove_nulls(value: Any) -> Any:
-    """Match ICC Plus 2.10.6 removeNulls for JSON-compatible values."""
+    """Match ICC Plus 2.10.7 removeNulls for JSON-compatible values."""
     if isinstance(value, list):
         out = []
         for item in value:
@@ -91,7 +91,7 @@ def viewer_image_separation(project: dict[str, Any], *, seen: dict[str, str] | N
 
 
 def image_separation(project: dict[str, Any]) -> tuple[dict[str, Any], dict[str, bytes]]:
-    """Mirror ICC Plus 2.10.6 Creator imageSeparation().
+    """Mirror ICC Plus 2.10.7 Creator imageSeparation().
 
     The input is not mutated. Paths intentionally preserve source quirks,
     including backpack change-background names that use the R prefix.
@@ -193,7 +193,7 @@ def _fill_creator_load_defaults(project: dict[str, Any]) -> dict[str, Any]:
     """Apply load-time defaults that materially change Creator Save-to-Disk output.
 
     This intentionally stays narrow. It mirrors defaults proven by the pinned
-    2.10.6 initializeApp path and the external Creator round-trip fixture rather
+    2.10.7 initializeApp path and the external Creator round-trip fixture rather
     than inventing a second full project migrator.
     """
     default_addon_justify = project.get('defaultAddonJustify')
@@ -216,7 +216,7 @@ def _fill_creator_load_defaults(project: dict[str, Any]) -> dict[str, Any]:
 
 
 def creator_save_payload(project: dict[str, Any]) -> dict[str, Any]:
-    """Mirror loading a project in Creator 2.10.6 and then Save to Disk.
+    """Mirror loading a project in Creator 2.10.7 and then Save to Disk.
 
     The Creator removes null/empty object values on file import, runs its load
     initialization, updates ``activated`` from the live Build Form state, then
@@ -344,7 +344,7 @@ def build_viewer_package(project: dict[str, Any], template_zip: str | Path, outp
     """Reproduce Creator exportWithViewer using an official viewer template ZIP.
 
     The official template is an explicit input so its version can be pinned.
-    Project/image transformations follow 2.10.6 source. HTML formatting and
+    Project/image transformations follow 2.10.7 source. HTML formatting and
     loading-text sanitization are semantic rather than byte-identical to the
     browser's DOMPurify + js-beautify pass.
     """
@@ -416,7 +416,7 @@ def build_viewer_package(project: dict[str, Any], template_zip: str | Path, outp
         'image_count': len(assets),
         'icc_plus_version': ICCPLUS_VERSION,
         'template': str(template_zip),
-        'content_parity': '2.10.6 exportWithViewer project/image/local-embed logic',
+        'content_parity': '2.10.7 exportWithViewer project/image/local-embed logic',
         'html_byte_parity': False,
         'html_note': 'HTML keeps template formatting; loading sanitization is conservative rather than DOMPurify byte parity.',
     }
