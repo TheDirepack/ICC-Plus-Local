@@ -73,6 +73,17 @@ def test_hydration_repairs_sparse_entities_but_never_invents_missing_identity():
     assert any(d['code'] in {'id.missing', 'complete.entity_missing_field'} for d in report['diagnostics'])
 
 
+def test_hydration_never_downgrades_a_future_project_version():
+    project = default_export_project()
+    project['version'] = '2.11.0'
+    changes = hydrate_project(project, upgrade_version=True)
+    assert project['version'] == '2.11.0'
+    assert not any(x.get('path') == '/version' and x.get('action') == 'upgraded' for x in changes)
+    report = validate_complete(project)
+    assert report['valid'] is False
+    assert any(d['code'] == 'complete.target_version' for d in report['diagnostics'])
+
+
 def test_hydration_does_not_overwrite_wrong_types_so_validation_can_report_them():
     project = default_export_project()
     project['viewerConfig']['loadingType'] = []
