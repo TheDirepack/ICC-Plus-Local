@@ -155,7 +155,7 @@ Add `"prompt": "Enter a callsign"` when the Viewer should ask the player for tex
 }
 ```
 
-Use only the fields that matter. The tool writes the corresponding native multiple-selection fields. ICC Plus 2.10.6 has three different repeatable modes. Variable-count mode uses `isMultipleUseVariable`; point-backed mode uses `multipleScoreId`; `isSelectableMultiple` with neither mode is a malformed counter whose click/counter action is a Viewer no-op. Do not treat the third case as an ordinary quantity counter. Variable counts can move below zero when `numMultipleTimesMinus` permits it.
+Use only the fields that matter. The tool writes the corresponding native multiple-selection fields. ICC Plus 2.10.7 has three different repeatable modes. Variable-count mode uses `isMultipleUseVariable`; point-backed mode uses `multipleScoreId`; `isSelectableMultiple` with neither mode is a malformed counter whose click/counter action is a Viewer no-op. Do not treat the third case as an ordinary quantity counter. Variable counts can move below zero when `numMultipleTimesMinus` permits it.
 
 ## Discounts
 
