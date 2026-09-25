@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-"""Pinned ICC Plus 2.10.6 native field type metadata.
+"""Pinned ICC Plus 2.10.7 native field type metadata.
 
 The field names and primitive/container types in this module are transcribed from
 ``ICCPlus/src/lib/store/types.ts`` at commit
-``a420836248d32043ae45d03f1b93cdcb9e354663``.  The catalog remains the source
+``1ea9db888cde2286d18d0d5de50933cb8773b739``.  The catalog remains the source
 of truth for which fields exist; this module adds the value shape needed by
 scripts, schemas, generated type declarations, and LLM-facing help.
 """
@@ -65,7 +65,7 @@ def _parse(spec: str) -> dict[str, str]:
 _TYPE_SPECS: dict[str, str] = {
     'project': '''version:s;isEditModeOnAll:b;isPointerCursor:b;importedChoicesIsOpen:b;curVolume:n;isMute:b;showMusicPlayer:b;fadeTransitionColor:s;fadeTransitionTime:n;fadeTransitionIsOn:b;hideBackpackBtn:n;btnBackpackIsOn:n;showAllAddons:n;tmpRow:oa;tmpChoice:oa;tmpRequired:oa;tmpScore:oa;tmpAddon:oa;tmpGroup:sa;tmpDesignGroup:sa;rowIdLength:n;objectIdLength:n;words:oa;groups:oa;rowDesignGroups:oa;objectDesignGroups:oa;objectsPerRow:s;globalRequirements:oa;soundEffects:oa;googleFonts:sa;customFonts:sa;compressImageAuto:b;useTextEditor:b;useToolbarBtn:b;useChoiceEditBtn:b;hideScoresUpdated:b;hideChoiceDT:b;hideImages:b;preloadImages:b;preloadExternalImages:b;useVW:b;addPrefix:b;mdObjects:sa;printThis:b;autoSaveIsOn:b;autoSaveInterval:n;buildAutoSaveIsOn:b;buildAutoSaveInterval:n;tooltipDelay:n;checkDeleteRow:b;checkDeleteObject:b;checkSelectAll:b;enableShortcut:b;defaultBgColor:s;defaultBgImage:s;defaultBarBgColor:s;defaultBarTextColor:s;defaultBarIconColor:s;bgColorStack:oa;bgImageStack:oa;barBgColorStack:oa;barTextColorStack:oa;barIconColorStack:oa;customCSS:s;variables:oa;pointTypes:oa;activated:sa;rows:oa;backpack:oa;styling:o;categories:oa;cropperPosition:n;enableSearch:b;useDesignGroupBtn:b;smallerScreenPx:n;enableHalfRow:b;minimizeTemplate:b;hideRowMenu:b;viewerConfig:o;defaultRowTitle:s;defaultRowText:s;defaultChoiceTitle:s;defaultChoiceText:s;defaultBeforePoint:s;defaultAfterPoint:s;defaultBeforeReq:s;defaultAfterReq:s;defaultAddonTitle:s;defaultAddonText:s;orderOrReqText:s;defaultOrReq:s;orderSelReqText:s;defaultSelReq:s;defaultRowTemplate:n;defaultRowWidth:s;defaultRowJustify:s;defaultRowAllowedChoices:n;defaultChoiceTemplate:n;defaultChoiceWidth:s;defaultChoiceMaxNum:n;defaultAddonJustify:s;defaultAddonTemplate:n;defaultAddonWidth:s;defaultUseSeperateAddon:b;defaultUseShowAddon:b;defaultUseHideAddon:b;defaultUseShowScore:b;defaultUseHideValue:b;defaultUseShowReq:b''',
     'requirement': '''required:b;requireds:oa;orRequired:oa;orRequireds:oa;id:s;type:s;reqId:s;reqId1:s;reqId2:s;reqId3:s;reqPoints:n;showRequired:b;hideRequired:b;hideRequired2:b;operator:s;afterText:s;beforeText:s;orNum:n;selNum:n;selFromOperators:s;selGroups:sa;selRows:sa;more:oa;customTextIsOn:b;customText:s''',
-    'score': '''idx:s;id:s;value:n;type:s;beforeText:s;afterText:s;requireds:oa;showScore:b;isActive:b;isActiveMul:ba;isActiveMulMinus:ba;hideValue:b;isNotRecalculatable:b;isNotRecalculateSelf:b;isNotDiscountable:b;isRandom:b;minValue:n;maxValue:n;setValue:b;discounts:oa;discountIsOn:b;discountShow:b;discountBeforeText:s;discountAfterText:s;discountScore:n;discountScoreCal:n;isChangeDiscount:b;discountNum:n;tmpDisScore:n;tmpDiscount:oa;discountedFrom:sa;dupTextA:o;dupTextB:o;discountTextA:sa;discountTextB:sa;notStackableDiscount:b;multiplyByTimes:b;displayMulScore:b;appliedDiscount:b;replaceText:b;hideDisValue:b;hideDisIcon:b;useExpression:b;expValue:s;expMinValue:s;expMaxValue:s;mulValue:na''',
+    'score': '''idx:s;id:s;value:n;type:s;beforeText:s;afterText:s;requireds:oa;showScore:b;isActive:b;isActiveMul:ba;isActiveMulMinus:ba;hideValue:b;isNotRecalculatable:b;isNotRecalculateSelf:b;isNotDiscountable:b;isRandom:b;minValue:n;maxValue:n;setValue:b;discounts:oa;discountIsOn:b;discountShow:b;discountBeforeText:s;discountAfterText:s;discountScore:n;discountScoreCal:n;isChangeDiscount:b;discountNum:n;tmpDisScore:n;tmpDiscount:oa;discountedFrom:sa;dupTextA:o;dupTextB:o;discountTextA:sa;discountTextB:sa;notStackableDiscount:b;multiplyByTimes:b;displayMulScore:b;appliedDiscount:b;replaceText:b;hideDisValue:b;hideDisIcon:b;useExpression:b;expValue:s;expMinValue:s;expMaxValue:s;mulValue:na;removeSpace:b''',
     'choice': '''id:s;index:n;title:s;text:s;debugTitle:s;image:s;imageSourceTooltip:s;template:n;objectWidth:s;isActive:b;multipleUseVariable:n;initMultipleTimesMinus:n;selectedThisManyTimesProp:n;requireds:oa;addons:oa;scores:oa;groups:sa;objectDesignGroups:sa;isPrivateStyling:b;privateFilterIsOn:b;privateTextIsOn:b;privateObjectImageIsOn:b;privateObjectIsOn:b;privateAddonImageIsOn:b;privateAddonIsOn:b;privateBackgroundIsOn:b;privateMultiChoiceIsOn:b;styling:o;addonJustify:s;linkedObjects:sa;hideMultipleCounter:b;allowSelectByClick:b;hideCounterUntilSelect:b;isSelectableMultiple:b;isMultipleUseVariable:b;multipleScoreId:s;numMultipleTimesMinus:n;numMultipleTimesPluss:n;isNotSelectable:b;selectOnce:b;notDeselectedByClean:b;isNotResult:b;isNotBuild:b;isImageUpload:b;cleanACtivatedOnSelect:b;activateOtherChoice:b;isNotDeactivate:b;isAllowDeselect:b;activateAfterReset:b;isActivateRandom:b;numActivateRandom:n;activateThisChoice:s;isNotActiveUnselectable:b;deactivateOtherChoice:b;deactivateThisChoice:s;discountOther:b;discountLowLimitIsOn:b;discountLowLimit:n;discountShow:b;replaceScoreText:b;hideScoreValue:b;hideScoreIcon:b;discountBeforeText:s;discountAfterText:s;isDisChoices:b;discountRows:sa;discountChoices:sa;discountGroups:sa;discountPointTypes:sa;discountOperator:s;discountValue:n;stackableDiscount:b;useDiscountCount:b;discountCount:n;countPerSelection:b;numDiscountChoices:n;appliedDisChoices:sa;duplicateRow:b;dRowAddSufReq:b;dRowAddSufFunc:b;duplicateRowId:s;duplicateRowPlace:s;isContentHidden:b;hiddenContentsRow:sa;hiddenContentsType:sa;addToAllowChoice:b;idOfAllowChoice:sa;numbAddToAllowChoice:n;showAllAddons:b;changeTemplates:b;changeAddonTemplate:b;changeWidth:b;changeTemplatesList:s;changeToThisTemplate:n;changeWidthList:s;changeToThisWidth:s;defaultTemplate:n;defaultWidth:s;scrollToRow:b;scrollToObject:b;scrollObjectId:s;scrollRowId:s;changePointBar:b;changeBarBgColorIsOn:b;changeBarTextColorIsOn:b;changeBarIconColorIsOn:b;changedBarBgColor:s;changedBarTextColor:s;changedBarIconColor:s;changeBackground:b;changeBgImage:b;changedBgColorCode:s;bgImage:s;setBgmIsOn:b;bgmId:s;bgmFadeIn:b;bgmFadeOut:b;bgmFadeInSec:n;bgmFadeOutSec:n;bgmNoLoop:b;muteBgm:b;useAudioURL:b;isFadeTransition:b;fadeTransitionColor:s;fadeTransitionTime:n;fadeInTransitionTime:n;fadeOutTransitionTime:n;multiplyPointtypeIsOn:b;pointTypeToMultiply:sa;multiplyWithThis:ns;multiplyPointtypeIsId:b;dividePointtypeIsOn:b;pointTypeToDivide:sa;divideWithThis:n;startingSumAtMultiply:oa;startingSumAtDivide:oa;startingSumAtSet:oa;multiplyPointtypeIsOnCheck:b;dividePointtypeIsOnCheck:b;setPointtypeIsOnCheck:b;isChangeVariables:b;changedVariables:sa;changeType:s;textfieldIsOn:b;customTextfieldIsOn:b;idOfTheTextfieldWord:s;wordPromptText:s;wordChangeSelect:s;wordChangeDeselect:s;confirmIsOn:b;backpackBtnRequirement:b;forcedActivated:b;activatedFrom:n;activatedRandom:sa;activatedRandomMul:ssa;defaultImage:s;tempMultipleValue:n;randomWeight:n;useSeperateAddon:b;useSlider:b;hideCounter:b;templateStack:oa;widthStack:oa;isEditModeOn:b;isSelectDelayed:b;selectDelayTime:n;selectDelayTimer:b;isDeselectDelayed:b;deselectDelayTime:n;deselectDelayTimer:b;showScoreInAddon:b;showReqInAddon:b;showMulInAddon:b;setPointtypeIsOn:b;pointTypeToSet:sa;setWithThis:s;isNotSearchable:b;isAutoActive:b;useSfx:b;sfxIdOnSelect:s;sfxIdOnDeselect:s;sfxOnSelect:b;sfxOnDeselect:b;isCountDisabled:b;deselectWhenNoAddon:b;showDebugTitle:b''',
     'row': '''id:s;index:n;isBackpack:b;title:s;titleText:s;debugTitle:s;objectWidth:s;image:s;template:n;isButtonRow:b;buttonType:b;buttonId:s;buttonText:s;buttonRandom:b;buttonRandomNumber:n;isWeightedRandom:b;allowActivateUnselectable:b;isResultRow:b;resultGroupId:s;isInfoRow:b;isGroupRow:b;defaultAspectWidth:n;defaultAspectHeight:n;allowedChoices:n;currentChoices:n;requireds:oa;isEditModeOn:b;isSimpleEditMode:b;isRequirementOpen:b;objects:oa;rowDesignGroups:sa;imageIsUrl:b;width:b;deselectChoices:b;rowJustify:s;groups:sa;imageSourceTooltip:s;isPrivateStyling:b;privateFilterIsOn:b;privateTextIsOn:b;privateObjectImageIsOn:b;privateObjectIsOn:b;privateRowImageIsOn:b;privateRowIsOn:b;privateAddonImageIsOn:b;privateAddonIsOn:b;privateBackgroundIsOn:b;privateMultiChoiceIsOn:b;styling:o;objectImgObjectFillHeight:n;resultShowRowTitle:b;textIsRemoved:b;objectTitleRemoved:b;objectImageRemoved:b;objectTextRemoved:b;objectScoreRemoved:b;objectRequirementRemoved:b;addonTitleRemoved:b;addonImageRemoved:b;addonTextRemoved:b;unselAddonRemoved:b;unmetAddonRemoved:b;buttonTypeRadio:s;btnPointAddon:b;pointTypeRandom:s;randomMin:n;randomMax:n;onlyUnselectedChoices:b;onlyIfNoChoices:b;choicesShareTemplate:b;defaultTemplate:n;defaultWidth:s;overrideWidth:b;preserveWidth:b;templateStack:oa;widthStack:oa''',
     'addon': '''id:s;title:s;text:s;template:n;image:s;imageSourceTooltip:s;requireds:oa;parentId:s;showAddon:b;hideAddon:b;skipIndex:b;defaultTemplate:n;templateStack:oa;addonWidth:s;isSelectable:false''',
@@ -156,7 +156,7 @@ FIELD_TYPE_CODES['styling'] = _style_types
 # The pinned default project still serializes two historical misspellings even
 # though ``types.ts`` and the active Creator controls use the corrected names.
 # Keep the field catalog source-exact, but accept these optional keys when a
-# native/wire object is being typed or validated so the official 2.10.6 default
+# native/wire object is being typed or validated so the official 2.10.7 default
 # export validates without normalization. New authoring should use the corrected
 # source field names.
 WIRE_COMPAT_FIELDS: dict[str, dict[str, str]] = {
@@ -387,7 +387,7 @@ def _schema_definition(kind: str, additional_properties: bool, *, mode: str = 'p
             properties[field] = {
                 **_schema_for_code(code),
                 'deprecated': True,
-                'description': f'ICC Plus 2.10.6 serialized compatibility spelling; author new data as {WIRE_COMPAT_ALIASES[catalog_kind][field]}.',
+                'description': f'ICC Plus 2.10.7 serialized compatibility spelling; author new data as {WIRE_COMPAT_ALIASES[catalog_kind][field]}.',
             }
     out: dict[str, Any] = {
         'type': 'object',
@@ -455,7 +455,7 @@ def json_schema_for_kind(kind: str, *, additional_properties: bool = False, mode
     root.update({
         '$schema': 'https://json-schema.org/draft/2020-12/schema',
         '$id': f'https://iccplus.local/schema/native/{catalog_kind}.schema.json',
-        'title': f'ICC Plus 2.10.6 {catalog_kind} native fields',
+        'title': f'ICC Plus 2.10.7 {catalog_kind} native fields',
         'description': f'Field/value shapes transcribed from {SOURCE_FILE} at {SOURCE_COMMIT}. Mode: {mode}.',
         'x-iccplus-mode': mode,
         'x-iccplus-source': {
@@ -524,7 +524,7 @@ def typescript_declarations(kinds: list[str] | None = None, *, mode: str = 'patc
     chosen = _declaration_kinds(kinds)
     suffix = 'Patch' if mode == 'patch' else 'Native'
     lines = [
-        '// Generated by iccplus-local from the pinned ICC Plus 2.10.6 field catalog.',
+        '// Generated by iccplus-local from the pinned ICC Plus 2.10.7 field catalog.',
         f'// Source: {SOURCE_REPOSITORY} {SOURCE_COMMIT} {SOURCE_FILE}',
         f'// Mode: {mode}',
         '',
@@ -539,7 +539,7 @@ def typescript_declarations(kinds: list[str] | None = None, *, mode: str = 'patc
         if mode == 'native':
             for field, code in WIRE_COMPAT_FIELDS.get(catalog_kind, {}).items():
                 alias = WIRE_COMPAT_ALIASES[catalog_kind][field]
-                lines.append(f'  /** @deprecated 2.10.6 wire spelling; author new data as {alias}. */')
+                lines.append(f'  /** @deprecated 2.10.7 wire spelling; author new data as {alias}. */')
                 lines.append(f'  {field}?: {_TYPE_INFO[code].typescript};')
         lines.extend(['}', ''])
     return '\n'.join(lines)
