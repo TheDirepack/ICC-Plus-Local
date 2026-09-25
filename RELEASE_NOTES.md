@@ -14,7 +14,7 @@
 - Fixed the semantic `effects.multiple` shorthand so normal counters explicitly select ICC Plus's variable-backed repeat mode unless a point-backed score is requested.
 - Added a dependency-free safe loading-text sanitizer that preserves simple formatting while dropping active content, matching the official DOMPurify intent more closely.
 - Kept the retained official-GUI result bundle and C01 round-trip evidence explicitly scoped to rc11 / ICC Plus 2.10.6 instead of relabeling historical browser evidence as 2.10.7.
-- Added a permanent GitHub Actions regression gate. Final rc12 branch verification: **324 tests passed** and all checked-in examples passed.
+- Added a permanent GitHub Actions regression gate. Final rc12 branch verification: **327 tests passed** and all checked-in examples passed.
 
 ## 0.10.0rc11
 
