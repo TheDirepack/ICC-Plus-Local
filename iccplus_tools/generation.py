@@ -6,6 +6,7 @@ from typing import Any
 from .editor import _deep_merge, make_entity, new_project
 from .identity import IdentityAllocator
 from .effects import apply_choice_effects
+from .project_integrity import hydrate_project
 
 ENTITY_ARRAYS = {
     'pointTypes': 'point',
@@ -251,7 +252,14 @@ def build_project(fragment: dict[str, Any]) -> dict[str, Any]:
     special = set(ENTITY_ARRAYS) | {'rows', 'backpack', 'categories'}
     for key, value in fragment.items():
         if key not in special:
-            project[key] = copy.deepcopy(value)
+            # Preserve the official Creator baseline for structured project
+            # sections such as styling and viewerConfig. A compact fragment
+            # supplies overrides, not a replacement for the rest of the
+            # official section.
+            if isinstance(value, dict) and isinstance(project.get(key), dict):
+                project[key] = _deep_merge(project[key], value)
+            else:
+                project[key] = copy.deepcopy(value)
 
     for key, kind in ENTITY_ARRAYS.items():
         if key in fragment:
@@ -332,4 +340,5 @@ def build_project(fragment: dict[str, Any]) -> dict[str, Any]:
                 side = member.value.setdefault('designGroups', [])
                 if isinstance(side, list) and design.id not in side:
                     side.append(design.id)
+    hydrate_project(project)
     return project
