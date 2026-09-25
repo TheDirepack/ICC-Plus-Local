@@ -117,6 +117,28 @@ def _same_wire_type(expected: Any, actual: Any) -> bool:
     return isinstance(actual, type(expected))
 
 
+def _version_tuple(value: Any) -> tuple[int, ...] | None:
+    if not isinstance(value, str) or not value:
+        return None
+    parts = value.split('.')
+    if not parts or any(not part.isdigit() for part in parts):
+        return None
+    return tuple(int(part) for part in parts)
+
+
+def _can_upgrade_to_target(value: Any) -> bool:
+    current = _version_tuple(value)
+    target = _version_tuple(ICCPLUS_VERSION)
+    if current is None:
+        return value in {None, ''}
+    if target is None:
+        return False
+    width = max(len(current), len(target))
+    current = (*current, *([0] * (width - len(current))))
+    target = (*target, *([0] * (width - len(target))))
+    return current <= target
+
+
 def _entity_defaults(project: dict[str, Any], kind: str, value: dict[str, Any], parent_id: str | None, path: str) -> dict[str, Any]:
     try:
         index = int(path.rsplit('/', 1)[-1])
@@ -273,7 +295,7 @@ def hydrate_project(project: dict[str, Any], *, upgrade_version: bool = False) -
 
     fill(project, baseline)
     _hydrate_entities(project, changes)
-    if upgrade_version and project.get('version') != ICCPLUS_VERSION:
+    if upgrade_version and project.get('version') != ICCPLUS_VERSION and _can_upgrade_to_target(project.get('version')):
         previous = project.get('version')
         project['version'] = ICCPLUS_VERSION
         changes.append({
