@@ -1,7 +1,7 @@
-"""Pinned ICC Plus 2.10.6 Creator style templates.
+"""Pinned ICC Plus 2.10.7 Creator style templates.
 
 Source: ICCPlus/src/lib/creator/Features/AppTemplates.svelte at
-commit a420836248d32043ae45d03f1b93cdcb9e354663.
+commit 1ea9db888cde2286d18d0d5de50933cb8773b739.
 
 The upstream Creator applies a preset with ``Object.assign(app.styling,
 styleTemplates[index])``.  This module stores the first preset in full and
@@ -13,7 +13,7 @@ from copy import deepcopy
 import json
 from typing import Any
 
-SOURCE_COMMIT = "a420836248d32043ae45d03f1b93cdcb9e354663"
+SOURCE_COMMIT = "1ea9db888cde2286d18d0d5de50933cb8773b739"
 STYLE_TEMPLATE_NAMES = (
     "Fall",
     "Book",
