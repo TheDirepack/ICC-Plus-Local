@@ -1,6 +1,6 @@
 ---
 name: iccplus-local
-description: Use when authoring, inspecting, testing, auditing, exporting, or otherwise working with ICC Plus 2.10.7 CYOA projects through ICC Plus Local 0.10.0rc12. This is the single general skill. Read the matching function guide under functions/ for the operation being performed.
+description: Use when working with native ICC Plus 2 projects.
 ---
 
 # ICC Plus Local
@@ -48,7 +48,7 @@ Local and embedded images are compressed automatically when assigned. Do not add
 
 ## Player-view rule
 
-When using `play`, Rows, direct Choices, and Addons are separate entity types. The rc11 player view exposes flat `rows`, `choices`, and `addons` lists plus explicit parent/child IDs. Do not reconstruct the hierarchy from the legacy nested compatibility field when the explicit links are available.
+When using `play`, Rows, direct Choices, and Addons are separate entity types. The current player view exposes flat `rows`, `choices`, and `addons` lists plus explicit parent/child IDs. Do not reconstruct the hierarchy from the legacy nested compatibility field when the explicit links are available.
 
 Read `functions/play.md` before doing player simulation or play audits. The full data model is documented in `../../docs/PLAY_STRUCTURE.md`.
 
@@ -59,7 +59,7 @@ The function guides are short operating instructions. Use the complete documenta
 Useful starting documents include:
 
 - `CLI_REFERENCE.md` for the command tree.
-- `PLAY_STRUCTURE.md` for the rc11 Row, Choice, and Addon player-view model.
+- `PLAY_STRUCTURE.md` for the current Row, Choice, and Addon player-view model.
 - `GAMEPLAY_RUNNER.md` for play audits.
 - `LLM_USAGE.md` for the broader agent workflow.
 - `PHASED_AUTHORING.md` and `AUTHORING_SCRIPTS.md` for edits.
