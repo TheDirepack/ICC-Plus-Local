@@ -179,7 +179,7 @@ For example, a single plot-critical Choice can have a one-off border:
 }
 ```
 
-If the same treatment appears on a second target, promote it to a Design Group rather than copying the private styling again.
+If the same treatment appears on a second target, promote it to a Design Group rather than copying the private styling again. The style command rejects multi-target item-level `styling`; shared native styling must use a Design Group.
 
 ## Apply project-wide styling carefully
 
