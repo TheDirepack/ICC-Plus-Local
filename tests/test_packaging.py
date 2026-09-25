@@ -38,7 +38,7 @@ class PackagingTests(unittest.TestCase):
             }], 'rowDesignGroups': []
         }]
         out, assets = image_separation(p)
-        self.assertEqual(out['version'], '2.10.6')
+        self.assertEqual(out['version'], '2.10.7')
         self.assertEqual(out['styling']['backgroundImage'], 'images/Bg.png')
         self.assertEqual(out['rows'][0]['objects'][0]['image'], 'images/Bg.png')
         self.assertEqual(out['rows'][0]['image'], 'images/R1.png')
@@ -60,7 +60,7 @@ class PackagingTests(unittest.TestCase):
                 self.assertFalse(raw.endswith(b'\n'))
                 project = json.loads(raw)
                 self.assertEqual(project['viewerConfig']['loadingBgImage'], 'images/Loading.png')
-                self.assertEqual(project['version'], '2.10.6')
+                self.assertEqual(project['version'], '2.10.7')
 
     def _template(self, path: Path, *, local: bool = False) -> None:
         html = '<!doctype html><html><head><title>Old</title></head><body><span id="projectSize">0</span><div id="indicator" class="old">old</div></body></html>'
@@ -101,7 +101,7 @@ class PackagingTests(unittest.TestCase):
             with zipfile.ZipFile(out) as zf:
                 self.assertNotIn('project.json', zf.namelist())
                 js = zf.read('js/app.js').decode()
-                self.assertIn('"version":"2.10.6"', js)
+                self.assertIn('"version":"2.10.7"', js)
                 self.assertIn('/*! End */', js)
 
 
