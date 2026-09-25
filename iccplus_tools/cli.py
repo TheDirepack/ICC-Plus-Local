@@ -1411,30 +1411,42 @@ def cmd_template(a: argparse.Namespace) -> int:
 
 def cmd_format(a: argparse.Namespace) -> int:
     project = load(a.project)
+    hydration_changes = hydrate_project(project, upgrade_version=True)
+    validation = validate_complete(project)
+    if not validation['valid']:
+        raise ValueError('project cannot be formatted as a complete ICC Plus project; run project validate for diagnostics')
     creator = a.style == 'creator'
     formatted = creator_save_payload(project) if creator else project
     expected = json_stringify(formatted) if creator else json.dumps(formatted, indent=2, ensure_ascii=False) + '\n'
     source = Path(a.project).read_text(encoding='utf-8')
     if a.check:
         ok = source == expected
-        emit({'ok': ok, 'style': a.style, 'project': a.project, 'would_change': not ok})
+        emit({'ok': ok, 'style': a.style, 'project': a.project, 'would_change': not ok, 'hydration_changes': hydration_changes, 'validation': validation})
         return 0 if ok else 2
     target = Path(a.output or a.project)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(expected, encoding='utf-8')
-    emit({'ok': True, 'style': a.style, 'written': str(target), 'bytes': len(expected.encode('utf-8'))})
+    emit({'ok': True, 'style': a.style, 'written': str(target), 'bytes': len(expected.encode('utf-8')), 'hydration_changes': hydration_changes, 'validation': validation})
     return 0
 
 
 def cmd_export_project(a: argparse.Namespace) -> int:
     project = load(a.project)
+    hydration_changes = hydrate_project(project, upgrade_version=True)
+    validation = validate_complete(project)
+    if not validation['valid']:
+        raise ValueError('project is not complete enough to export; run project validate for diagnostics')
     report = export_project_zip(project, a.output)
-    emit({'ok': True, **report})
+    emit({'ok': True, 'hydration_change_count': len(hydration_changes), 'validation': validation, **report})
     return 0
 
 
 def cmd_build_viewer(a: argparse.Namespace) -> int:
     project = load(a.project)
+    hydrate_project(project, upgrade_version=True)
+    validation = validate_complete(project)
+    if not validation['valid']:
+        raise ValueError('project is not complete enough to package in a Viewer; run project validate for diagnostics')
     separate = None
     if a.separate_images:
         separate = True
@@ -2384,8 +2396,10 @@ def add_project_namespace(sub: argparse._SubParsersAction) -> None:
     q = sub.add_parser('project', help='Project formatting, import/export, IDs, fragments, and Build Form serialization')
     pt = q.add_subparsers(dest='project_action', required=True)
 
-    r = pt.add_parser('format', help='Write Creator-compatible or pretty project JSON'); r.add_argument('project'); r.add_argument('--style', choices=['creator','pretty'], default='creator'); r.add_argument('-o','--output'); r.add_argument('--check', action='store_true'); add_output_flags(r); r.set_defaults(func=cmd_format)
-    r = pt.add_parser('export', help='Export Project with Separate Images'); r.add_argument('project'); r.add_argument('-o','--output', required=True); add_output_flags(r); r.set_defaults(func=cmd_export_project)
+    r = pt.add_parser('format', help='Write a complete Creator-compatible or pretty project JSON'); r.add_argument('project'); r.add_argument('--style', choices=['creator','pretty'], default='creator'); r.add_argument('-o','--output'); r.add_argument('--check', action='store_true'); add_output_flags(r); r.set_defaults(func=cmd_format)
+    r = pt.add_parser('validate', help='Validate a final project against the complete official Creator shape'); r.add_argument('project'); r.add_argument('--compat', action='store_true', help='Use permissive compatibility validation instead of final-project completeness validation'); add_output_flags(r); r.set_defaults(func=cmd_project_validate)
+    r = pt.add_parser('hydrate', help='Fill missing project sections from official Creator defaults and upgrade to the pinned target version'); r.add_argument('project'); r.add_argument('-o','--output'); r.add_argument('--dry-run', action='store_true'); add_output_flags(r); r.set_defaults(func=cmd_project_hydrate)
+    r = pt.add_parser('export', help='Export Project with Separate Images after complete-project validation'); r.add_argument('project'); r.add_argument('-o','--output', required=True); add_output_flags(r); r.set_defaults(func=cmd_export_project)
 
     r = pt.add_parser('fragment', help='Import or export one Creator entity as ordinary ICC Plus JSON')
     ft = r.add_subparsers(dest='fragment_action', required=True)
@@ -2516,7 +2530,7 @@ def parser() -> argparse.ArgumentParser:
     r.add_argument('-o','--output'); add_safe_write_flags(r); add_output_flags(r); r.set_defaults(func=cmd_design)
 
     q = sub.add_parser('inspect', help='Run one or more read-only project queries from a single JSON request'); q.add_argument('project'); q.add_argument('request', nargs='?', default='-', help='Query JSON, @file, file path, or - for stdin. Defaults to stdin.'); q.set_defaults(func=cmd_inspect)
-    q = sub.add_parser('check', help='Run shape, identity, and validation checks in one call'); q.add_argument('project'); q.set_defaults(func=cmd_check)
+    q = sub.add_parser('check', help='Run shape, identity, and validation checks in one call'); q.add_argument('project'); q.add_argument('--complete', action='store_true'); q.set_defaults(func=cmd_check)
 
 
     # `template` is registered above as the consolidated template namespace.
