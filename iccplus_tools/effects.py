@@ -196,6 +196,11 @@ def _apply_multiple(values: dict[str, Any], raw: Any) -> None:
         raise ValueError('effects.multiple must be true or an object')
     _set(values, 'isSelectableMultiple', True, 'effects.multiple')
     _set(values, 'multipleUseVariable', int(raw.get('start', 0)), 'effects.multiple')
+    # A normal semantic multiple counter uses the Creator's variable-backed
+    # repeat mode. Point-backed mode is selected only when an explicit score
+    # ID is supplied.
+    if 'score' not in raw:
+        _set(values, 'isMultipleUseVariable', True, 'effects.multiple')
     if 'max' in raw:
         maximum = raw['max']
         if not isinstance(maximum, int) or isinstance(maximum, bool) or maximum < 0:
