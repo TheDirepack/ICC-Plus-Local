@@ -117,6 +117,133 @@ def _same_wire_type(expected: Any, actual: Any) -> bool:
     return isinstance(actual, type(expected))
 
 
+def _entity_defaults(project: dict[str, Any], kind: str, value: dict[str, Any], parent_id: str | None, path: str) -> dict[str, Any]:
+    try:
+        index = int(path.rsplit('/', 1)[-1])
+    except (ValueError, TypeError):
+        index = int(value.get('index', 0)) if isinstance(value.get('index'), int) else 0
+
+    if kind == 'row':
+        return {
+            'index': index, 'title': project.get('defaultRowTitle', 'Row'),
+            'titleText': project.get('defaultRowText', ''), 'debugTitle': '',
+            'objectWidth': project.get('defaultRowWidth', 'col-md-3'), 'image': '',
+            'template': project.get('defaultRowTemplate', 1), 'isButtonRow': False,
+            'isResultRow': False, 'resultGroupId': '', 'isInfoRow': False,
+            'defaultAspectWidth': 1, 'defaultAspectHeight': 1,
+            'allowedChoices': project.get('defaultRowAllowedChoices', 0),
+            'currentChoices': 0, 'rowJustify': project.get('defaultRowJustify', 'start'),
+            'requireds': [], 'isEditModeOn': False, 'isRequirementOpen': False,
+            'objects': [], 'rowDesignGroups': [],
+        }
+    if kind == 'backpack_row':
+        return {
+            'index': index, 'isBackpack': True,
+            'title': project.get('defaultRowTitle', 'Row'),
+            'titleText': project.get('defaultRowText', ''), 'debugTitle': '',
+            'objectWidth': 'col-md-3', 'image': '', 'template': 1,
+            'isButtonRow': False, 'buttonType': True, 'buttonId': '',
+            'buttonText': 'Click', 'buttonRandom': False, 'buttonRandomNumber': 1,
+            'isResultRow': True, 'resultGroupId': '', 'isInfoRow': True,
+            'defaultAspectWidth': 1, 'defaultAspectHeight': 1,
+            'allowedChoices': 0, 'currentChoices': 0, 'requireds': [],
+            'isEditModeOn': False, 'isRequirementOpen': False,
+            'objects': [], 'rowDesignGroups': [],
+        }
+    if kind == 'choice':
+        return {
+            'index': index, 'title': project.get('defaultChoiceTitle', 'Choice'),
+            'text': project.get('defaultChoiceText', ''), 'debugTitle': '',
+            'image': '', 'template': project.get('defaultChoiceTemplate', 1),
+            'objectWidth': project.get('defaultChoiceWidth', ''), 'isActive': False,
+            'multipleUseVariable': 0, 'initMultipleTimesMinus': 0,
+            'selectedThisManyTimesProp': 0, 'requireds': [], 'addons': [],
+            'scores': [], 'groups': [], 'objectDesignGroups': [],
+        }
+    if kind in {'addon', 'selectable_addon'}:
+        out = {
+            'title': project.get('defaultAddonTitle', 'Addon'),
+            'text': project.get('defaultAddonText', ''),
+            'template': project.get('defaultAddonTemplate', 1),
+            'addonWidth': project.get('defaultAddonWidth', 'col-12'),
+            'image': '', 'requireds': [],
+        }
+        if parent_id is not None:
+            out['parentId'] = parent_id
+        if project.get('defaultUseShowAddon'):
+            out['showAddon'] = True
+        if project.get('defaultUseHideAddon'):
+            out['hideAddon'] = True
+        if kind == 'selectable_addon':
+            out.update({'isSelectable': True, 'scores': []})
+        return out
+    if kind == 'score':
+        return {
+            'id': '', 'value': 0, 'type': '', 'requireds': [],
+            'beforeText': project.get('defaultBeforePoint', 'Cost:'),
+            'afterText': project.get('defaultAfterPoint', 'points'),
+            'showScore': project.get('defaultUseShowScore', True),
+        }
+    if kind == 'requirement':
+        req_type = str(value.get('type', 'id'))
+        return {
+            'required': True, 'requireds': [],
+            'orRequired': ([{'req': ''}] if req_type == 'word' else []),
+            'orRequireds': [], 'id': '', 'type': 'id', 'reqId': '',
+            'reqId1': '', 'reqId2': '', 'reqId3': '', 'reqPoints': 0,
+            'showRequired': project.get('defaultUseShowReq', False),
+            'operator': '1', 'afterText': project.get('defaultAfterReq', 'choice'),
+            'beforeText': project.get('defaultBeforeReq', 'Required:'),
+            'orNum': 1, 'selNum': 1, 'selFromOperators': '1', 'more': [],
+        }
+    if kind == 'point':
+        return {
+            'name': 'Point', 'startingSum': 0, 'initValue': 0, 'activatedId': '',
+            'beforeText': 'Point:', 'afterText': '', 'category': -1,
+        }
+    if kind == 'variable':
+        return {'isTrue': False, 'category': -1}
+    if kind == 'word':
+        return {'replaceText': '', 'category': -1}
+    if kind == 'group':
+        return {'name': 'Group', 'category': -1, 'elements': [], 'rowElements': []}
+    if kind == 'global_requirement':
+        return {'name': 'Requirement', 'category': -1, 'requireds': []}
+    if kind in {'row_design_group', 'choice_design_group'}:
+        return {
+            'name': 'Design Group', 'activatedId': '', 'elements': [],
+            'backpackElements': [], 'groupElements': [], 'styling': {}, 'category': -1,
+        }
+    if kind == 'sound_effect':
+        return {
+            'name': 'Sound effect', 'audio': '', 'volume': 1, 'pitch': 0,
+            'isDefault': False, 'onSelected': False, 'onDeselected': False,
+            'requireds': [], 'groups': [],
+        }
+    if kind == 'category':
+        idx = value.get('idx')
+        return {'name': f'Slot {idx + 1}' if isinstance(idx, int) else 'Slot'}
+    return {}
+
+
+def _hydrate_entities(project: dict[str, Any], changes: list[dict[str, Any]]) -> None:
+    index = ProjectIndex(project)
+    for ent in index.entities:
+        if not isinstance(ent.value, dict):
+            continue
+        defaults = _entity_defaults(project, ent.kind, ent.value, ent.parent_id, ent.path)
+        for key, default in defaults.items():
+            if key in ent.value:
+                continue
+            ent.value[key] = copy.deepcopy(default)
+            changes.append({
+                'path': _path(ent.path, key),
+                'action': 'filled',
+                'source': 'official_creator_entity_default',
+                'entity_id': ent.id,
+            })
+
+
 def hydrate_project(project: dict[str, Any], *, upgrade_version: bool = False) -> list[dict[str, Any]]:
     """Fill missing official project-level fields in place.
 
@@ -143,6 +270,7 @@ def hydrate_project(project: dict[str, Any], *, upgrade_version: bool = False) -
                 fill(current, default, p)
 
     fill(project, baseline)
+    _hydrate_entities(project, changes)
     if upgrade_version and project.get('version') != ICCPLUS_VERSION:
         previous = project.get('version')
         project['version'] = ICCPLUS_VERSION
