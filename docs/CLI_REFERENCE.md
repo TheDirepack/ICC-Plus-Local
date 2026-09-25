@@ -1,6 +1,6 @@
 # CLI reference
 
-The canonical rc12 surface has 11 top-level commands.
+The canonical rc13 surface has 11 top-level commands.
 
 ## `generate`
 
@@ -52,7 +52,7 @@ iccplus-local play project.json --state run.json --select choice_a
 iccplus-local play project.json @audit.json --state run.json
 ```
 
-Audit requests use `steps` or `actions`. Each step may select, deselect, press a Row button, request status, reset, or request a view. Player views expose visible `rows`, `choices`, and `addons` as separate entity lists. Rows contain ordered `choice_ids`; Choices contain `row_id`, visible-order `index`, and `addon_ids`; Addons contain `choice_id`, `row_id`, and visible-order `index`. Top-level `row_ids`, `choice_ids`, `addon_ids`, `selectable_addon_ids`, and `informational_addon_ids` make the visible structure directly enumerable. New automation should use `available_direct_choice_ids` and `available_selectable_addon_ids` when entity type matters. The older `available_choice_ids` compatibility name includes both direct Choices and selectable Addons. `expect` can check visible `points`, `selected`, `not_selected`, `available`, `not_available`, `deselectable`, `not_deselectable`, `visible`, `hidden`, `row_choices`, or `choice_rows`. See `PLAY_STRUCTURE.md` for the full rc11 view model.
+Audit requests use `steps` or `actions`. Each step may select, deselect, press a Row button, request status, reset, or request a view. Player views expose visible `rows`, `choices`, and `addons` as separate entity lists. Rows contain ordered `choice_ids`; Choices contain `row_id`, visible-order `index`, and `addon_ids`; Addons contain `choice_id`, `row_id`, and visible-order `index`. Top-level `row_ids`, `choice_ids`, `addon_ids`, `selectable_addon_ids`, and `informational_addon_ids` make the visible structure directly enumerable. New automation should use `available_direct_choice_ids` and `available_selectable_addon_ids` when entity type matters. The older `available_choice_ids` compatibility name includes both direct Choices and selectable Addons. `expect` can check visible `points`, `selected`, `not_selected`, `available`, `not_available`, `deselectable`, `not_deselectable`, `visible`, `hidden`, `row_choices`, or `choice_rows`. See `PLAY_STRUCTURE.md` for the current view model.
 
 ## `build`
 

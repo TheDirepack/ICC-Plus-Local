@@ -29,7 +29,7 @@ For new automation, treat the flat `rows`, `choices`, and `addons` lists as cano
 4. Follow a Choice's `addon_ids` into the flat `addons` list when Addons matter.
 5. Use the explicit direct-Choice and selectable-Addon availability fields before acting.
 
-See `PLAY_STRUCTURE.md` for the complete field-by-field rc11 structure.
+See `PLAY_STRUCTURE.md` for the current field-by-field structure.
 
 ## One action at a time
 

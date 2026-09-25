@@ -1,8 +1,8 @@
 # Operation reference
 
-`iccplus-local apply PROJECT [SCRIPT]` runs every operation against an in-memory copy. `SCRIPT` defaults to stdin. The command writes only after all operations and identity checks succeed. Static validation also has to pass unless `--allow-invalid` is explicit.
+This document describes the underlying operation vocabulary used by phase scripts and retained compatibility paths. It is not a separate public workflow. New automation should execute operations through `structure`, `rules`, or `style`, using the schema returned by `reference schema` for that phase.
 
-The script may be one operation object, an object containing `operations`, a bare array, or JSONL.
+Phase writes run against a copy and replace the project only after operation checks and complete-project validation succeed.
 
 ## Short syntax
 
@@ -37,7 +37,7 @@ Do not put the same field both inline and in `values`.
 
 ```json
 {"op":"assert","ref":"row_perks","kind":"row"}
-{"op":"assert","pointer":"/version","equals":"2.10.6"}
+{"op":"assert","pointer":"/version","equals":"2.10.7"}
 ```
 
 Use assertions before edits whose correctness depends on the project revision.
@@ -68,7 +68,7 @@ An update cannot change an entity identity. Use `rename`.
 
 ## `where`, `expect`, and `allow_empty`
 
-Bulk operations can target an exact structural set with `where`. Preview the same selector first with `match`.
+Bulk operations can target an exact structural set with `where`. Preview the same selector first with an `inspect` match query.
 
 ```json
 {
@@ -187,4 +187,4 @@ This fills missing identities, rebuilds indexes, repairs known reverse membershi
 
 ## Failure response
 
-A failed operation includes its operation index and returns exit code 4. An identity failure after otherwise successful operations also returns exit code 4. In both cases the CLI writes nothing. If operations succeed but static validation fails, the command returns exit code 2 and also writes nothing unless `--allow-invalid` was supplied.
+A failed phase operation reports the failing operation and writes nothing. Identity or complete-project validation failures also leave the original target unchanged. Compatibility-only raw paths may have different diagnostic detail and should not be the default for new automation.

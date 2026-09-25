@@ -38,7 +38,7 @@ For a multiple-selection count, use the ICC Plus `/ON#N` suffix:
 
 The local generator's `requires` and `excludes` shortcuts create simple ID Requirements.
 
-ICC Plus parses the numeric part of `/ON#N` with JavaScript `parseInt` behavior. A prefix such as `/ON#2junk` therefore reads as 2. Negative forced activation counts are effectively a no-op in 2.10.6. Preserve these quirks when reproducing source behavior.
+ICC Plus parses the numeric part of `/ON#N` with JavaScript `parseInt` behavior. A prefix such as `/ON#2junk` therefore reads as 2. Negative forced activation counts are effectively a no-op in the pinned 2.10.7 behavior. Preserve these quirks when reproducing source behavior.
 
 ## Point Requirement
 
@@ -142,7 +142,7 @@ Arithmetic `more[].operator` codes modeled from the Viewer logic are `1` add, `2
 }
 ```
 
-The selection-count comparator uses ICC Plus's own codes, which differ from Point Requirement operators. The local runtime models the reviewed Viewer behavior. For uncommon count rules, make a passing and failing `status` or `scenario` test rather than inferring the meaning from the numeric code.
+The selection-count comparator uses ICC Plus's own codes, which differ from Point Requirement operators. The local runtime models the reviewed Viewer behavior. For uncommon count rules, make passing and failing `play` audit cases rather than inferring the meaning from the numeric code.
 
 ## Global Requirement
 

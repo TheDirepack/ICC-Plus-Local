@@ -62,23 +62,26 @@ See `BUILD_SYSTEM.md` and `PHASED_AUTHORING.md`.
 
 ## Inspect before changing
 
-Use `inspect` for several read-only queries in one process, or the smaller commands when one query is enough.
+Use `inspect` for read-only discovery. Put related queries in one request:
 
-```bash
-iccplus-local search build/project.json "Magic" --kind row
-iccplus-local list build/project.json choice --row row_magic
-iccplus-local show build/project.json choice_engineer
+```json
+{
+  "queries": [
+    {"op":"search","query":"Magic","kind":"row","limit":10},
+    {"op":"show","ref":"choice_engineer","kind":"choice"},
+    {"op":"match","where":{"kind":"choice","row":"row_magic"},"expect":{"min":1}}
+  ]
+}
 ```
 
-For a bulk selector, run `match` with `--expect`, then keep the same selector and expectation in the rules file.
-
-## Low-level apply
-
-Use generic `apply` only for an uncommon native field or a migration that does not fit a phase tool.
-
 ```bash
-iccplus-local reference schema agent-operations
-iccplus-local apply project.json @99-raw-fix.json
+iccplus-local inspect build/project.json @inspect.json
 ```
 
-Keep durable raw edits in their own file so they can be reviewed and moved into a phase tool later.
+Keep the same selector and `expect` count in the following phase operation.
+
+## Uncommon native fields
+
+Do not switch to a hidden compatibility command because a field is uncommon. Discover it with `reference fields` and `reference schema`, then write it through `structure`, `rules`, or `style` according to its owner.
+
+If a maintained build genuinely requires a compatibility-only raw step, isolate that step in the build source and document why no canonical phase can represent it. New one-off automation should stay on the public command tree.

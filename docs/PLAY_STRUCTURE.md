@@ -1,10 +1,10 @@
-# Play structure in ICC Plus Local 0.10.0rc11
+# Play structure in ICC Plus Local 0.10.0rc13
 
 This file describes the player-visible hierarchy returned by `iccplus-local play`.
 
 ## The main rule
 
-Rows, direct Choices, and Addons are separate entity types. The rc11 player view exposes each type separately and includes explicit links between them. New automation should use those links instead of reconstructing hierarchy from nested JSON.
+Rows, direct Choices, and Addons are separate entity types. The current player view exposes each type separately and includes explicit links between them. This structure was introduced in rc11 and remains the rc13 contract. New automation should use those links instead of reconstructing hierarchy from nested JSON.
 
 The response still includes the older `rows[].choices` compatibility field. It is not the preferred representation.
 
@@ -96,7 +96,7 @@ For an informational Addon, `kind` is `addon`. For a selectable Addon, `kind` is
 
 ## Selection fields
 
-The top-level view exposes both compatibility fields and explicit rc11 fields.
+The top-level view exposes both compatibility fields and explicit current fields.
 
 Use these fields for new automation:
 

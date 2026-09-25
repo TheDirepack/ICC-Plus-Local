@@ -41,16 +41,11 @@ Normal writes validate automatically. Use an `inspect` query with `op: "check"` 
 
 Put a `match` query in the same `inspect` request used for other discovery. Keep the same `expect` count in the following phase operation. A stale selector then fails before writing.
 
-## Low-level edits
+## Uncommon fields
 
-Generic `apply` is the automation escape hatch for a native field that does not fit the phase tools.
+Use `reference fields` and the phase schemas before assuming a native field needs a compatibility path. New automation should write through `structure`, `rules`, or `style`. Hidden compatibility aliases are for old scripts and are not part of the current contract.
 
-```bash
-iccplus-local reference schema agent-operations
-iccplus-local apply project.json @99-raw-fix.json
-```
-
-A failed atomic operation returns exit code 4 and never writes a partial project. Malformed input returns exit code 1. Validation failure returns exit code 2.
+A failed atomic phase operation writes nothing. Malformed input returns exit code 1. Validation failure returns exit code 2.
 
 ## Continuous session files
 

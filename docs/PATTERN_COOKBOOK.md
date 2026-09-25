@@ -5,12 +5,12 @@ Use these patterns when generating or repairing `project.json`. Prefer the gener
 Before generating, run:
 
 ```bash
-iccplus-local capabilities --compact
-iccplus-local template row --compact
-iccplus-local template choice --compact
+iccplus-local reference capabilities --brief
+iccplus-local template entity row
+iccplus-local template entity choice
 ```
 
-After a change, run `ids`, `validate`, and the smallest runtime test that covers the mechanic.
+After a change, use the write receipt plus the smallest `play` audit that covers the mechanic. Use `project validate` for the final Creator-complete check.
 
 ## Pick one or pick N
 
@@ -338,7 +338,7 @@ Use an information Row for text that is not a player selection.
 Button behavior has several native modes. Start from the exact installed factory:
 
 ```bash
-iccplus-local template row --compact
+iccplus-local template entity row
 ```
 
 Common fields include `isButtonRow`, `buttonType`, `buttonId`, `buttonText`, `buttonRandom`, `buttonRandomNumber`, `isWeightedRandom`, `allowActivateUnselectable`, `btnPointAddon`, `pointTypeRandom`, `randomMin`, `randomMax`, `onlyUnselectedChoices`, and `onlyIfNoChoices`.
@@ -412,11 +412,9 @@ Keep presentation changes native. They are easier to compare with the target Vie
 A reliable scripted repair cycle is:
 
 ```bash
-iccplus-local ids project.json
-iccplus-local validate project.json
-iccplus-local list project.json choice --row row_powers > powers.json
-iccplus-local apply project.json repair.json
-iccplus-local validate project.json
+iccplus-local inspect project.json @inspect.json
+iccplus-local rules project.json @repair-rules.json
+iccplus-local project validate project.json
 ```
 
 If a batch operation or static validation fails, `apply` leaves the output file unchanged. Use `--allow-invalid` only for an intentional invalid intermediate file.

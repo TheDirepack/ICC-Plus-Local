@@ -1,6 +1,6 @@
 # ICC Plus field reference for scripted work
 
-This is a compact field catalog for the ICC Plus 2.10.6 source snapshot used by this release. It is not a replacement for the official Viewer source. It exists so a generator can find the native field names without opening the Creator UI.
+This is a compact field catalog for the ICC Plus 2.10.7 source snapshot used by this release. It is not a replacement for the official Viewer source. It exists so a generator can find the native field names without opening the Creator UI.
 
 ## Requirement
 
@@ -48,6 +48,7 @@ beforeText
 afterText
 showScore
 hideValue
+removeSpace
 isRandom
 minValue
 maxValue
@@ -97,7 +98,7 @@ isCountDisabled
 deselectWhenNoAddon
 ```
 
-`isSelectableMultiple` only enables the repeatable UI path. A working counter also needs a mode. `isMultipleUseVariable: true` uses the signed `multipleUseVariable` count. `multipleScoreId` uses a Point Type-backed count. If neither mode is present, ICC Plus 2.10.6 leaves the counter inert.
+`isSelectableMultiple` only enables the repeatable UI path. A working counter also needs a mode. `isMultipleUseVariable: true` uses the signed `multipleUseVariable` count. `multipleScoreId` uses a Point Type-backed count. If neither mode is present, ICC Plus 2.10.7 leaves the counter inert.
 
 Activation:
 
