@@ -11,6 +11,10 @@
 - Canonical writes now hydrate and complete-validate before replacing a project; build/generation/export paths cannot silently emit a sparse project.
 - Added `project validate` and `project hydrate` as canonical LLM-facing repair/verification operations. `inspect` check queries can request complete validation while compatibility validation remains available for legacy read-only work.
 - Compact generation now deep-merges partial project objects such as `styling` and `viewerConfig` over official defaults instead of replacing the whole section.
+- Fixed the semantic `effects.multiple` shorthand so normal counters explicitly select ICC Plus's variable-backed repeat mode unless a point-backed score is requested.
+- Added a dependency-free safe loading-text sanitizer that preserves simple formatting while dropping active content, matching the official DOMPurify intent more closely.
+- Kept the retained official-GUI result bundle and C01 round-trip evidence explicitly scoped to rc11 / ICC Plus 2.10.6 instead of relabeling historical browser evidence as 2.10.7.
+- Added a permanent GitHub Actions regression gate. Final rc12 branch verification: **324 tests passed** and all checked-in examples passed.
 
 ## 0.10.0rc11
 
