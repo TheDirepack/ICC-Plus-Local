@@ -1,5 +1,7 @@
 # External upstream verification
 
+> Historical verification record. This document describes the earlier 2.10.6 browser-verification campaign. The current package is rc13 targeting ICC Plus 2.10.7; do not treat the candidate/version labels below as current release instructions.
+
 Version 0.10.0rc7 is the current verification candidate for ICC Plus 2.10.6. It incorporates the usable evidence from the first official-browser run and repairs flaws in the first test package. It still does not claim complete official Viewer parity because the first runtime automation did not produce reliable observations for every case.
 
 The target source commit is `a420836248d32043ae45d03f1b93cdcb9e354663`.

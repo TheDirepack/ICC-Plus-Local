@@ -1,16 +1,17 @@
 {
-  "package": "ICC Plus Local rc12 complete-project validation and reusable-style candidate",
-  "tool_version": "0.10.0rc12",
+  "package": "ICC Plus Local rc13 compressed CYOA skill and documentation candidate",
+  "tool_version": "0.10.0rc13",
   "target_icc_plus_version": "2.10.7",
   "target_source_commit": "1ea9db888cde2286d18d0d5de50933cb8773b739",
-  "candidate_role": "LLM-first ICC Plus authoring with official-default hydration, Creator-complete output validation, native Design Group styling, player-safe audit, and source-pinned 2.10.7 compatibility",
+  "candidate_role": "LLM-first ICC Plus 2.10.7 authoring plus a compressed high-level CYOA planning/review/migration/release skill set",
   "local_regression": {
-    "normal_tests": "327 passed",
+    "normal_tests": "332 passed",
     "checked_in_examples": "all passed",
     "ci_workflow": ".github/workflows/tests.yml",
-    "ci_verified_on_pr": 4,
+    "ci_verified_on_pr": 5,
     "default_export_bytes": 13414,
-    "default_export_sha256": "10e9b3ba3ccee2a9ca7e2ce2753e2f61fc2e289549629f2c2d6235cc0705f68d"
+    "default_export_sha256": "10e9b3ba3ccee2a9ca7e2ce2753e2f61fc2e289549629f2c2d6235cc0705f68d",
+    "rc13_workflow_run": 36196654260
   },
   "project_integrity": {
     "canonical_final_validation": "project validate",
@@ -49,5 +50,29 @@
     "historical_2_10_6": "C01 official Creator export exactly matched the retained 2.10.6 round-trip fixture",
     "browser_authority": "official Creator/Viewer remains authoritative for rendering and browser-only behavior"
   },
-  "historical_manifest": "PACKAGE_MANIFEST_RC11.json"
+  "historical_manifest": "PACKAGE_MANIFEST_RC11.json",
+  "cyoa_skills": {
+    "implementation": "iccplus-local",
+    "retained_high_level": [
+      "cyoa-plan",
+      "cyoa-review",
+      "cyoa-migrate",
+      "cyoa-develop",
+      "cyoa-ship",
+      "cyoa-compress"
+    ],
+    "retired_wrappers": [
+      "cyoa-create",
+      "cyoa-edit",
+      "cyoa-look",
+      "cyoa-test"
+    ],
+    "prose": "external Unslop skill; not bundled"
+  },
+  "documentation": {
+    "cyoa_guide": "docs/cyoa/guide/",
+    "legacy_migration_reference": "docs/cyoa/legacy/legacy-icc-migration-reference.md",
+    "skill_routing": "docs/cyoa/skills-usage.md",
+    "current_target": "ICC Plus 2.10.7"
+  }
 }

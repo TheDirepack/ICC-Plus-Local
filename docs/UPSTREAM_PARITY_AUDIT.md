@@ -56,7 +56,7 @@ The affected IDs in that historical snapshot were:
 - `choice_race_selected_domain_resistance`
 - `choice_race_selected_source_resistance`
 
-Do not use this section as live project status. Re-run `iccplus-local validate` on the current export. The current Revision 5 export checked during the 0.9.1 re-audit validates with 0 errors and 0 warnings.
+Do not use this section as live project status. Run `iccplus-local project validate` on the current export. The current Revision 5 export checked during the 0.9.1 re-audit validates with 0 errors and 0 warnings.
 
 The audit also exercised the five economy presets as an integration sequence. Their Creation Point results were Standard 290, Generous 370, Tight 220, Mythic 500, and Cheat 1,000,000, with only the latest preset active. A normal 1-point selectable Addon changed 290 to 289 and restored 290 on deselection.
 

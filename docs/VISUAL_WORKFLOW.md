@@ -1,6 +1,6 @@
 # LLM visual authoring workflow
 
-`iccplus-local` 0.10.0rc7 includes the compact visual audit and visual manifest introduced in 0.9.0. The tool writes ordinary ICC Plus 2.10.7 fields. The manifest is an authoring file, not a runtime format.
+`iccplus-local` 0.10.0rc13 uses the compact visual inspection and style-manifest workflow introduced in earlier candidates. The tool writes ordinary ICC Plus 2.10.7 fields. The manifest is an authoring file, not a runtime format.
 
 ## Start with a small work queue
 

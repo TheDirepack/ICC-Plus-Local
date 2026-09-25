@@ -1,0 +1,27 @@
+# Review checklist
+
+- [ ] Premise and non-goals are still coherent.
+- [ ] Player contract is clear.
+- [ ] Completion rule is clear.
+- [ ] Main format matches the premise.
+- [ ] Every section has a distinct purpose.
+- [ ] Related choices and prerequisite information are reasonably close together.
+- [ ] Section order minimizes avoidable backtracking.
+- [ ] Important hidden content has a useful clue or visible unlock path.
+- [ ] Important choices give the player a basis for deciding.
+- [ ] Important choices have a consequence, payoff, or lasting build meaning.
+- [ ] Budgets are visible and meaningful.
+- [ ] Mandatory spending is not hidden.
+- [ ] No obvious dominated or mandatory option remains unexplained.
+- [ ] Drawbacks create real costs and do not accidentally erase paid benefits without a deliberate tradeoff.
+- [ ] Full builds or paths were checked in enough variety for the project size.
+- [ ] Major synergies and exploit-seeking builds were checked.
+- [ ] Requirement chains remain understandable, reachable, and acyclic.
+- [ ] Source facts, supported inferences, design choices, and placeholders remain distinguishable.
+- [ ] No stale terminology remains after renames.
+- [ ] Mobile layout matches text density.
+- [ ] Contrast, non-color cues, interaction targets, and text alternatives were checked where relevant.
+- [ ] Save, import, summary, and static-edition behavior match project length and release plans.
+- [ ] No legacy workaround remains without a current need.
+- [ ] Generated output agrees with the authoritative structured source.
+- [ ] No authoring, debug, template, or placeholder metadata appears as player-facing content.

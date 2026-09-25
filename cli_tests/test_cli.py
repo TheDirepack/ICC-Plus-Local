@@ -1400,7 +1400,7 @@ class AgentAutomationExampleTests(unittest.TestCase):
         )
         self.assertEqual(proc.returncode, 0, proc.stderr)
         value = json.loads(proc.stdout)
-        self.assertEqual(value['capabilities']['tool_version'], '0.10.0rc12')
+        self.assertEqual(value['capabilities']['tool_version'], (ROOT / 'VERSION').read_text().strip())
         self.assertTrue(value['inspection']['ok'])
         self.assertTrue(value['dry_run']['ok'])
         self.assertTrue(value['dry_run']['dry_run'])

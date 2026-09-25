@@ -2,7 +2,7 @@
 
 ## Skill routing
 
-Use `../../skills/iccplus-local/SKILL.md` as the single general ICC Plus Local skill. It routes the task to one or more focused guides under `../../skills/iccplus-local/functions/`. The function guides are not standalone installed skills. Read only the guide or guides needed for the current operation.
+Use `../../skills/iccplus-local/SKILL.md` as the single native ICC Plus 2 implementation skill. It routes the task to one or more focused guides under `../../skills/iccplus-local/functions/`. The function guides are reference files, not separate installed skills. Use the retained high-level CYOA skills only for planning, review, migration, long-project coordination, release work, or exceptional external compression. See `cyoa/skills-usage.md`.
 
 Use the smallest workflow possible.
 
@@ -52,7 +52,7 @@ Local and embedded images are compressed automatically when assigned. Do not ask
 Keep `--state FILE` private. The LLM should reason from the returned player view, not from the serialized runtime state.
 
 
-### Reading the rc11 player structure
+### Reading the current player structure
 
 Use compact player views by default. Read `rows`, `choices`, and `addons` as separate entity lists. A Row's `choice_ids` gives its visible direct Choices. Each Choice has `row_id` plus `addon_ids`. Each Addon has both `choice_id` and `row_id`.
 

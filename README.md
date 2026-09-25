@@ -1,23 +1,26 @@
 # ICC Plus Local
 
-**Version 0.10.0rc12**
+**Version 0.10.0rc13**
 
-ICC Plus Local is a local command-line authoring and mechanical-testing tool for ICC Plus 2 projects. The current source in this repository is ICC Plus Local 0.10.0rc12, targeting ICC Plus 2.10.7 and pinned to upstream source commit `1ea9db888cde2286d18d0d5de50933cb8773b739`.
+ICC Plus Local is a local command-line authoring and mechanical-testing tool for ICC Plus 2 projects. The current source in this repository is ICC Plus Local 0.10.0rc13, targeting ICC Plus 2.10.7 and pinned to upstream source commit `1ea9db888cde2286d18d0d5de50933cb8773b739`.
 
 It is an independent local implementation. The official ICC Plus Creator and Viewer remain the authority for browser rendering and behavior outside the local tool's verified coverage.
 
 ## What is included
 
 - The ICC Plus Local Python source, schemas, tests, verification fixtures, and package metadata at the repository root.
-- `skills/iccplus-local/`, the single general ICC Plus Local Agent Skill.
-- `skills/iccplus-local/functions/`, its focused guides for the 11 canonical command families.
-- `docs/`, the current ICC Plus Local documentation from the active CYOA New toolset.
-- `docs/cyoa/`, generic CYOA authoring, audit, and blind-playtest guidance.
-- The files under `examples/` provide tested rc12 command, selector, session, and automation examples.
+- `skills/iccplus-local/`, the single native ICC Plus 2 implementation skill.
+- `skills/iccplus-local/functions/`, focused guides for the 11 canonical command families.
+- `skills/cyoa-plan/`, `cyoa-review/`, `cyoa-migrate/`, `cyoa-develop/`, `cyoa-ship/`, and `cyoa-compress/`, the retained high-level CYOA skills whose work is not replaced by the CLI.
+- `docs/`, the current ICC Plus Local documentation.
+- `docs/cyoa/guide/`, the complete generic CYOA design, authoring, testing, and release guide.
+- `docs/cyoa/legacy/`, the legacy ICC migration reference used by `cyoa-migrate`.
+- `docs/cyoa/`, generic audit rules, authoring rules, skill usage, and playtest prompts.
+- The files under `examples/` provide tested command, selector, continuation-state, and automation examples.
 - `examples/simple-cyoa/` is a small phased CYOA with builder scripts and a player-safe smoke test.
 - `examples/main-cyoa-development/` is a validated standalone excerpt derived from the current 6.6.11 main CYOA.
 
-The older collection of separate CYOA lifecycle skills is not included. Their ICC Plus Local responsibilities were consolidated into the current `iccplus-local` skill and its function guides.
+The old wrapper skills `cyoa-create`, `cyoa-edit`, `cyoa-look`, and `cyoa-test` are intentionally absent. Native ICC Plus 2 creation, editing, styling, media work, validation, and mechanical playtesting are consolidated into `iccplus-local`. Planning, review, migration, long-project coordination, release work, and exceptional external compression remain separate because they add work outside the CLI itself.
 
 ## Quick start
 
@@ -42,7 +45,7 @@ python -m iccplus_tools play project.json
 
 ## Agent skill
 
-Start with [`skills/iccplus-local/SKILL.md`](skills/iccplus-local/SKILL.md). It is the only ICC Plus Local skill in this repository.
+For native ICC Plus 2 project work, start with [`skills/iccplus-local/SKILL.md`](skills/iccplus-local/SKILL.md). It is the single implementation skill. Use the retained high-level CYOA skills only for planning, review, migration, long-project coordination, final release work, or exceptional external compression.
 
 The skill routes the task to one or more files under `skills/iccplus-local/functions/`:
 
@@ -66,16 +69,18 @@ The function files are reference material for the one skill. They are not separa
 
 Start with these files when more detail is needed:
 
+- [`docs/cyoa/guide/00-index.md`](docs/cyoa/guide/00-index.md) for the full CYOA design and implementation guide.
+- [`docs/cyoa/skills-usage.md`](docs/cyoa/skills-usage.md) for the compressed skill-routing model.
 - [`docs/CLI_REFERENCE.md`](docs/CLI_REFERENCE.md) for the canonical command tree.
 - [`docs/LLM_USAGE.md`](docs/LLM_USAGE.md) for the agent workflow.
 - [`docs/PHASED_AUTHORING.md`](docs/PHASED_AUTHORING.md) and [`docs/AUTHORING_SCRIPTS.md`](docs/AUTHORING_SCRIPTS.md) for structured edits.
 - [`docs/FIELD_CATALOG.md`](docs/FIELD_CATALOG.md) and [`docs/ICCPLUS_FIELD_REFERENCE.md`](docs/ICCPLUS_FIELD_REFERENCE.md) for native fields.
-- [`docs/PLAY_STRUCTURE.md`](docs/PLAY_STRUCTURE.md) for the rc11 player-visible Row, Choice, and Addon model.
+- [`docs/PLAY_STRUCTURE.md`](docs/PLAY_STRUCTURE.md) for the current player-visible Row, Choice, and Addon model.
 - [`docs/GAMEPLAY_RUNNER.md`](docs/GAMEPLAY_RUNNER.md) for progressive player-safe tests.
 - [`docs/VISUAL_WORKFLOW.md`](docs/VISUAL_WORKFLOW.md) for images and presentation work.
 - [`COVERAGE.md`](COVERAGE.md) for the local simulator boundary.
 
-Historical per-version audit reports are intentionally not carried in the working documentation set. Release history remains in [`RELEASE_NOTES.md`](RELEASE_NOTES.md).
+Historical per-version audit reports are retained as evidence and labeled by the version they audited. Current workflow instructions live in the non-historical docs and [`RELEASE_NOTES.md`](RELEASE_NOTES.md).
 
 ## Examples
 
@@ -106,7 +111,7 @@ The scripts build `build/project.json` from the phase files in `project-src/` an
 
 ### Main CYOA development excerpt
 
-`examples/main-cyoa-development/` is derived from the in-development 6.6.11 main CYOA. It preserves seven real species-builder rows, 26 real Choices, current IDs, player-facing text, and the original row selection limits. Cross-section Requirements, Scores, Groups, and generated relationships are deliberately omitted so the excerpt remains standalone and reproducible.
+`examples/main-cyoa-development/` is an earlier development excerpt derived from the 6.6.11 main CYOA. It preserves seven real species-builder rows, 26 real Choices, current IDs, player-facing text, and the original row selection limits. Cross-section Requirements, Scores, Groups, and generated relationships are deliberately omitted so the excerpt remains standalone and reproducible.
 
 ```bash
 cd examples/main-cyoa-development
@@ -128,7 +133,7 @@ For prose cleanup, the recommended external companion is the [Unslop skill](http
 
 ## Verification
 
-The current repository passes the rc12 automated regression gate: **327 tests passed**. `./examples/test_examples.sh` also passes and covers the command fixtures, both continuation-state requests, the simple CYOA, and the main-CYOA development excerpt.
+rc13 keeps the rc12 ICC Plus 2.10.7 engine target and adds the compressed CYOA skill/documentation set. Final PR verification: **332 tests passed** and all checked-in examples passed, including the skill/documentation consistency checks.
 
 Local mechanical tests do not replace final checks in the official Creator or Viewer for browser rendering, responsive layout, CSS, animation, dialogs, network-loaded assets, or behavior outside documented local coverage.
 
