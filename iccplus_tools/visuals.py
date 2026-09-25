@@ -21,7 +21,7 @@ _ITEM_META_KEYS = {
     'ref', 'id', 'refs', 'where', 'expect', 'allow_empty', 'preset', 'presets',
     'design_group', 'design_groups', 'source', 'credit', 'notes',
 }
-_DESIGN_GROUP_SPEC_KEYS = {'kind', 'name', 'activated_id', 'category', 'styling', 'replace_styling', 'unset_styling'}
+_DESIGN_GROUP_SPEC_KEYS = {'kind', 'name', 'activated_id', 'category', 'groups', 'styling', 'replace_styling', 'unset_styling'}
 
 
 def _strings(value: Any) -> list[str]:
@@ -101,6 +101,10 @@ def _validate_design_group_spec(name: str, spec: Any) -> dict[str, Any]:
             raise ValueError(f'unknown design_groups.{name}.unset_styling field(s): {", ".join(sorted(unknown_style))}')
     if 'activated_id' in spec and not isinstance(spec.get('activated_id'), str):
         raise ValueError(f'design_groups.{name}.activated_id must be a string')
+    if 'groups' in spec:
+        groups = spec.get('groups')
+        if not isinstance(groups, list) or any(not isinstance(x, str) or not x.strip() for x in groups):
+            raise ValueError(f'design_groups.{name}.groups must be an array of non-empty Group IDs')
     if 'category' in spec and (not isinstance(spec.get('category'), int) or isinstance(spec.get('category'), bool)):
         raise ValueError(f'design_groups.{name}.category must be an integer')
     return spec
@@ -157,6 +161,28 @@ def _upsert_design_group(project: dict[str, Any], design_id: str, spec: dict[str
         if group.get('category') != value:
             group['category'] = value
             changed.append('category')
+
+    if 'groups' in spec:
+        linked_groups = list(dict.fromkeys(x.strip() for x in spec.get('groups') or []))
+        group_elements = group.get('groupElements')
+        if not isinstance(group_elements, list):
+            group_elements = []
+            group['groupElements'] = group_elements
+        idx = ProjectIndex(project)
+        for group_id in linked_groups:
+            normal_group = idx.one(group_id, 'group')
+            if normal_group is None:
+                raise ValueError(f'design_groups.{design_id}.groups references missing Group {group_id!r}')
+            if group_id not in group_elements:
+                group_elements.append(group_id)
+                changed.append('groupElements')
+            memberships = normal_group.value.get('designGroups')
+            if not isinstance(memberships, list):
+                memberships = []
+                normal_group.value['designGroups'] = memberships
+            if design_id not in memberships:
+                memberships.append(design_id)
+                changed.append(f'group.{group_id}.designGroups')
 
     if 'styling' in spec or spec.get('replace_styling') is True or spec.get('unset_styling'):
         current = group.get('styling') if isinstance(group.get('styling'), dict) else {}
@@ -635,6 +661,8 @@ def apply_visual_manifest(
         item_spec = {k: copy.deepcopy(v) for k, v in raw.items() if k in _VISUAL_SPEC_KEYS}
         combined = _deep_merge(combined, item_spec)
         _validate_visual_spec(combined, label=f'visual manifest items[{n}]')
+        if 'design_group' in raw and 'design_groups' in raw:
+            raise ValueError(f'visual manifest items[{n}] cannot set both design_group and design_groups')
         requested_design_groups = raw.get('design_groups', raw.get('design_group'))
         design_ids = _design_group_refs(
             requested_design_groups,
