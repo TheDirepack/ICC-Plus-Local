@@ -25,6 +25,13 @@
       },
       "additionalProperties": false
     },
+    "design_groups": {
+      "type": "object",
+      "description": "Reusable native ICC Plus Row/Choice Design Groups. Prefer these over repeating private inline styling on individual Rows or Choices.",
+      "additionalProperties": {
+        "$ref": "#/$defs/designGroupSpec"
+      }
+    },
     "defaults": {
       "$ref": "#/$defs/visualSpec"
     },
@@ -62,7 +69,8 @@
         "template": {},
         "width": {},
         "styling": {
-          "$ref": "#/$defs/styling"
+          "$ref": "#/$defs/styling",
+          "description": "Private inline styling escape hatch for a single target. Prefer project.styling for global defaults or top-level design_groups plus item design_group(s) for reusable styling."
         },
         "copy_from": {
           "type": "string",
@@ -155,7 +163,8 @@
         "template": {},
         "width": {},
         "styling": {
-          "$ref": "#/$defs/styling"
+          "$ref": "#/$defs/styling",
+          "description": "Private per-target styling. Use only for a truly one-off Row/Choice case that cannot reasonably be expressed by global styling or a Design Group."
         },
         "copy_from": {
           "type": "string",
@@ -185,6 +194,29 @@
         "allow_empty": {
           "type": "boolean",
           "default": false
+        },
+        "design_group": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Assign one official ICC Plus Design Group. Prefer this over item.styling when a reusable style can apply."
+        },
+        "design_groups": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            }
+          ],
+          "description": "Assign one or more official ICC Plus Design Groups. Reusable styling should normally use this field."
         }
       },
       "oneOf": [
@@ -291,6 +323,48 @@
           "clear_image"
         ]
       },
+      "additionalProperties": false
+    },
+    "designGroupSpec": {
+      "type": "object",
+      "description": "Official ICC Plus Design Group definition. The object key is the Design Group ID.",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "row",
+            "choice"
+          ],
+          "description": "Whether this creates/updates a Row Design Group or Choice Design Group."
+        },
+        "name": {
+          "type": "string"
+        },
+        "activated_id": {
+          "type": "string",
+          "description": "Optional Choice or Global Requirement ID controlling when this Design Group is active."
+        },
+        "category": {
+          "type": "integer"
+        },
+        "styling": {
+          "$ref": "#/$defs/styling"
+        },
+        "replace_styling": {
+          "type": "boolean"
+        },
+        "unset_styling": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "kind"
+      ],
       "additionalProperties": false
     }
   }
