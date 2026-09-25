@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from .editor import ProjectEditor, make_entity, new_project, pointer_get
-from .upstream_2106 import default_export_project, json_stringify
+from .upstream_2106 import ICCPLUS_VERSION, default_export_project, json_stringify
 from .operations import apply_operation_script, load_operation_script
 from .phase_ops import apply_phase_script, load_phase_script
 from .build_pipeline import build_from_manifest, load_build_manifest
@@ -26,7 +26,8 @@ from .agent_protocol import brief_capabilities, command_metadata, load_protocol_
 from .field_catalog import FIELD_CATALOG, catalog_kinds, fields_for, suggest_fields, STYLE_FIELD_GROUPS
 from .field_types import fields_details, json_schema_for_kind, python_typeddicts, typescript_declarations, validate_known_values, validate_field_value
 from .assets import Config as AssetConfig, Totals as AssetTotals, ToolError as AssetToolError, compact_result as compact_asset_result, compact_totals as compact_asset_totals, doctor as asset_doctor, process_directory, process_single_file, probe_path, quality_from_cq, unique_output_path
-from .validation import project_shape_diagnostics, validate
+from .validation import project_shape_diagnostics, validate, validate_complete
+from .project_integrity import hydrate_project, completeness_summary
 from .visuals import VISUAL_KINDS, apply_visual_manifest, visual_audit
 from .packaging import build_viewer_package, creator_save_payload, export_project_zip
 from .gui_parity import gui_parity_report
@@ -224,7 +225,9 @@ def cli_strings(values: list[str] | None) -> list[str]:
 
 
 def write_checked(project: dict[str, Any], target: str, *, allow_invalid: bool = False) -> tuple[dict[str, Any], str | None]:
-    report = validate(project)
+    hydration_changes = hydrate_project(project, upgrade_version=True)
+    report = validate_complete(project)
+    report['hydration_changes'] = hydration_changes
     if report['valid'] or allow_invalid:
         save(target, project)
         return report, target
@@ -355,6 +358,9 @@ def cmd_delete(a: argparse.Namespace) -> int:
 def cmd_generate(a: argparse.Namespace) -> int:
     """Create the exact blank ICC Plus Creator project used as the build starting point."""
     project = default_export_project()
+    validation = validate_complete(project)
+    if not validation['valid']:
+        raise ValueError('internal official blank project failed complete validation')
     output = a.output or str(unique_output_path(Path('project.json')))
     written = None
     if not a.dry_run:
@@ -369,6 +375,7 @@ def cmd_generate(a: argparse.Namespace) -> int:
         'dry_run': bool(a.dry_run),
         'version': project['version'],
         'summary': ProjectIndex(project).summary(),
+        'validation': validation,
         'next': f'iccplus-local structure {output} SCRIPT' if written else 'iccplus-local structure PROJECT SCRIPT',
     })
     return 0
@@ -434,7 +441,10 @@ def _cmd_phase_apply(a: argparse.Namespace, phase: str) -> int:
     if not result.get('ok'):
         emit(_compact_apply_payload(result))
         return 4
-    report = result.get('validation')
+    hydration_changes = hydrate_project(updated, upgrade_version=True)
+    report = validate_complete(updated) if not a.no_validate else None
+    result['validation'] = report
+    result['hydration_changes'] = hydration_changes
     valid = report is None or report.get('valid') is True
     written = None
     if not a.dry_run and (valid or a.allow_invalid):
@@ -463,7 +473,10 @@ def cmd_apply(a: argparse.Namespace) -> int:
     if not result.get('ok'):
         emit(_compact_apply_payload(result) if result_mode == 'compact' else result)
         return 4
-    report = result.get('validation')
+    hydration_changes = hydrate_project(updated, upgrade_version=True)
+    report = validate_complete(updated) if not a.no_validate else None
+    result['validation'] = report
+    result['hydration_changes'] = hydration_changes
     valid = report is None or report.get('valid') is True
     written = None
     if not a.dry_run and (valid or a.allow_invalid):
@@ -741,7 +754,8 @@ def cmd_apply_visuals(a: argparse.Namespace) -> int:
     updated, result = apply_visual_manifest(project, manifest, asset_base=asset_base)
     editor = ProjectEditor(updated)
     changes = editor.normalize_and_check()
-    report = validate(updated) if not a.no_validate else None
+    hydration_changes = hydrate_project(updated, upgrade_version=True)
+    report = validate_complete(updated) if not a.no_validate else None
     valid = report is None or report.get('valid') is True
     written = None
     if not a.dry_run and (valid or a.allow_invalid):
@@ -753,6 +767,7 @@ def cmd_apply_visuals(a: argparse.Namespace) -> int:
     result['written'] = written
     result['dry_run'] = bool(a.dry_run)
     result['normalization_changes'] = changes
+    result['hydration_changes'] = hydration_changes
     result['summary'] = ProjectIndex(updated).summary()
     if report is not None:
         result['validation'] = report
@@ -803,7 +818,7 @@ def cmd_match(a: argparse.Namespace) -> int:
 
 
 _INSPECT_KEYS: dict[str, set[str]] = {
-    'check': {'op'},
+    'check': {'op', 'complete'},
     'summary': {'op'},
     'ids': {'op', 'all'},
     'list': {'op', 'kind', 'row', 'parent', 'group', 'id_prefix'},
@@ -901,8 +916,15 @@ def _inspect_query(project: dict[str, Any], idx: ProjectIndex, query: dict[str, 
     op = str(query['op'])
     if op == 'check':
         ids = identity_report(project, include_all=False)
-        validation = validate(project)
-        return {'ok': bool(ids['ok'] and validation['valid']), 'summary': idx.summary(), 'identities': ids, 'validation': validation}
+        complete = bool(query.get('complete', False))
+        validation = validate(project, complete=complete)
+        return {
+            'ok': bool(ids['ok'] and validation['valid']),
+            'summary': idx.summary(),
+            'identities': ids,
+            'validation': validation,
+            'completeness': completeness_summary(project),
+        }
     if op == 'summary':
         out = idx.summary()
         shape = project_shape_diagnostics(project)
@@ -1641,7 +1663,7 @@ def cmd_ids(a: argparse.Namespace) -> int:
 def cmd_check(a: argparse.Namespace) -> int:
     project = load(a.project, require_iccplus=False)
     ids = identity_report(project, include_all=False)
-    validation = validate(project)
+    validation = validate(project, complete=bool(getattr(a, 'complete', False)))
     summary = ProjectIndex(project).summary()
     out = {
         'ok': bool(ids['ok'] and validation['valid']),
