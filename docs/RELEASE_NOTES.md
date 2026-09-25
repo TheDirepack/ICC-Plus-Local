@@ -1,3 +1,30 @@
+## 0.10.0rc13
+
+- Kept the ICC Plus engine target at 2.10.7 and the pinned upstream source commit `1ea9db888cde2286d18d0d5de50933cb8773b739`; rc13 is a CYOA skill/documentation packaging candidate rather than an engine-semantics change.
+- Added the compressed high-level CYOA skill set to the repository: `cyoa-plan`, `cyoa-review`, `cyoa-migrate`, `cyoa-develop`, `cyoa-ship`, and the exceptional `cyoa-compress`.
+- Kept `iccplus-local` as the single native ICC Plus 2 implementation skill. Retired `cyoa-create`, `cyoa-edit`, `cyoa-look`, and `cyoa-test` remain absent because their work is covered by the 11 canonical ICC Plus Local command families.
+- Added the complete current CYOA guide and legacy ICC migration reference under `docs/cyoa/` so retained skills have all referenced documentation in-repository.
+- Refreshed current documentation to the rc13 package and ICC Plus 2.10.7 command model while preserving explicitly historical rc11 and 2.10.6 verification records as historical evidence.
+- Added regression checks for the compressed skill set and current-documentation contract.
+
+## 0.10.0rc12
+
+- Made official ICC Plus Row/Choice Design Groups first-class in the `style` manifest through top-level `design_groups` and per-item `design_group` / `design_groups` assignments.
+- Added direct Design Group links to normal ICC Plus Groups, preserving the official `Group.designGroups` / `groupElements` relationship so future Group members can inherit reusable styling automatically.
+- Updated the agent skill, style guide, visual workflow, LLM workflow, schemas, CLI reference, and examples to prefer project styling and Design Groups over duplicated private per-Choice styling.
+- Clarified that manifest presets are authoring macros, not the ICC Plus reusable runtime style system, and that custom CSS/private styling are fallback mechanisms.
+- The `style` command now rejects one item applying private inline `styling` to multiple targets and directs shared treatments to an official Design Group instead.
+- Upgraded the pinned official target to ICC Plus 2.10.7 commit `1ea9db888cde2286d18d0d5de50933cb8773b739`, including the optional Score `removeSpace` field and the corrected Point-load compatibility boundary.
+- Added complete-project validation against the official Creator blank-project sections, native field types, and Creator-eager entity shapes.
+- Added official-default hydration for missing project sections, nested styling/Viewer configuration, and safe eager entity fields. Existing values are never overwritten and missing identities are never invented.
+- Canonical writes now hydrate and complete-validate before replacing a project; build/generation/export paths cannot silently emit a sparse project.
+- Added `project validate` and `project hydrate` as canonical LLM-facing repair/verification operations. `inspect` check queries can request complete validation while compatibility validation remains available for legacy read-only work.
+- Compact generation now deep-merges partial project objects such as `styling` and `viewerConfig` over official defaults instead of replacing the whole section.
+- Fixed the semantic `effects.multiple` shorthand so normal counters explicitly select ICC Plus's variable-backed repeat mode unless a point-backed score is requested.
+- Added a dependency-free safe loading-text sanitizer that preserves simple formatting while dropping active content, matching the official DOMPurify intent more closely.
+- Kept the retained official-GUI result bundle and C01 round-trip evidence explicitly scoped to rc11 / ICC Plus 2.10.6 instead of relabeling historical browser evidence as 2.10.7.
+- Added a permanent GitHub Actions regression gate. Final rc12 branch verification: **327 tests passed** and all checked-in examples passed.
+
 ## 0.10.0rc11
 
 - Normalized the player-safe `play` view so visible Rows, direct Choices, and Addons are exposed as separate top-level entity lists instead of requiring agents to recover structure from nested data.

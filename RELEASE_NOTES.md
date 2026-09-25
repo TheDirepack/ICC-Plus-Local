@@ -1,3 +1,12 @@
+## 0.10.0rc13
+
+- Kept the ICC Plus engine target at 2.10.7 and the pinned upstream source commit `1ea9db888cde2286d18d0d5de50933cb8773b739`; rc13 is a CYOA skill/documentation packaging candidate rather than an engine-semantics change.
+- Added the compressed high-level CYOA skill set to the repository: `cyoa-plan`, `cyoa-review`, `cyoa-migrate`, `cyoa-develop`, `cyoa-ship`, and the exceptional `cyoa-compress`.
+- Kept `iccplus-local` as the single native ICC Plus 2 implementation skill. Retired `cyoa-create`, `cyoa-edit`, `cyoa-look`, and `cyoa-test` remain absent because their work is covered by the 11 canonical ICC Plus Local command families.
+- Added the complete current CYOA guide and legacy ICC migration reference under `docs/cyoa/` so retained skills have all referenced documentation in-repository.
+- Refreshed current documentation to the rc13 package and ICC Plus 2.10.7 command model while preserving explicitly historical rc11 and 2.10.6 verification records as historical evidence.
+- Added regression checks for the compressed skill set and current-documentation contract.
+
 ## 0.10.0rc12
 
 - Made official ICC Plus Row/Choice Design Groups first-class in the `style` manifest through top-level `design_groups` and per-item `design_group` / `design_groups` assignments.
