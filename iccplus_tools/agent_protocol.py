@@ -32,7 +32,7 @@ CANONICAL_AGENT_COMMANDS = {
     'play': 'play PROJECT [REQUEST] [--state STATE]',
     'templates': 'template entity|style|design ...',
     'media': 'media image|crop|font|sound|probe ...',
-    'project_io': 'project format|export|fragment|ids|build-summary|build-string ...',
+    'project_io': 'project validate|hydrate|format|export|fragment|ids|build-summary|build-string ...',
 }
 
 COMMAND_EXAMPLES: dict[str, list[str]] = {
@@ -258,6 +258,8 @@ def brief_capabilities(full: dict[str, Any]) -> dict[str, Any]:
         'safety': {
             'writes_validate_before_commit': True,
             'normal_edit_validation_is_automatic': True,
+            'normal_writes_use_complete_project_validation': True,
+            'missing_official_project_defaults_are_hydrated_before_write': True,
             'phase_writes_are_atomic': True,
             'phase_tools_reject_cross_phase_fields': True,
             'build_starts_from_exact_blank': True,
