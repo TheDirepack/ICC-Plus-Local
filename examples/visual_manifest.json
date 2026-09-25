@@ -10,9 +10,44 @@
     }
   },
   "presets": {
-    "portrait-card": {
+    "portrait-layout": {
       "template": 2,
-      "width": "col-md-4",
+      "width": "col-md-4"
+    }
+  },
+  "items": [
+    {
+      "id": "sword",
+      "preset": "portrait-layout",
+      "source": {
+        "url": "https://example.invalid/source-page",
+        "creator": "Example artist",
+        "license": "Record the real license or permission here"
+      },
+      "credit": "Example artist",
+      "notes": "Crop around the blade and hand.",
+      "image": "assets/sword.webp",
+      "design_group": "portrait-card"
+    },
+    {
+      "id": "shield",
+      "preset": "portrait-layout",
+      "image": "assets/shield.webp",
+      "design_group": "portrait-card"
+    },
+    {
+      "refs": [
+        "fire",
+        "water"
+      ],
+      "preset": "portrait-layout",
+      "design_group": "portrait-card"
+    }
+  ],
+  "design_groups": {
+    "portrait-card": {
+      "kind": "choice",
+      "name": "Portrait card",
       "styling": {
         "object_image": {
           "objectImageWidth": 100,
@@ -23,31 +58,5 @@
         }
       }
     }
-  },
-  "items": [
-    {
-      "id": "sword",
-      "preset": "portrait-card",
-      "source": {
-        "url": "https://example.invalid/source-page",
-        "creator": "Example artist",
-        "license": "Record the real license or permission here"
-      },
-      "credit": "Example artist",
-      "notes": "Crop around the blade and hand.",
-      "image": "assets/sword.webp"
-    },
-    {
-      "id": "shield",
-      "preset": "portrait-card",
-      "image": "assets/shield.webp"
-    },
-    {
-      "refs": [
-        "fire",
-        "water"
-      ],
-      "preset": "portrait-card"
-    }
-  ]
+  }
 }
