@@ -10,7 +10,7 @@ _MODIFIER_RE = re.compile(r"/(IMG|WORD|RND|RS)#")
 
 @dataclass(slots=True)
 class NativeBuildEntry:
-    """One entry in ICC Plus 2.10.6's Build Form string."""
+    """One entry in ICC Plus 2.10.7's Build Form string."""
 
     raw: str
     id: str
@@ -41,7 +41,7 @@ def _parse_number(value: str) -> float:
 
 
 def parse_build_string(value: str) -> list[NativeBuildEntry]:
-    """Parse the exact comma-delimited Build Form syntax used by ICC Plus 2.10.6.
+    """Parse the exact comma-delimited Build Form syntax used by ICC Plus 2.10.7.
 
     The upstream format only escapes commas inside WORD and IMG payloads using
     ``/CHAR#``. Other delimiter strings intentionally retain their upstream
