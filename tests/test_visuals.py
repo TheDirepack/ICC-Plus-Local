@@ -132,6 +132,27 @@ def test_apply_visual_manifest_uses_official_design_groups_for_reusable_choice_s
     assert report['changed_items'] == 2
 
 
+def test_apply_visual_manifest_can_link_design_group_to_normal_group():
+    updated, report = apply_visual_manifest(copy.deepcopy(PROJECT), {
+        'design_groups': {
+            'element-card': {
+                'kind': 'choice',
+                'groups': ['elements'],
+                'styling': {'text': {'objectTitleAlign': 'center'}},
+            },
+        },
+        'items': [],
+    })
+    idx = ProjectIndex(updated)
+    design = idx.one('element-card', 'choice_design_group')
+    normal = idx.one('elements', 'group')
+    assert design is not None and normal is not None
+    assert 'elements' in design.value['groupElements']
+    assert 'element-card' in normal.value['designGroups']
+    assert idx.one('fire', 'choice').value.get('objectDesignGroups', []) == []
+    assert report['design_groups'][0]['id'] == 'element-card'
+
+
 def test_apply_visual_manifest_rejects_wrong_design_group_family():
     with pytest.raises(ValueError, match='not a row design group'):
         apply_visual_manifest(copy.deepcopy(PROJECT), {
