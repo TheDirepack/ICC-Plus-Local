@@ -1,3 +1,10 @@
+## Unreleased
+
+- Made official ICC Plus Row/Choice Design Groups first-class in the `style` manifest through top-level `design_groups` and per-item `design_group` / `design_groups` assignments.
+- Added direct Design Group links to normal ICC Plus Groups, preserving the official `Group.designGroups` / `groupElements` relationship so future Group members can inherit reusable styling automatically.
+- Updated the agent skill, style guide, visual workflow, LLM workflow, schemas, CLI reference, and examples to prefer project styling and Design Groups over duplicated private per-Choice styling.
+- Clarified that manifest presets are authoring macros, not the ICC Plus reusable runtime style system, and that custom CSS/private styling are fallback mechanisms.
+
 ## 0.10.0rc11
 
 - Normalized the player-safe `play` view so visible Rows, direct Choices, and Addons are exposed as separate top-level entity lists instead of requiring agents to recover structure from nested data.

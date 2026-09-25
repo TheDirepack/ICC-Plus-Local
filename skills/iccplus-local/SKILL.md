@@ -38,6 +38,8 @@ Inspect before editing an unfamiliar project. Use `reference` when the tool or s
 
 Keep phase boundaries clear. Structure changes belong in `structure`, gameplay logic belongs in `rules`, and presentation belongs in `style`. Use `project` only for interchange and serialization work.
 
+For styling, use the broadest native ICC Plus scope that fits. Start with project-wide styling, then use official Row/Choice Design Groups for reusable visual families. Use private Row styling only for a true one-Row exception, and private Choice styling only for a true one-Choice exception when neither project styling nor a Design Group fits. Do not duplicate the same inline styling across many Choices. Use custom CSS only when native ICC Plus styling cannot express the required presentation.
+
 Normal writes validate before replacing the project. Do not add a separate validation pass after every write unless the task calls for one or a function guide says it is needed.
 
 For broad edits, prefer batched `items`, explicit `refs`, or selectors. Add `expect` when the number of matches matters.

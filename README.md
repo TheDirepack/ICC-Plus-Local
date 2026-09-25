@@ -36,7 +36,7 @@ python -m iccplus_tools style project.json @style.json
 python -m iccplus_tools play project.json
 ```
 
-`structure`, `rules`, and `style` validate before replacing the target project. Image compression is automatic when local or embedded images are assigned through the current media/style workflow.
+`structure`, `rules`, and `style` validate before replacing the target project. For styling, prefer project-wide native styling and official Row/Choice Design Groups; private per-entity styling is for genuine one-off exceptions. Image compression is automatic when local or embedded images are assigned through the current media/style workflow.
 
 ## Agent skill
 

@@ -10,7 +10,7 @@ template style list|show|apply
 template design export|import
 ```
 
-Use entity templates to inspect or create canonical entity defaults. Use style templates for reusable presentation presets. Use design export/import when the task is about moving ICC Plus design configuration rather than editing normal project content.
+Use entity templates to inspect or create canonical entity defaults. Creator style templates are built-in design presets that can seed a design, but they are not the preferred mechanism for maintaining a reusable style family inside a project. For reusable project styling, use `style` with official Row/Choice Design Groups. Use design export/import when the task is about moving ICC Plus design configuration rather than editing normal project content.
 
 Do not use `template` as a substitute for structural, rule, or normal style authoring. Use `structure`, `rules`, or `style` for those changes.
 

@@ -31,7 +31,19 @@ Normal edits validate automatically before write. Do not plan a separate validat
 
 ## Style and images
 
-Use one style manifest for one or many changes. Local and embedded images are compressed automatically when assigned. Do not ask the model to choose whether to compress them.
+Use one style manifest for one or many changes. Follow the native ICC Plus styling hierarchy instead of copying private style onto many entities:
+
+1. project `styling` for the CYOA-wide default,
+2. official Row/Choice Design Groups for reusable visual families,
+3. private Row styling for a one-Row exception,
+4. private Choice styling only for a one-Choice exception when no reusable scope fits,
+5. custom CSS only when native styling fields cannot express the result.
+
+The `style` manifest exposes reusable Design Groups directly through top-level `design_groups` and per-item `design_group` / `design_groups`. Prefer that path whenever two or more Rows or Choices should share styling.
+
+Manifest `presets` are authoring macros, not ICC Plus runtime Design Groups. Do not put shared styling in a preset merely to copy it into many Choices.
+
+Local and embedded images are compressed automatically when assigned. Do not ask the model to choose whether to compress them.
 
 ## Testing
 

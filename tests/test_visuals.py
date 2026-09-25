@@ -99,6 +99,76 @@ def test_apply_visual_manifest_copy_from_copies_treatment_not_image_by_default()
     assert target.value['styling']['objectBorderWidth'] == 2
 
 
+def test_apply_visual_manifest_uses_official_design_groups_for_reusable_choice_style():
+    updated, report = apply_visual_manifest(copy.deepcopy(PROJECT), {
+        'design_groups': {
+            'shared-card': {
+                'kind': 'choice',
+                'name': 'Shared card',
+                'styling': {
+                    'object': {'objectBorderIsOn': True, 'objectBorderWidth': 2},
+                    'text': {'objectTitleAlign': 'center'},
+                },
+            },
+        },
+        'items': [{
+            'refs': ['sword', 'shield'],
+            'design_group': 'shared-card',
+        }],
+    })
+    idx = ProjectIndex(updated)
+    group = idx.one('shared-card', 'choice_design_group')
+    assert group is not None
+    assert group.value['styling']['objectBorderWidth'] == 2
+    assert group.value['privateObjectIsOn'] is True
+    assert group.value['privateTextIsOn'] is True
+    assert set(group.value['elements']) >= {'sword', 'shield'}
+    for ident in ('sword', 'shield'):
+        choice = idx.one(ident, 'choice')
+        assert choice is not None
+        assert 'shared-card' in choice.value['objectDesignGroups']
+        assert choice.value.get('styling', {}) == {}
+    assert report['design_groups'][0]['id'] == 'shared-card'
+    assert report['changed_items'] == 2
+
+
+def test_apply_visual_manifest_can_link_design_group_to_normal_group():
+    updated, report = apply_visual_manifest(copy.deepcopy(PROJECT), {
+        'design_groups': {
+            'element-card': {
+                'kind': 'choice',
+                'groups': ['elements'],
+                'styling': {'text': {'objectTitleAlign': 'center'}},
+            },
+        },
+        'items': [],
+    })
+    idx = ProjectIndex(updated)
+    design = idx.one('element-card', 'choice_design_group')
+    normal = idx.one('elements', 'group')
+    assert design is not None and normal is not None
+    assert 'elements' in design.value['groupElements']
+    assert 'element-card' in normal.value['designGroups']
+    assert idx.one('fire', 'choice').value.get('objectDesignGroups', []) == []
+    assert report['design_groups'][0]['id'] == 'element-card'
+
+
+def test_apply_visual_manifest_rejects_wrong_design_group_family():
+    with pytest.raises(ValueError, match='not a row design group'):
+        apply_visual_manifest(copy.deepcopy(PROJECT), {
+            'design_groups': {
+                'choice-style': {
+                    'kind': 'choice',
+                    'styling': {'text': {'objectTitleAlign': 'center'}},
+                },
+            },
+            'items': [{
+                'id': 'gear',
+                'design_group': 'choice-style',
+            }],
+        })
+
+
 def test_apply_visual_manifest_rejects_unknown_style_field():
     with pytest.raises(ValueError, match='unknown styling field'):
         apply_visual_manifest(copy.deepcopy(PROJECT), {
@@ -194,6 +264,11 @@ def test_bundled_visual_manifest_example_applies_to_demo_project():
     assert idx.one('shield', 'choice').value['image'] == 'assets/shield.webp'
     assert idx.one('fire', 'choice').value['objectWidth'] == 'col-md-4'
     assert idx.one('water', 'choice').value['objectWidth'] == 'col-md-4'
+    design = idx.one('portrait-card', 'choice_design_group')
+    assert design is not None
+    assert design.value['styling']['objectImageWidth'] == 100
+    assert set(design.value['elements']) >= {'sword', 'shield', 'fire', 'water'}
+    assert idx.one('sword', 'choice').value.get('styling', {}) == {}
 
 
 def test_visual_audit_style_values_are_opt_in():
