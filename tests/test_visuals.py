@@ -169,6 +169,16 @@ def test_apply_visual_manifest_rejects_wrong_design_group_family():
         })
 
 
+def test_apply_visual_manifest_rejects_shared_private_inline_styling():
+    with pytest.raises(ValueError, match='define an official Design Group'):
+        apply_visual_manifest(copy.deepcopy(PROJECT), {
+            'items': [{
+                'refs': ['sword', 'shield'],
+                'styling': {'text': {'objectTitleAlign': 'center'}},
+            }],
+        })
+
+
 def test_apply_visual_manifest_rejects_unknown_style_field():
     with pytest.raises(ValueError, match='unknown styling field'):
         apply_visual_manifest(copy.deepcopy(PROJECT), {
