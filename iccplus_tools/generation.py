@@ -7,6 +7,7 @@ from .editor import _deep_merge, make_entity, new_project
 from .identity import IdentityAllocator
 from .effects import apply_choice_effects
 from .project_integrity import hydrate_project
+from .validation import validate_complete
 
 ENTITY_ARRAYS = {
     'pointTypes': 'point',
@@ -340,5 +341,10 @@ def build_project(fragment: dict[str, Any]) -> dict[str, Any]:
                 side = member.value.setdefault('designGroups', [])
                 if isinstance(side, list) and design.id not in side:
                     side.append(design.id)
-    hydrate_project(project)
+    hydrate_project(project, upgrade_version=True)
+    report = validate_complete(project)
+    if not report['valid']:
+        first = next((d for d in report['diagnostics'] if d.get('severity') == 'error'), None)
+        message = first.get('message') if isinstance(first, dict) else 'complete project validation failed'
+        raise ValueError(f'generated project is not Creator-complete: {message}')
     return project
