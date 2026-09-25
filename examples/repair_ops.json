@@ -1,0 +1,19 @@
+{
+  "format": "iccplus-rules-ops",
+  "format_version": 1,
+  "strict_fields": true,
+  "operations": [
+    {
+      "op": "score_many",
+      "target": "sword",
+      "point": "budget",
+      "value": 3
+    },
+    {
+      "op": "gate",
+      "source": "sword",
+      "targets": ["shield"],
+      "hidden": true
+    }
+  ]
+}
