@@ -128,7 +128,7 @@ For prose cleanup, the recommended external companion is the [Unslop skill](http
 
 ## Verification
 
-The current repository passes the rc12 automated regression gate: **324 tests passed**. `./examples/test_examples.sh` also passes and covers the command fixtures, both continuation-state requests, the simple CYOA, and the main-CYOA development excerpt.
+The current repository passes the rc12 automated regression gate: **327 tests passed**. `./examples/test_examples.sh` also passes and covers the command fixtures, both continuation-state requests, the simple CYOA, and the main-CYOA development excerpt.
 
 Local mechanical tests do not replace final checks in the official Creator or Viewer for browser rendering, responsive layout, CSS, animation, dialogs, network-loaded assets, or behavior outside documented local coverage.
 
