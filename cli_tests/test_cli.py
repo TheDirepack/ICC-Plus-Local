@@ -190,6 +190,68 @@ class CliTests(unittest.TestCase):
             self.assertEqual(hashlib.sha256(out.read_bytes()).hexdigest(), '10e9b3ba3ccee2a9ca7e2ce2753e2f61fc2e289549629f2c2d6235cc0705f68d')
             self.assertFalse(out.read_bytes().endswith(b'\n'))
 
+    def test_project_validate_distinguishes_complete_from_compatibility(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / 'sparse.json'
+            project.write_text(json.dumps({'rows': []}), encoding='utf-8')
+
+            strict = run_cli('project', 'validate', str(project), '--compact')
+            self.assertEqual(strict.returncode, 2, strict.stderr)
+            strict_value = json.loads(strict.stdout)
+            self.assertFalse(strict_value['ok'])
+            self.assertEqual(strict_value['mode'], 'complete')
+            self.assertGreater(strict_value['completeness']['issue_count'], 0)
+
+            compat = run_cli('project', 'validate', str(project), '--compat', '--compact')
+            self.assertEqual(compat.returncode, 0, compat.stderr)
+            compat_value = json.loads(compat.stdout)
+            self.assertTrue(compat_value['ok'])
+            self.assertEqual(compat_value['mode'], 'compatibility')
+            self.assertFalse(compat_value['completeness']['complete'])
+
+    def test_project_hydrate_repairs_sparse_legacy_project(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / 'legacy.json'
+            project.write_text(json.dumps({
+                'version': '2.10.6',
+                'rows': [],
+                'viewerConfig': {'title': 'Legacy title'},
+            }), encoding='utf-8')
+
+            result = run_cli('project', 'hydrate', str(project), '--compact')
+            self.assertEqual(result.returncode, 0, result.stderr)
+            value = json.loads(result.stdout)
+            self.assertTrue(value['ok'])
+            self.assertGreater(value['change_count'], 0)
+            hydrated = json.loads(project.read_text(encoding='utf-8'))
+            self.assertEqual(hydrated['version'], '2.10.7')
+            self.assertEqual(hydrated['viewerConfig']['title'], 'Legacy title')
+            self.assertIn('loadingType', hydrated['viewerConfig'])
+            self.assertIn('styling', hydrated)
+            self.assertIn('backpack', hydrated)
+
+    def test_structure_write_completes_sparse_legacy_project(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / 'legacy.json'
+            project.write_text(json.dumps({'version': '2.10.6', 'rows': []}), encoding='utf-8')
+            script = json.dumps({
+                'format': 'iccplus-structure-ops',
+                'format_version': 1,
+                'strict_fields': True,
+                'operations': [
+                    {'op': 'add', 'kind': 'row', 'values': {'id': 'row_added', 'title': 'Added'}},
+                ],
+            })
+            result = run_cli('structure', str(project), '-', '--compact', stdin=script)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            value = json.loads(result.stdout)
+            self.assertTrue(value['ok'])
+            final = json.loads(project.read_text(encoding='utf-8'))
+            self.assertEqual(final['version'], '2.10.7')
+            self.assertIn('viewerConfig', final)
+            self.assertIn('styling', final)
+            self.assertEqual(final['rows'][0]['id'], 'row_added')
+
     def test_apply_jsonl_from_stdin(self):
         with tempfile.TemporaryDirectory() as tmp:
             project = Path(tmp) / 'project.json'
