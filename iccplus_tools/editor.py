@@ -11,7 +11,7 @@ from .upstream_2106 import default_project
 
 
 def new_project() -> dict[str, Any]:
-    """Return an exact deep copy of ICC Plus 2.10.6 ``defaultApp``."""
+    """Return an exact deep copy of ICC Plus 2.10.7 ``defaultApp``."""
     return default_project()
 
 
