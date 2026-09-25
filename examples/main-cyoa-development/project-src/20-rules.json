@@ -1,0 +1,63 @@
+{
+  "format": "iccplus-rules-ops",
+  "format_version": 1,
+  "strict_fields": true,
+  "operations": [
+    {
+      "op": "update",
+      "kind": "row",
+      "ref": "row_race_organism_basis",
+      "values": {
+        "allowedChoices": 1
+      }
+    },
+    {
+      "op": "update",
+      "kind": "row",
+      "ref": "row_race_individual_organization",
+      "values": {
+        "allowedChoices": 1
+      }
+    },
+    {
+      "op": "update",
+      "kind": "row",
+      "ref": "row_race_embodiment_persistence",
+      "values": {
+        "allowedChoices": 1
+      }
+    },
+    {
+      "op": "update",
+      "kind": "row",
+      "ref": "row_race_embodiment_material",
+      "values": {
+        "allowedChoices": 1
+      }
+    },
+    {
+      "op": "update",
+      "kind": "row",
+      "ref": "row_race_embodiment_native_environment",
+      "values": {
+        "allowedChoices": 1
+      }
+    },
+    {
+      "op": "update",
+      "kind": "row",
+      "ref": "row_race_species_variation_model",
+      "values": {
+        "allowedChoices": 0
+      }
+    },
+    {
+      "op": "update",
+      "kind": "row",
+      "ref": "row_race_body_and_anatomy_head_and_neck_head_count_and_control_head_count",
+      "values": {
+        "allowedChoices": 1
+      }
+    }
+  ]
+}

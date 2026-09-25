@@ -1,0 +1,57 @@
+{
+  "steps": [
+    {
+      "select": "choice_race_biological_organism_basis",
+      "expect": {
+        "selected": [
+          "choice_race_biological_organism_basis"
+        ],
+        "choice_rows": {
+          "choice_race_biological_organism_basis": "row_race_organism_basis"
+        }
+      }
+    },
+    {
+      "select": "choice_race_individual_one_body",
+      "expect": {
+        "selected": [
+          "choice_race_biological_organism_basis",
+          "choice_race_individual_one_body"
+        ]
+      }
+    },
+    {
+      "select": "choice_race_embodiment_persistent_body",
+      "expect": {
+        "selected": [
+          "choice_race_biological_organism_basis",
+          "choice_race_individual_one_body",
+          "choice_race_embodiment_persistent_body"
+        ]
+      }
+    },
+    {
+      "select": "choice_race_embodiment_ordinary_matter"
+    },
+    {
+      "select": "choice_race_embodiment_habitat_bound"
+    },
+    {
+      "select": "choice_race_variation_one_standard_form"
+    },
+    {
+      "select": "choice_race_single_head",
+      "expect": {
+        "selected": [
+          "choice_race_biological_organism_basis",
+          "choice_race_individual_one_body",
+          "choice_race_embodiment_persistent_body",
+          "choice_race_embodiment_ordinary_matter",
+          "choice_race_embodiment_habitat_bound",
+          "choice_race_variation_one_standard_form",
+          "choice_race_single_head"
+        ]
+      }
+    }
+  ]
+}

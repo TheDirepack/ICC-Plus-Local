@@ -1,0 +1,14 @@
+{
+  "format": "iccplus-structure-ops",
+  "format_version": 1,
+  "strict_fields": true,
+  "operations": [
+    {
+      "op": "update",
+      "kind": "choice",
+      "where": {"kind": "choice", "row": "element"},
+      "expect": 4,
+      "values": {"text": "Updated by the bounded selector example."}
+    }
+  ]
+}
