@@ -4,6 +4,7 @@
 - Added direct Design Group links to normal ICC Plus Groups, preserving the official `Group.designGroups` / `groupElements` relationship so future Group members can inherit reusable styling automatically.
 - Updated the agent skill, style guide, visual workflow, LLM workflow, schemas, CLI reference, and examples to prefer project styling and Design Groups over duplicated private per-Choice styling.
 - Clarified that manifest presets are authoring macros, not the ICC Plus reusable runtime style system, and that custom CSS/private styling are fallback mechanisms.
+- The `style` command now rejects one item applying private inline `styling` to multiple targets and directs shared treatments to an official Design Group instead.
 
 ## 0.10.0rc11
 
