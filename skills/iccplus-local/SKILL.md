@@ -1,14 +1,14 @@
 ---
 name: iccplus-local
-description: Use when authoring, inspecting, testing, auditing, exporting, or otherwise working with ICC Plus 2.10.6 CYOA projects through ICC Plus Local 0.10.0rc11. This is the single general skill. Read the matching function guide under functions/ for the operation being performed.
+description: Use when authoring, inspecting, testing, auditing, exporting, or otherwise working with ICC Plus 2.10.7 CYOA projects through ICC Plus Local 0.10.0rc12. This is the single general skill. Read the matching function guide under functions/ for the operation being performed.
 ---
 
 # ICC Plus Local
 
 Use this as the one general ICC Plus Local skill. Do not treat the files under `functions/` as separate installed skills. They are focused operating guides that this skill routes to when a task needs that function.
 
-Current tool version: `0.10.0rc11`.
-Target ICC Plus version: `2.10.6`.
+Current tool version: `0.10.0rc12`.
+Target ICC Plus version: `2.10.7`.
 
 ## How to use this skill
 
