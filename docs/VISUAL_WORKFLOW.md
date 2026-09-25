@@ -1,6 +1,6 @@
 # LLM visual authoring workflow
 
-`iccplus-local` 0.10.0rc7 includes the compact visual audit and visual manifest introduced in 0.9.0. The tool writes ordinary ICC Plus 2.10.6 fields. The manifest is an authoring file, not a runtime format.
+`iccplus-local` 0.10.0rc7 includes the compact visual audit and visual manifest introduced in 0.9.0. The tool writes ordinary ICC Plus 2.10.7 fields. The manifest is an authoring file, not a runtime format.
 
 ## Start with a small work queue
 
@@ -33,7 +33,7 @@ Set `asset_root` in the same visual inspect query when image paths should resolv
 
 Record source data next to the image assignment when attribution, permission, or later replacement may matter. Useful fields include source URL, creator, license or permission, credit text, search terms, and crop notes.
 
-`style` returns these records in `source_records`. Each record also contains the resulting image path. The tool does not add this metadata to `project.json` because ICC Plus 2.10.6 has no general native per-image attribution field.
+`style` returns these records in `source_records`. Each record also contains the resulting image path. The tool does not add this metadata to `project.json` because ICC Plus 2.10.7 has no general native per-image attribution field.
 
 ## Prefer native style scopes
 
