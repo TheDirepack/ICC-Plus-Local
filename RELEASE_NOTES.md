@@ -1,10 +1,16 @@
-## Unreleased
+## 0.10.0rc12
 
 - Made official ICC Plus Row/Choice Design Groups first-class in the `style` manifest through top-level `design_groups` and per-item `design_group` / `design_groups` assignments.
 - Added direct Design Group links to normal ICC Plus Groups, preserving the official `Group.designGroups` / `groupElements` relationship so future Group members can inherit reusable styling automatically.
 - Updated the agent skill, style guide, visual workflow, LLM workflow, schemas, CLI reference, and examples to prefer project styling and Design Groups over duplicated private per-Choice styling.
 - Clarified that manifest presets are authoring macros, not the ICC Plus reusable runtime style system, and that custom CSS/private styling are fallback mechanisms.
 - The `style` command now rejects one item applying private inline `styling` to multiple targets and directs shared treatments to an official Design Group instead.
+- Upgraded the pinned official target to ICC Plus 2.10.7 commit `1ea9db888cde2286d18d0d5de50933cb8773b739`, including the optional Score `removeSpace` field and the corrected Point-load compatibility boundary.
+- Added complete-project validation against the official Creator blank-project sections, native field types, and Creator-eager entity shapes.
+- Added official-default hydration for missing project sections, nested styling/Viewer configuration, and safe eager entity fields. Existing values are never overwritten and missing identities are never invented.
+- Canonical writes now hydrate and complete-validate before replacing a project; build/generation/export paths cannot silently emit a sparse project.
+- Added `project validate` and `project hydrate` as canonical LLM-facing repair/verification operations. `inspect` check queries can request complete validation while compatibility validation remains available for legacy read-only work.
+- Compact generation now deep-merges partial project objects such as `styling` and `viewerConfig` over official defaults instead of replacing the whole section.
 
 ## 0.10.0rc11
 
