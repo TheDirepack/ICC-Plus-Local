@@ -20,6 +20,8 @@ Each normal edit validates automatically before writing. Validation failure leav
 
 Use `expect` on broad selectors. Use `inspect` before a selector edit when the match set is not obvious.
 
+Within `style`, prefer project-wide native styling first and official Design Groups second. Private Row/Choice styling is an exception mechanism, not the default reusable style path. If several Rows or Choices share a treatment, define one Design Group and assign it rather than copying inline styling. Use custom CSS only for gaps in native styling.
+
 Images assigned through `style` are compressed automatically.
 
 After authoring, use `play` to audit actual player-visible behavior rather than inspecting hidden runtime mechanics.
