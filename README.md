@@ -133,7 +133,7 @@ For prose cleanup, the recommended external companion is the [Unslop skill](http
 
 ## Verification
 
-rc13 keeps the rc12 ICC Plus 2.10.7 engine target and adds the compressed CYOA skill/documentation set. The automated gate runs the full regression suite, checked-in examples, and skill/documentation consistency checks before merge. The rc12 engine baseline was **327 tests passed** with all checked-in examples passing.
+rc13 keeps the rc12 ICC Plus 2.10.7 engine target and adds the compressed CYOA skill/documentation set. Final PR verification: **332 tests passed** and all checked-in examples passed, including the skill/documentation consistency checks.
 
 Local mechanical tests do not replace final checks in the official Creator or Viewer for browser rendering, responsive layout, CSS, animation, dialogs, network-loaded assets, or behavior outside documented local coverage.
 
