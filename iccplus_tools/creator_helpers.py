@@ -39,7 +39,7 @@ def js_string_length(value: Any) -> int:
 
 
 def project_stats(project: dict[str, Any]) -> dict[str, Any]:
-    """Mirror ICC Plus 2.10.6 Creator AppProjectStats.svelte."""
+    """Mirror ICC Plus 2.10.7 Creator AppProjectStats.svelte."""
     char_count = 0
     choice_count = 0
     image_count = 0
@@ -131,7 +131,7 @@ def clean_private_styling(project: dict[str, Any]) -> dict[str, int]:
     }
 
 
-# ICC Plus 2.10.6 ``objectWidths`` order from store.svelte.ts.  Row Settings
+# ICC Plus 2.10.7 ``objectWidths`` order from store.svelte.ts.  Row Settings
 # sorts against the position in this array, including the empty "inherit Row"
 # value at index 0.
 OBJECT_WIDTH_ORDER = (
