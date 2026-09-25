@@ -340,7 +340,7 @@ def validate(project: Any, *, complete: bool = False) -> dict[str, Any]:
             raw = ent.value.get(field)
             if isinstance(raw, str) and raw:
                 for token in raw.split(','):
-                    # ICC Plus 2.10.6 splits these fields on commas but does not
+                    # ICC Plus 2.10.7 splits these fields on commas but does not
                     # trim each token. Validation must use the same literal ID so
                     # a target like " a" is reported as missing when only "a"
                     # exists instead of being falsely accepted here.
