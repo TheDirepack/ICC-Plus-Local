@@ -5,6 +5,8 @@ import json
 from typing import Any
 
 from .model import Entity, ProjectIndex
+from .project_integrity import completeness_issues
+from .upstream_2106 import ICCPLUS_VERSION
 
 
 @dataclass(slots=True)
@@ -173,7 +175,7 @@ def project_shape_diagnostics(project: Any) -> list[Diagnostic]:
     return out
 
 
-def validate(project: Any) -> dict[str, Any]:
+def validate(project: Any, *, complete: bool = False) -> dict[str, Any]:
     out = project_shape_diagnostics(project)
     if not isinstance(project, dict):
         return _report(out, {})
@@ -304,13 +306,13 @@ def validate(project: Any) -> dict[str, Any]:
             if not variable_mode and not score_mode:
                 _diag(
                     out, 'multiple.mode_missing', 'error', ent.path + '/isSelectableMultiple',
-                    'isSelectableMultiple is enabled but neither isMultipleUseVariable nor multipleScoreId is configured; ICC Plus 2.10.6 renders the counter but +/- does not change this entity.',
+                    f'isSelectableMultiple is enabled but neither isMultipleUseVariable nor multipleScoreId is configured; ICC Plus {ICCPLUS_VERSION} renders the counter but +/- does not change this entity.',
                     ent, 'Enable isMultipleUseVariable for a normal repeat counter, or set multipleScoreId for a point-backed counter.'
                 )
             elif variable_mode and score_mode:
                 _diag(
                     out, 'multiple.mode_ambiguous', 'warning', ent.path + '/isSelectableMultiple',
-                    'Both repeat modes are configured. ICC Plus 2.10.6 gives isMultipleUseVariable precedence and ignores multipleScoreId for the counter.',
+                    f'Both repeat modes are configured. ICC Plus {ICCPLUS_VERSION} gives isMultipleUseVariable precedence and ignores multipleScoreId for the counter.',
                     ent
                 )
         _duplicate_strings(out, ent, 'groups')
@@ -362,7 +364,25 @@ def validate(project: Any) -> dict[str, Any]:
     if isinstance(vc, dict) and vc.get('useSeparateImages') is True and vc.get('useLocalViewer') is True:
         _diag(out, 'viewer.mutually_exclusive_export_modes', 'error', '/viewerConfig', 'useSeparateImages and useLocalViewer cannot both be true.')
 
-    return _report(out, index.summary())
+    if complete:
+        for issue in completeness_issues(project):
+            out.append(Diagnostic(
+                issue.get('code', 'complete.invalid'),
+                'error',
+                str(issue.get('path', '')),
+                str(issue.get('message', 'Project is not Creator-complete.')),
+                issue.get('entity_id'),
+                issue.get('suggestion'),
+            ))
+
+    report = _report(out, index.summary())
+    report['mode'] = 'complete' if complete else 'compatibility'
+    return report
+
+
+def validate_complete(project: Any) -> dict[str, Any]:
+    """Validate a final/generated project against the official Creator-complete shape."""
+    return validate(project, complete=True)
 
 
 def _report(out: list[Diagnostic], summary: dict[str, Any]) -> dict[str, Any]:
