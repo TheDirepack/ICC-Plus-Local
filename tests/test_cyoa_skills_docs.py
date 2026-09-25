@@ -33,6 +33,7 @@ def test_retained_skill_dependencies_are_packaged():
     assert (SKILLS / "cyoa-migrate/references/migration-checklist.md").is_file()
     assert (SKILLS / "cyoa-develop/references/develop-checklist.md").is_file()
     assert (SKILLS / "cyoa-ship/references/ship-checklist.md").is_file()
+    assert (SKILLS / "iccplus-local/references/local-workflow-checklist.md").is_file()
 
 
 def test_current_docs_use_rc13_and_2107():
