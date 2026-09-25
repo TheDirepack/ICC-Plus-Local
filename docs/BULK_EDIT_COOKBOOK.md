@@ -200,7 +200,7 @@ Deletion is still part of the transaction. If one reference is wrong, none are r
 Put assertions before edits:
 
 ```json
-{"op":"assert","pointer":"/version","equals":"2.10.6"}
+{"op":"assert","pointer":"/version","equals":"2.10.7"}
 {"op":"assert","reference":"row_perks","kind":"row"}
 ```
 
