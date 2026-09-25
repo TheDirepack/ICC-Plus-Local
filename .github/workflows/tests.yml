@@ -22,3 +22,21 @@ jobs:
         run: python -m pytest -q tests cli_tests
       - name: Run checked-in examples
         run: ./examples/test_examples.sh
+      - name: Build release artifacts
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          python -m pip install build
+          python -m build --wheel
+          VERSION="$(cat VERSION)"
+          git archive --format=zip --prefix="iccplus-local-v${VERSION}/" HEAD > "iccplus-local-v${VERSION}-source.zip"
+          sha256sum "iccplus-local-v${VERSION}-source.zip" dist/*.whl > "ICCPlus_Local_${VERSION}_SHA256SUMS.txt"
+      - name: Upload release artifacts
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: iccplus-local-release
+          path: |
+            iccplus-local-v*-source.zip
+            dist/*.whl
+            ICCPlus_Local_*_SHA256SUMS.txt
+          if-no-files-found: error
