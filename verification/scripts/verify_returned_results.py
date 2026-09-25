@@ -213,11 +213,16 @@ def main(argv: list[str] | None = None) -> int:
 
     if data.get('format') != 'iccplus-official-gui-results-v2':
         issues.append('wrong or missing result format; expected iccplus-official-gui-results-v2')
-    expected_version = (ROOT / 'VERSION').read_text().strip()
-    if data.get('tested_tool_version') != expected_version:
-        issues.append(f"tested_tool_version must be {expected_version!r}")
-    if data.get('official_gui_version') != '2.10.6':
-        issues.append("official_gui_version must be '2.10.6'")
+    # This verification bundle is historical evidence for the release and
+    # official GUI version encoded by its checked-in template. Do not silently
+    # reinterpret old browser evidence as proof for a newer tool/upstream pair.
+    template = load(ROOT / 'verification' / 'results_template' / 'official_results.json')
+    expected_tool_version = template.get('tested_tool_version')
+    expected_gui_version = template.get('official_gui_version')
+    if data.get('tested_tool_version') != expected_tool_version:
+        issues.append(f"tested_tool_version must be {expected_tool_version!r}")
+    if data.get('official_gui_version') != expected_gui_version:
+        issues.append(f"official_gui_version must be {expected_gui_version!r}")
     if not str(data.get('official_gui_url_or_build', '')).strip():
         incomplete.append('official_gui_url_or_build is empty')
     if not str(data.get('browser', '')).strip():
