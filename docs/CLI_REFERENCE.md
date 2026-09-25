@@ -28,7 +28,7 @@ iccplus-local rules project.json @rules.json
 
 ## `style`
 
-Apply one or many presentation/image changes through the style manifest. Items may target one ref, explicit refs, or selectors with `expect`. Local/data images are compressed automatically. Validation runs automatically before write.
+Apply one or many presentation/image changes through the style manifest. Project styling handles global defaults; top-level `design_groups` plus item `design_group` / `design_groups` expose the official reusable Row/Choice Design Group system directly. Design Groups can also link to normal ICC Plus Groups so future Group members inherit the style. Private item `styling` is for genuine one-off exceptions. Items may target one ref, explicit refs, or selectors with `expect`. Local/data images are compressed automatically. Validation runs automatically before write.
 
 ```bash
 iccplus-local style project.json @style.json
