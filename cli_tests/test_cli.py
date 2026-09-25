@@ -87,7 +87,7 @@ class CliTests(unittest.TestCase):
         self.assertGreater(value['count'], 10)
         self.assertTrue(all('discount' in name.lower() for name in value['fields']))
         self.assertIn('discountOther', value['fields'])
-        self.assertEqual(value['source']['icc_plus_version'], '2.10.6')
+        self.assertEqual(value['source']['icc_plus_version'], '2.10.7')
 
     def test_fields_command_suggests_close_names_when_filter_misses(self):
         result = run_cli('fields', 'choice', '--contains', 'titel')
@@ -534,7 +534,7 @@ class CliTests(unittest.TestCase):
 
     def test_player_safe_session_normalizes_hidden_and_missing_targets(self):
         project = {
-            'version': '2.10.6', 'styling': {'reqFilterVisibleIsOn': True}, 'pointTypes': [],
+            'version': '2.10.7', 'styling': {'reqFilterVisibleIsOn': True}, 'pointTypes': [],
             'rows': [{'id': 'r', 'title': 'R', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [{
                 'id': 'hidden_secret_id', 'title': 'Hidden', 'text': 'Secret text',
                 'requireds': [{'id': '', 'type': 'id', 'required': True, 'reqId': 'missing_gate'}],
@@ -659,7 +659,7 @@ class CliTests(unittest.TestCase):
 
     def test_session_invalid_selection_returns_semantic_error_and_no_partial_state(self):
         project = {
-            'version': '2.10.6',
+            'version': '2.10.7',
             'pointTypes': [{'id': 'p', 'name': 'P', 'startingSum': 1, 'belowZeroNotAllowed': True}],
             'rows': [{'id': 'r', 'title': 'R', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [{
                 'id': 'x', 'title': 'X', 'text': '', 'requireds': [], 'addons': [],
@@ -679,7 +679,7 @@ class CliTests(unittest.TestCase):
 
     def test_run_invalid_selection_exits_three_with_semantic_error(self):
         project = {
-            'version': '2.10.6', 'pointTypes': [],
+            'version': '2.10.7', 'pointTypes': [],
             'rows': [{'id': 'r', 'title': 'R', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [{
                 'id': 'blocked', 'title': 'Blocked', 'text': '', 'isNotSelectable': True,
                 'requireds': [], 'scores': [], 'addons': [],
@@ -696,7 +696,7 @@ class CliTests(unittest.TestCase):
 
     def test_view_after_invalid_selection_exits_three_without_leaking_state(self):
         project = {
-            'version': '2.10.6', 'styling': {'reqFilterVisibleIsOn': True}, 'pointTypes': [],
+            'version': '2.10.7', 'styling': {'reqFilterVisibleIsOn': True}, 'pointTypes': [],
             'rows': [{'id': 'r', 'title': 'R', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [{
                 'id': 'hidden', 'title': 'Hidden', 'text': 'Secret',
                 'requireds': [{'id': 'req', 'type': 'id', 'required': True, 'reqId': 'missing'}],
@@ -818,7 +818,7 @@ class PackagingCliTests(unittest.TestCase):
 
     def test_build_string_preserves_mixed_native_entry_order(self):
         project_value = {
-            'version': '2.10.6', 'styling': {},
+            'version': '2.10.7', 'styling': {},
             'pointTypes': [{'id': 'p', 'name': 'P', 'startingSum': 0, 'allowFloat': False}],
             'variables': [{'id': 'v', 'name': 'V', 'isTrue': False}],
             'rows': [
@@ -942,7 +942,7 @@ class PackagingCliTests(unittest.TestCase):
             value = json.loads(DEMO.read_text(encoding='utf-8'))
             project.write_text(json.dumps(value), encoding='utf-8')
             design.write_text(json.dumps({
-                'version': '2.10.6',
+                'version': '2.10.7',
                 'styling': {
                     'rowMargin': '12',
                     'objectMargin': '7',
@@ -974,7 +974,7 @@ class PackagingCliTests(unittest.TestCase):
             self.assertEqual(exported_result.returncode, 0, exported_result.stderr)
             self.assertFalse(exported.read_bytes().endswith(b'\n'))
             exported_value = json.loads(exported.read_text(encoding='utf-8'))
-            self.assertEqual(exported_value['version'], '2.10.6')
+            self.assertEqual(exported_value['version'], '2.10.7')
             self.assertEqual(exported_value['styling'], gear['styling'])
 
     def test_design_import_export_supports_design_groups(self):
@@ -985,7 +985,7 @@ class PackagingCliTests(unittest.TestCase):
             value['rowDesignGroups'] = [{'id': 'rdg', 'name': 'Row design', 'elements': [], 'backpackElements': [], 'groupElements': [], 'styling': {}}]
             value['objectDesignGroups'] = [{'id': 'cdg', 'name': 'Choice design', 'elements': [], 'backpackElements': [], 'groupElements': [], 'styling': {}}]
             project.write_text(json.dumps(value), encoding='utf-8')
-            design.write_text(json.dumps({'version': '2.10.6', 'styling': {'rowMargin': 8, 'objectMargin': 5, 'barTextSize': 99}}), encoding='utf-8')
+            design.write_text(json.dumps({'version': '2.10.7', 'styling': {'rowMargin': 8, 'objectMargin': 5, 'barTextSize': 99}}), encoding='utf-8')
             row_result = run_cli('design', 'import', str(project), 'rdg', str(design), '--compact')
             self.assertEqual(row_result.returncode, 0, row_result.stderr)
             choice_result = run_cli('design', 'import', str(project), 'cdg', str(design), '--compact')
@@ -1059,7 +1059,7 @@ class PackagingCliTests(unittest.TestCase):
         def choice(ident):
             return {'id': ident, 'title': ident, 'text': '', 'requireds': [], 'scores': [], 'addons': []}
         project_value = {
-            'version': '2.10.6',
+            'version': '2.10.7',
             'styling': {},
             'pointTypes': [{'id': 'p', 'name': 'P', 'startingSum': 0, 'allowFloat': False}],
             'variables': [{'id': 'v', 'name': 'V', 'isTrue': False}],
