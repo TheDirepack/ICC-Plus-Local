@@ -53,7 +53,7 @@ Design Groups are the official ICC Plus reusable style system. Define them at th
 }
 ```
 
-Use `kind: "row"` for Row Design Groups. Existing Design Group IDs can also be assigned with `design_group` or `design_groups` without redefining them.
+Use `kind: "row"` for Row Design Groups. Existing Design Group IDs can also be assigned with `design_group` or `design_groups` without redefining them. If the project already has a normal ICC Plus Group that represents the visual family, put its ID in the Design Group definition's `groups` array. That links the reusable style to the Group itself, so current and future members inherit it without per-Choice style assignment.
 
 ICC Plus evaluates private Choice styling before Choice Design Groups, then private Row styling, then Row Design Groups, then project styling. Avoid private styling unless that precedence is actually needed for a one-off exception.
 
