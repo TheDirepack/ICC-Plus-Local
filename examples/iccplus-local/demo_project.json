@@ -1,0 +1,153 @@
+{
+  "version": "2.10.6",
+  "rows": [
+    {
+      "index": 0,
+      "id": "gear",
+      "title": "Gear",
+      "allowedChoices": 0,
+      "currentChoices": 0,
+      "isInfoRow": false,
+      "requireds": [],
+      "objects": [
+        {
+          "index": 0,
+          "id": "sword",
+          "title": "Sword",
+          "isActive": false,
+          "multipleUseVariable": 0,
+          "requireds": [],
+          "groups": ["weapons"],
+          "addons": [
+            {
+              "id": "sharp",
+              "title": "Sharpened",
+              "isSelectable": true,
+              "parentId": "sword",
+              "isActive": false,
+              "multipleUseVariable": 0,
+              "countAsChoice": false,
+              "requireds": [],
+              "groups": [],
+              "scores": [{"idx": "s_sharp", "id": "budget", "value": 1, "requireds": [], "showScore": true}]
+            }
+          ],
+          "scores": [{"idx": "s_sword", "id": "budget", "value": 4, "requireds": [], "showScore": true}],
+          "objectDesignGroups": []
+        },
+        {
+          "index": 1,
+          "id": "shield",
+          "title": "Shield",
+          "isActive": false,
+          "multipleUseVariable": 0,
+          "requireds": [],
+          "groups": [],
+          "addons": [],
+          "scores": [{"idx": "s_shield", "id": "budget", "value": 7, "requireds": [], "showScore": true}],
+          "objectDesignGroups": []
+        },
+        {
+          "index": 2,
+          "id": "elite",
+          "title": "Elite training",
+          "isActive": false,
+          "multipleUseVariable": 0,
+          "requireds": [
+            {"id":"r_elite_sword","required":true,"requireds":[],"orRequired":[],"orRequireds":[],"type":"id","reqId":"sword","reqId1":"","reqId2":"","reqId3":"","reqPoints":0,"operator":"1","showRequired":false,"beforeText":"","afterText":""}
+          ],
+          "groups": [],
+          "addons": [],
+          "scores": [],
+          "objectDesignGroups": []
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "id": "element",
+      "title": "Element",
+      "allowedChoices": 0,
+      "currentChoices": 0,
+      "isInfoRow": false,
+      "requireds": [],
+      "objects": [
+        {
+          "index": 0,
+          "id": "fire",
+          "title": "Fire",
+          "isActive": false,
+          "multipleUseVariable": 0,
+          "requireds": [],
+          "groups": ["elements"],
+          "addons": [], "scores": [], "objectDesignGroups": []
+        },
+        {
+          "index": 1,
+          "id": "water",
+          "title": "Water",
+          "isActive": false,
+          "multipleUseVariable": 0,
+          "requireds": [
+            {"id":"r_no_fire","required":false,"requireds":[],"orRequired":[],"orRequireds":[],"type":"id","reqId":"fire","reqId1":"","reqId2":"","reqId3":"","reqPoints":0,"operator":"1","showRequired":false,"beforeText":"","afterText":""}
+          ],
+          "groups": ["elements"],
+          "addons": [], "scores": [], "objectDesignGroups": []
+        },
+        {
+          "index": 2,
+          "id": "switcher",
+          "title": "Switch flag",
+          "isActive": false,
+          "multipleUseVariable": 0,
+          "isChangeVariables": true,
+          "changedVariables": ["flag"],
+          "changeType": "1",
+          "requireds": [], "groups": [], "addons": [], "scores": [], "objectDesignGroups": []
+        },
+        {
+          "index": 3,
+          "id": "flagged",
+          "title": "Flag gated",
+          "isActive": false,
+          "multipleUseVariable": 0,
+          "requireds": [
+            {"id":"r_flag","required":true,"requireds":[],"orRequired":[],"orRequireds":[],"type":"id","reqId":"flag","reqId1":"","reqId2":"","reqId3":"","reqPoints":0,"operator":"1","showRequired":false,"beforeText":"","afterText":""}
+          ],
+          "groups": [], "addons": [], "scores": [], "objectDesignGroups": []
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "id": "onepick",
+      "title": "One pick",
+      "allowedChoices": 1,
+      "currentChoices": 0,
+      "isInfoRow": false,
+      "requireds": [],
+      "objects": [
+        {"index":0,"id":"a","title":"A","isActive":false,"multipleUseVariable":0,"requireds":[],"groups":[],"addons":[],"scores":[],"objectDesignGroups":[]},
+        {"index":1,"id":"b","title":"B","isActive":false,"multipleUseVariable":0,"requireds":[],"groups":[],"addons":[],"scores":[],"objectDesignGroups":[]}
+      ]
+    }
+  ],
+  "backpack": [],
+  "pointTypes": [
+    {"id":"budget","name":"Budget","startingSum":10,"initValue":10,"activatedId":"","beforeText":"Budget:","afterText":"","belowZeroNotAllowed":true}
+  ],
+  "variables": [{"id":"flag","isTrue":false,"category":-1}],
+  "words": [],
+  "groups": [
+    {"id":"weapons","name":"Weapons","category":-1,"elements":["sword"],"rowElements":[]},
+    {"id":"elements","name":"Elements","category":-1,"elements":["fire","water"],"rowElements":[]}
+  ],
+  "rowDesignGroups": [],
+  "objectDesignGroups": [],
+  "globalRequirements": [],
+  "soundEffects": [],
+  "categories": [],
+  "activated": [],
+  "viewerConfig": {"title":"Demo","useSeparateImages":false,"useLocalViewer":false},
+  "styling": {}
+}

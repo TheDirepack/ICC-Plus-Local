@@ -1,0 +1,2123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openai.local/iccplus/rules-operation-script.schema.json",
+  "title": "ICC Plus rules phase operation script",
+  "description": "Gameplay rules phase. Runtime accepts rule entities and mechanical fields; section text/layout and styling fields are rejected. The same add/update/delete operations accept one or many targets; there are no separate bulk phase commands.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": "iccplus-rules-ops"
+    },
+    "format_version": {
+      "const": 1
+    },
+    "strict_fields": {
+      "const": true
+    },
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/operation"
+      }
+    }
+  },
+  "required": [
+    "format",
+    "format_version",
+    "strict_fields",
+    "operations"
+  ],
+  "$defs": {
+    "operation": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "add"
+            },
+            "kind": {
+              "type": "string"
+            },
+            "parent": {
+              "type": "string"
+            },
+            "values": {
+              "type": "object"
+            },
+            "items": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object"
+              }
+            }
+          },
+          "required": [
+            "op",
+            "kind"
+          ],
+          "description": "One-or-many phase edit. Use values for one entity or items for many entities of the same kind and parent.",
+          "oneOf": [
+            {
+              "required": [
+                "values"
+              ]
+            },
+            {
+              "required": [
+                "items"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "upsert"
+            },
+            "kind": {
+              "type": "string"
+            },
+            "parent": {
+              "type": "string"
+            },
+            "values": {
+              "type": "object"
+            },
+            "items": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object"
+              }
+            }
+          },
+          "required": [
+            "op",
+            "kind"
+          ],
+          "description": "One-or-many phase edit. Use values for one entity or items for many entities of the same kind and parent.",
+          "oneOf": [
+            {
+              "required": [
+                "values"
+              ]
+            },
+            {
+              "required": [
+                "items"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "update"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "kind": {
+              "type": "string"
+            },
+            "values": {
+              "type": "object"
+            },
+            "unset": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            },
+            "ref": {
+              "type": "string"
+            },
+            "references": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            "refs": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            "where": {
+              "$ref": "#/$defs/selector"
+            },
+            "expect": {
+              "$ref": "#/$defs/expectation"
+            },
+            "allow_empty": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "required": [
+            "op",
+            "kind"
+          ],
+          "description": "One-or-many phase edit. Target one ref, an explicit refs list, or a selector with optional expect bounds.",
+          "oneOf": [
+            {
+              "required": [
+                "reference"
+              ]
+            },
+            {
+              "required": [
+                "ref"
+              ]
+            },
+            {
+              "required": [
+                "references"
+              ]
+            },
+            {
+              "required": [
+                "refs"
+              ]
+            },
+            {
+              "required": [
+                "where"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "require"
+            },
+            "source": {
+              "type": "string"
+            },
+            "targets": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            "target": {
+              "type": "string"
+            },
+            "where": {
+              "$ref": "#/$defs/selector"
+            },
+            "expect": {
+              "$ref": "#/$defs/expectation"
+            },
+            "allow_empty": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "required": [
+            "op",
+            "source"
+          ],
+          "anyOf": [
+            {
+              "required": [
+                "targets"
+              ]
+            },
+            {
+              "required": [
+                "target"
+              ]
+            },
+            {
+              "required": [
+                "where"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "exclude"
+            },
+            "source": {
+              "type": "string"
+            },
+            "targets": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            "target": {
+              "type": "string"
+            },
+            "where": {
+              "$ref": "#/$defs/selector"
+            },
+            "expect": {
+              "$ref": "#/$defs/expectation"
+            },
+            "allow_empty": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "required": [
+            "op",
+            "source"
+          ],
+          "anyOf": [
+            {
+              "required": [
+                "targets"
+              ]
+            },
+            {
+              "required": [
+                "target"
+              ]
+            },
+            {
+              "required": [
+                "where"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "gate"
+            },
+            "source": {
+              "type": "string"
+            },
+            "targets": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            "hidden": {
+              "type": "boolean"
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "target": {
+              "type": "string"
+            },
+            "where": {
+              "$ref": "#/$defs/selector"
+            },
+            "expect": {
+              "$ref": "#/$defs/expectation"
+            },
+            "allow_empty": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "required": [
+            "op",
+            "source"
+          ],
+          "anyOf": [
+            {
+              "required": [
+                "targets"
+              ]
+            },
+            {
+              "required": [
+                "target"
+              ]
+            },
+            {
+              "required": [
+                "where"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "ungate"
+            },
+            "source": {
+              "type": "string"
+            },
+            "targets": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            "restore_visibility": {
+              "type": "boolean"
+            },
+            "target": {
+              "type": "string"
+            },
+            "where": {
+              "$ref": "#/$defs/selector"
+            },
+            "expect": {
+              "$ref": "#/$defs/expectation"
+            },
+            "allow_empty": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "required": [
+            "op",
+            "source"
+          ],
+          "anyOf": [
+            {
+              "required": [
+                "targets"
+              ]
+            },
+            {
+              "required": [
+                "target"
+              ]
+            },
+            {
+              "required": [
+                "where"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "score_many"
+            },
+            "targets": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            "point": {
+              "type": "string"
+            },
+            "value": {
+              "type": "number"
+            },
+            "target": {
+              "type": "string"
+            },
+            "where": {
+              "$ref": "#/$defs/selector"
+            },
+            "expect": {
+              "$ref": "#/$defs/expectation"
+            },
+            "allow_empty": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "required": [
+            "op",
+            "point",
+            "value"
+          ],
+          "anyOf": [
+            {
+              "required": [
+                "targets"
+              ]
+            },
+            {
+              "required": [
+                "target"
+              ]
+            },
+            {
+              "required": [
+                "where"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "group_members"
+            },
+            "group": {
+              "type": "string"
+            },
+            "members": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            "remove": {
+              "type": "boolean"
+            },
+            "member": {
+              "type": "string"
+            },
+            "where": {
+              "$ref": "#/$defs/selector"
+            },
+            "expect": {
+              "$ref": "#/$defs/expectation"
+            },
+            "allow_empty": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "required": [
+            "op",
+            "group"
+          ],
+          "anyOf": [
+            {
+              "required": [
+                "members"
+              ]
+            },
+            {
+              "required": [
+                "member"
+              ]
+            },
+            {
+              "required": [
+                "where"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "effects"
+            },
+            "targets": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            "target": {
+              "type": "string"
+            },
+            "where": {
+              "$ref": "#/$defs/selector"
+            },
+            "expect": {
+              "$ref": "#/$defs/expectation"
+            },
+            "allow_empty": {
+              "type": "boolean",
+              "default": false
+            },
+            "effects": {
+              "$ref": "#/$defs/effects"
+            }
+          },
+          "required": [
+            "op",
+            "effects"
+          ],
+          "anyOf": [
+            {
+              "required": [
+                "targets"
+              ]
+            },
+            {
+              "required": [
+                "target"
+              ]
+            },
+            {
+              "required": [
+                "where"
+              ]
+            }
+          ],
+          "description": "Apply one compact ChoiceFunc effect object to one or many Choices/selectable Addons."
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "hide_contents"
+            },
+            "source": {
+              "type": "string"
+            },
+            "rows": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            "contents": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            "row": {
+              "type": "string"
+            },
+            "content": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "source"
+          ],
+          "allOf": [
+            {
+              "anyOf": [
+                {
+                  "required": [
+                    "rows"
+                  ]
+                },
+                {
+                  "required": [
+                    "row"
+                  ]
+                }
+              ]
+            },
+            {
+              "anyOf": [
+                {
+                  "required": [
+                    "contents"
+                  ]
+                },
+                {
+                  "required": [
+                    "content"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "clear_hide_contents"
+            },
+            "source": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "delete"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "kind": {
+              "type": "string"
+            },
+            "ref": {
+              "type": "string"
+            },
+            "references": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            "refs": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            "where": {
+              "$ref": "#/$defs/selector"
+            },
+            "expect": {
+              "$ref": "#/$defs/expectation"
+            },
+            "allow_empty": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "required": [
+            "op",
+            "kind"
+          ],
+          "oneOf": [
+            {
+              "required": [
+                "reference"
+              ]
+            },
+            {
+              "required": [
+                "ref"
+              ]
+            },
+            {
+              "required": [
+                "references"
+              ]
+            },
+            {
+              "required": [
+                "refs"
+              ]
+            },
+            {
+              "required": [
+                "where"
+              ]
+            }
+          ],
+          "description": "One-or-many phase delete. Target one ref, an explicit refs list, or a selector with optional expect bounds."
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "assert"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "kind": {
+              "type": "string"
+            },
+            "pointer": {
+              "type": "string"
+            },
+            "equals": {},
+            "ref": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "normalize"
+            }
+          },
+          "required": [
+            "op"
+          ]
+        }
+      ]
+    },
+    "selector": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "kinds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "id": {
+          "type": "string"
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "id_prefix": {
+          "type": "string"
+        },
+        "row": {
+          "type": "string"
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "parent": {
+          "type": "string"
+        },
+        "parents": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "group": {
+          "type": "string"
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "title_contains": {
+          "type": "string"
+        },
+        "text_contains": {
+          "type": "string"
+        },
+        "path_prefix": {
+          "type": "string"
+        },
+        "backpack": {
+          "type": "boolean"
+        }
+      },
+      "description": "Exact structural selector used by bulk operations. title_contains and text_contains are literal case-insensitive substring filters, not fuzzy matching."
+    },
+    "expectation": {
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "min": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "max": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      ]
+    },
+    "effects": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "activate": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            }
+          ]
+        },
+        "deactivate": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            }
+          ]
+        },
+        "hide_contents": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "rows": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            "row": {
+              "type": "string"
+            },
+            "contents": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            "content": {
+              "type": "string"
+            }
+          }
+        },
+        "row_limit": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "rows": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            "row": {
+              "type": "string"
+            },
+            "targets": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            "add": {
+              "type": "number"
+            },
+            "amount": {
+              "type": "number"
+            },
+            "value": {
+              "type": "number"
+            }
+          }
+        },
+        "variables": {
+          "oneOf": [
+            {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "targets": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "uniqueItems": true
+                    }
+                  ]
+                },
+                "ids": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "uniqueItems": true
+                    }
+                  ]
+                },
+                "variables": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "uniqueItems": true
+                    }
+                  ]
+                },
+                "mode": {
+                  "type": [
+                    "string",
+                    "integer"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "points": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "multiply": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "targets": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "uniqueItems": true
+                    }
+                  ]
+                },
+                "points": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "uniqueItems": true
+                    }
+                  ]
+                },
+                "point": {
+                  "type": "string"
+                },
+                "by": {},
+                "value": {},
+                "by_id": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "divide": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "targets": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "uniqueItems": true
+                    }
+                  ]
+                },
+                "points": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "uniqueItems": true
+                    }
+                  ]
+                },
+                "point": {
+                  "type": "string"
+                },
+                "by": {
+                  "type": "number"
+                },
+                "value": {
+                  "type": "number"
+                }
+              }
+            },
+            "set": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "targets": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "uniqueItems": true
+                    }
+                  ]
+                },
+                "points": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "uniqueItems": true
+                    }
+                  ]
+                },
+                "point": {
+                  "type": "string"
+                },
+                "to": {},
+                "value": {}
+              }
+            }
+          }
+        },
+        "word": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "word": {
+              "type": "string"
+            },
+            "select": {},
+            "on_select": {},
+            "deselect": {},
+            "on_deselect": {},
+            "prompt": {}
+          }
+        },
+        "multiple": {
+          "oneOf": [
+            {
+              "const": true
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "start": {
+                  "type": "integer"
+                },
+                "max": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "min": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "click": {
+                  "type": "boolean"
+                },
+                "slider": {
+                  "type": "boolean"
+                },
+                "hide_counter": {
+                  "type": "boolean"
+                },
+                "hide_until_selected": {
+                  "type": "boolean"
+                },
+                "score": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "discount": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "choices": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            "rows": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            "groups": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            "points": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            "point_types": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            "operator": {
+              "type": [
+                "string",
+                "integer"
+              ]
+            },
+            "value": {
+              "type": "number"
+            },
+            "stackable": {
+              "type": "boolean"
+            },
+            "show": {
+              "type": "boolean"
+            },
+            "replace_text": {
+              "type": "boolean"
+            },
+            "hide_value": {
+              "type": "boolean"
+            },
+            "hide_icon": {
+              "type": "boolean"
+            },
+            "count_per_selection": {
+              "type": "boolean"
+            },
+            "low_limit": {
+              "type": "number"
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "before_text": {},
+            "after_text": {}
+          }
+        },
+        "random_activate": {
+          "oneOf": [
+            {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "targets": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "uniqueItems": true
+                    }
+                  ]
+                },
+                "choices": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "uniqueItems": true
+                    }
+                  ]
+                },
+                "count": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          ]
+        },
+        "scroll_to": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "row": {
+                  "type": "string"
+                },
+                "choice": {
+                  "type": "string"
+                },
+                "object": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "template": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "targets": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            "to": {
+              "type": "integer"
+            },
+            "template": {
+              "type": "integer"
+            },
+            "addons": {
+              "type": "boolean"
+            }
+          }
+        },
+        "width": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "targets": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              ]
+            },
+            "to": {
+              "type": "string"
+            },
+            "width": {
+              "type": "string"
+            }
+          }
+        },
+        "sfx": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "select": {
+                  "type": "string"
+                },
+                "on_select": {
+                  "type": "string"
+                },
+                "deselect": {
+                  "type": "string"
+                },
+                "on_deselect": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "delay": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "select": {
+              "type": "number",
+              "minimum": 0
+            },
+            "deselect": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "background": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "color": {
+                  "type": "string"
+                },
+                "image": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "point_bar": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "background": {
+              "type": "string"
+            },
+            "text": {
+              "type": "string"
+            },
+            "icon": {
+              "type": "string"
+            }
+          }
+        },
+        "confirm": {
+          "type": "boolean"
+        },
+        "selection": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "not_selectable": {
+              "type": "boolean"
+            },
+            "select_once": {
+              "type": "boolean"
+            },
+            "allow_deselect": {
+              "type": "boolean"
+            },
+            "auto_active": {
+              "type": "boolean"
+            },
+            "activate_after_reset": {
+              "type": "boolean"
+            },
+            "not_deselected_by_clean": {
+              "type": "boolean"
+            },
+            "clean_activated_on_select": {
+              "type": "boolean"
+            },
+            "not_deactivate": {
+              "type": "boolean"
+            },
+            "active_unselectable": {
+              "type": "boolean"
+            },
+            "count_disabled": {
+              "type": "boolean"
+            },
+            "deselect_when_no_addon": {
+              "type": "boolean"
+            },
+            "not_searchable": {
+              "type": "boolean"
+            },
+            "not_result": {
+              "type": "boolean"
+            },
+            "image_upload": {
+              "type": "boolean"
+            },
+            "show_debug_title": {
+              "type": "boolean"
+            }
+          }
+        },
+        "duplicate_row": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "source": {
+                  "type": "string"
+                },
+                "row": {
+                  "type": "string"
+                },
+                "after": {
+                  "type": "string"
+                },
+                "preserve_requirement_ids": {
+                  "type": "boolean"
+                },
+                "preserve_function_ids": {
+                  "type": "boolean"
+                }
+              }
+            }
+          ]
+        },
+        "addons": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "show_all": {
+              "type": "boolean"
+            },
+            "separate_layout": {
+              "type": "boolean"
+            },
+            "show_score": {
+              "type": "boolean"
+            },
+            "show_requirements": {
+              "type": "boolean"
+            },
+            "show_multiple": {
+              "type": "boolean"
+            }
+          }
+        },
+        "bgm": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "fade_in": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "fade_out": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "no_loop": {
+                  "type": "boolean"
+                },
+                "mute": {
+                  "type": "boolean"
+                }
+              }
+            }
+          ]
+        },
+        "transition": {
+          "oneOf": [
+            {
+              "const": true
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "color": {
+                  "type": "string"
+                },
+                "time": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "fade_in": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "fade_out": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              }
+            }
+          ]
+        },
+        "random_weight": {
+          "type": "number"
+        },
+        "backpack_button_requirement": {
+          "type": "boolean"
+        },
+        "default_image": {
+          "type": "string"
+        }
+      },
+      "description": "Script-friendly ChoiceFunc effects. The CLI expands these into ordinary native ICC Plus fields and rejects conflicts with explicitly supplied native fields."
+    }
+  },
+  "x-iccplus-canonical-agent": true,
+  "x-iccplus-phase": "rules",
+  "x-iccplus-allowed-operations": [
+    "add",
+    "assert",
+    "clear_hide_contents",
+    "delete",
+    "effects",
+    "exclude",
+    "gate",
+    "group_members",
+    "hide_contents",
+    "normalize",
+    "require",
+    "score_many",
+    "ungate",
+    "update",
+    "upsert"
+  ],
+  "x-iccplus-addable-kinds": [
+    "global_requirement",
+    "group",
+    "point",
+    "requirement",
+    "score",
+    "sound_effect",
+    "variable",
+    "word"
+  ],
+  "x-iccplus-updatable-kinds": [
+    "addon",
+    "backpack_row",
+    "choice",
+    "global_requirement",
+    "group",
+    "point",
+    "requirement",
+    "row",
+    "score",
+    "selectable_addon",
+    "sound_effect",
+    "variable",
+    "word"
+  ],
+  "x-iccplus-allowed-fields": {
+    "addon": [
+      "hideAddon",
+      "requireds",
+      "showAddon"
+    ],
+    "backpack_row": [
+      "allowActivateUnselectable",
+      "allowedChoices",
+      "btnPointAddon",
+      "buttonId",
+      "buttonRandom",
+      "buttonRandomNumber",
+      "buttonText",
+      "buttonType",
+      "buttonTypeRadio",
+      "deselectChoices",
+      "groups",
+      "isButtonRow",
+      "isResultRow",
+      "isWeightedRandom",
+      "onlyIfNoChoices",
+      "onlyUnselectedChoices",
+      "pointTypeRandom",
+      "randomMax",
+      "randomMin",
+      "requireds",
+      "resultGroupId"
+    ],
+    "choice": [
+      "activateAfterReset",
+      "allowSelectByClick",
+      "cleanACtivatedOnSelect",
+      "deselectDelayTime",
+      "deselectWhenNoAddon",
+      "groups",
+      "hideCounterUntilSelect",
+      "hideMultipleCounter",
+      "initMultipleTimesMinus",
+      "isAllowDeselect",
+      "isAutoActive",
+      "isCountDisabled",
+      "isDeselectDelayed",
+      "isMultipleUseVariable",
+      "isNotActiveUnselectable",
+      "isNotBuild",
+      "isNotDeactivate",
+      "isNotResult",
+      "isNotSearchable",
+      "isNotSelectable",
+      "isSelectDelayed",
+      "isSelectableMultiple",
+      "linkedObjects",
+      "multipleScoreId",
+      "multipleUseVariable",
+      "notDeselectedByClean",
+      "numMultipleTimesMinus",
+      "numMultipleTimesPluss",
+      "randomWeight",
+      "requireds",
+      "scores",
+      "selectDelayTime",
+      "selectOnce",
+      "showMulInAddon",
+      "showReqInAddon",
+      "showScoreInAddon"
+    ],
+    "global_requirement": [
+      "category",
+      "id",
+      "name",
+      "requireds"
+    ],
+    "group": [
+      "category",
+      "elements",
+      "id",
+      "name",
+      "rowElements"
+    ],
+    "point": [
+      "afterText",
+      "allowFloat",
+      "beforeText",
+      "belowZeroNotAllowed",
+      "category",
+      "decimalPlaces",
+      "id",
+      "isNotShownObjects",
+      "isNotShownPointBar",
+      "name",
+      "scoreAfterText",
+      "scoreBeforeText",
+      "startingSum",
+      "useScoreText"
+    ],
+    "requirement": [
+      "afterText",
+      "beforeText",
+      "customText",
+      "customTextIsOn",
+      "hideRequired",
+      "hideRequired2",
+      "id",
+      "more",
+      "operator",
+      "orNum",
+      "orRequired",
+      "orRequireds",
+      "reqId",
+      "reqId1",
+      "reqId2",
+      "reqId3",
+      "reqPoints",
+      "required",
+      "requireds",
+      "selFromOperators",
+      "selGroups",
+      "selNum",
+      "selRows",
+      "showRequired",
+      "type"
+    ],
+    "row": [
+      "allowActivateUnselectable",
+      "allowedChoices",
+      "btnPointAddon",
+      "buttonId",
+      "buttonRandom",
+      "buttonRandomNumber",
+      "buttonText",
+      "buttonType",
+      "buttonTypeRadio",
+      "deselectChoices",
+      "groups",
+      "isButtonRow",
+      "isResultRow",
+      "isWeightedRandom",
+      "onlyIfNoChoices",
+      "onlyUnselectedChoices",
+      "pointTypeRandom",
+      "randomMax",
+      "randomMin",
+      "requireds",
+      "resultGroupId"
+    ],
+    "score": [
+      "afterText",
+      "beforeText",
+      "displayMulScore",
+      "expMaxValue",
+      "expMinValue",
+      "expValue",
+      "hideDisIcon",
+      "hideDisValue",
+      "hideValue",
+      "id",
+      "idx",
+      "isNotDiscountable",
+      "isNotRecalculatable",
+      "isNotRecalculateSelf",
+      "isRandom",
+      "maxValue",
+      "minValue",
+      "multiplyByTimes",
+      "notStackableDiscount",
+      "replaceText",
+      "requireds",
+      "setValue",
+      "showScore",
+      "type",
+      "useExpression",
+      "value"
+    ],
+    "selectable_addon": [
+      "activateAfterReset",
+      "allowSelectByClick",
+      "cleanACtivatedOnSelect",
+      "countAsChoice",
+      "deselectDelayTime",
+      "deselectParent",
+      "deselectWhenNoAddon",
+      "groups",
+      "hideAddon",
+      "hideCounterUntilSelect",
+      "hideMultipleCounter",
+      "isAllowDeselect",
+      "isAutoActive",
+      "isCountDisabled",
+      "isDeselectDelayed",
+      "isMultipleUseVariable",
+      "isNotActiveUnselectable",
+      "isNotBuild",
+      "isNotDeactivate",
+      "isNotResult",
+      "isNotSearchable",
+      "isNotSelectable",
+      "isSelectDelayed",
+      "isSelectableMultiple",
+      "multipleScoreId",
+      "multipleUseVariable",
+      "notDeselectedByClean",
+      "numMultipleTimesMinus",
+      "numMultipleTimesPluss",
+      "randomWeight",
+      "requireds",
+      "scores",
+      "selectDelayTime",
+      "selectOnce",
+      "showAddon",
+      "showMulInAddon",
+      "showReqInAddon",
+      "showScoreInAddon"
+    ],
+    "sound_effect": [
+      "audio",
+      "groups",
+      "id",
+      "isDefault",
+      "name",
+      "onDeselected",
+      "onSelected",
+      "pitch",
+      "requireds",
+      "volume"
+    ],
+    "variable": [
+      "category",
+      "id",
+      "isTrue"
+    ],
+    "word": [
+      "category",
+      "id",
+      "replaceText"
+    ]
+  }
+}

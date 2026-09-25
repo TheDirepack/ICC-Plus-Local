@@ -1,0 +1,545 @@
+{
+  "format": "iccplus-external-verification-manifest-v2",
+  "tool_version": "0.10.0rc11",
+  "target": {
+    "icc_plus_version": "2.10.6",
+    "source_commit": "a420836248d32043ae45d03f1b93cdcb9e354663"
+  },
+  "creator_template_boundary": {
+    "rule": "Authoring templates, compact effects, presets, and verification metadata must compile to native ICC Plus fields. They are never inserted into project.json as tool-specific objects.",
+    "forbidden_tool_keys": [
+      "$iccplusLocal",
+      "_component",
+      "_creatorTemplate",
+      "_iccplusLocal",
+      "_templateSource",
+      "componentTemplate",
+      "componentTemplates",
+      "creatorComponent",
+      "creatorComponents",
+      "styleTemplate",
+      "styleTemplates",
+      "templateProvenance"
+    ],
+    "fixture_scan": "expected/template_boundary.json"
+  },
+  "fixtures": [
+    {
+      "id": "F01",
+      "file": "fixtures/01_field_retention.json",
+      "purpose": "Every declared native field is present at least once with a type-correct neutral or fixture value. Load and export without gameplay."
+    },
+    {
+      "id": "R01-R32",
+      "file": "fixtures/02_runtime_matrix.json",
+      "purpose": "Compact reference matrix only. Official runtime execution uses one isolated fixture per case under fixtures/runtime_cases/.",
+      "case_manifest": "expected/runtime_cases.json"
+    },
+    {
+      "id": "A01-A12",
+      "file": "fixtures/03_advanced_interaction_export.json",
+      "purpose": "Browser-owned and high-interaction combinations that require the official GUI.",
+      "case_manifest": "expected/advanced_cases.json"
+    }
+  ],
+  "creator_actions": [
+    {
+      "feature": "project.save_json",
+      "status": "complete",
+      "tests": [
+        "C01",
+        "C12"
+      ],
+      "source": "AppSaveLoad.svelte saveToDisk"
+    },
+    {
+      "feature": "project.load_json",
+      "status": "complete",
+      "tests": [
+        "C01",
+        "C12"
+      ],
+      "source": "AppSaveLoad.svelte loadFromDisk"
+    },
+    {
+      "feature": "project.save_slots",
+      "status": "equivalent",
+      "tests": [
+        "C12"
+      ],
+      "source": "AppSaveLoad.svelte saveApp/loadApp/removeSave"
+    },
+    {
+      "feature": "project.autosave",
+      "status": "equivalent",
+      "tests": [
+        "C12"
+      ],
+      "source": "store.svelte.ts autoSave"
+    },
+    {
+      "feature": "project.project_stats",
+      "status": "complete",
+      "tests": [
+        "C11"
+      ],
+      "source": "AppProjectStats.svelte"
+    },
+    {
+      "feature": "project.defaults",
+      "status": "complete",
+      "tests": [
+        "C11"
+      ],
+      "source": "Features/AppDefaults.svelte"
+    },
+    {
+      "feature": "project.ids_from_titles",
+      "status": "complete",
+      "tests": [
+        "C08"
+      ],
+      "source": "Features/AppDefaults.svelte idToTitle"
+    },
+    {
+      "feature": "project.viewer_config",
+      "status": "complete",
+      "tests": [
+        "C11",
+        "A12"
+      ],
+      "source": "AppViewerConfig.svelte"
+    },
+    {
+      "feature": "project.global_styling",
+      "status": "complete",
+      "tests": [
+        "C07",
+        "A11"
+      ],
+      "source": "Creator styling dialogs"
+    },
+    {
+      "feature": "project.style_templates",
+      "status": "complete",
+      "tests": [
+        "C07"
+      ],
+      "source": "Features/AppTemplates.svelte"
+    },
+    {
+      "feature": "project.custom_css",
+      "status": "complete",
+      "tests": [
+        "C09",
+        "A11"
+      ],
+      "source": "AppCustomCSS.svelte"
+    },
+    {
+      "feature": "project.fonts",
+      "status": "complete",
+      "tests": [
+        "C09"
+      ],
+      "source": "AppGlobalSettings.svelte importFont/deleteFont"
+    },
+    {
+      "feature": "project.id_name_csv",
+      "status": "complete",
+      "tests": [
+        "C08"
+      ],
+      "source": "Features/AppIdSearch.svelte exportAsCsv"
+    },
+    {
+      "feature": "project.search_navigation",
+      "status": "complete",
+      "tests": [
+        "C11",
+        "A09"
+      ],
+      "source": "AppSearchForm.svelte and Row/Object list dialogs"
+    },
+    {
+      "feature": "project.symbol_reference",
+      "status": "complete",
+      "tests": [
+        "C11"
+      ],
+      "source": "Features/AppSymbols.svelte"
+    },
+    {
+      "feature": "rows.create_edit_delete",
+      "status": "complete",
+      "tests": [
+        "C02",
+        "C04"
+      ],
+      "source": "AppRowList.svelte"
+    },
+    {
+      "feature": "backpack_rows.create_edit_delete",
+      "status": "complete",
+      "tests": [
+        "C10",
+        "A09"
+      ],
+      "source": "AppBackpack.svelte"
+    },
+    {
+      "feature": "choices.create_edit_delete",
+      "status": "complete",
+      "tests": [
+        "C02",
+        "C04"
+      ],
+      "source": "AppObjectList.svelte"
+    },
+    {
+      "feature": "addons.create_edit_delete",
+      "status": "complete",
+      "tests": [
+        "C02",
+        "C05",
+        "A08"
+      ],
+      "source": "ObjectAddon.svelte"
+    },
+    {
+      "feature": "scores.create_edit_delete",
+      "status": "complete",
+      "tests": [
+        "C02",
+        "C05",
+        "A01"
+      ],
+      "source": "ObjectScore.svelte"
+    },
+    {
+      "feature": "requirements.create_edit_delete",
+      "status": "complete",
+      "tests": [
+        "C02",
+        "C05",
+        "R01-R32"
+      ],
+      "source": "ObjectRequired.svelte"
+    },
+    {
+      "feature": "points.create_edit_delete",
+      "status": "complete",
+      "tests": [
+        "C03",
+        "A07",
+        "A10"
+      ],
+      "source": "Features/AppPoints.svelte"
+    },
+    {
+      "feature": "variables.create_edit_delete",
+      "status": "complete",
+      "tests": [
+        "C03",
+        "A07",
+        "A10"
+      ],
+      "source": "Features/AppVariables.svelte"
+    },
+    {
+      "feature": "words.create_edit_delete",
+      "status": "complete",
+      "tests": [
+        "C03",
+        "A04"
+      ],
+      "source": "Features/AppWords.svelte"
+    },
+    {
+      "feature": "groups.create_edit_delete",
+      "status": "complete",
+      "tests": [
+        "C03",
+        "A09"
+      ],
+      "source": "Features/AppGroups.svelte"
+    },
+    {
+      "feature": "row_design_groups.create_edit_delete",
+      "status": "complete",
+      "tests": [
+        "C03",
+        "C07",
+        "A11"
+      ],
+      "source": "Features/AppDesignGroups.svelte"
+    },
+    {
+      "feature": "choice_design_groups.create_edit_delete",
+      "status": "complete",
+      "tests": [
+        "C03",
+        "C07",
+        "A11"
+      ],
+      "source": "Features/AppDesignGroups.svelte"
+    },
+    {
+      "feature": "global_requirements.create_edit_delete",
+      "status": "complete",
+      "tests": [
+        "C03",
+        "R01-R32"
+      ],
+      "source": "Features/AppGlobalRequirements.svelte"
+    },
+    {
+      "feature": "sound_effects.create_edit_delete",
+      "status": "complete",
+      "tests": [
+        "C03",
+        "C09",
+        "A05"
+      ],
+      "source": "Features/AppSoundEffects.svelte"
+    },
+    {
+      "feature": "categories.create_rename_delete",
+      "status": "complete",
+      "tests": [
+        "C06"
+      ],
+      "source": "Features/AppCategories.svelte"
+    },
+    {
+      "feature": "rows.drag_reorder",
+      "status": "complete",
+      "tests": [
+        "C02",
+        "C04"
+      ],
+      "source": "AppRowList.svelte dndzone"
+    },
+    {
+      "feature": "features.move_up_down",
+      "status": "complete",
+      "tests": [
+        "C03"
+      ],
+      "source": "Features management dialogs"
+    },
+    {
+      "feature": "choices.drag_reorder",
+      "status": "complete",
+      "tests": [
+        "C02",
+        "C04"
+      ],
+      "source": "AppObjectList.svelte dndzone"
+    },
+    {
+      "feature": "nested.reorder",
+      "status": "complete",
+      "tests": [
+        "C02",
+        "C05"
+      ],
+      "source": "Creator list controls"
+    },
+    {
+      "feature": "nested.move",
+      "status": "complete",
+      "tests": [
+        "C02",
+        "C05"
+      ],
+      "source": "structural scripting equivalent"
+    },
+    {
+      "feature": "copy_paste.deep_clone",
+      "status": "complete",
+      "tests": [
+        "C04",
+        "C05"
+      ],
+      "source": "CreatorMain.svelte copyRow/pasteRow and store.svelte.ts pasteObject"
+    },
+    {
+      "feature": "fragment.export_import",
+      "status": "complete",
+      "tests": [
+        "C05"
+      ],
+      "source": "store.svelte.ts exportData/importData"
+    },
+    {
+      "feature": "row_settings.sort_choices",
+      "status": "complete",
+      "tests": [
+        "C04"
+      ],
+      "source": "AppRowSettings.svelte sortObjects"
+    },
+    {
+      "feature": "row_settings.copy_choices",
+      "status": "complete",
+      "tests": [
+        "C04"
+      ],
+      "source": "AppRowSettings.svelte copyObjects"
+    },
+    {
+      "feature": "row_settings.copy_and_delete",
+      "status": "complete",
+      "tests": [
+        "C04"
+      ],
+      "source": "AppRowSettings.svelte mergeRow"
+    },
+    {
+      "feature": "choice_settings.copy_to_row",
+      "status": "complete",
+      "tests": [
+        "C04"
+      ],
+      "source": "AppObjectSettings.svelte copyToAnotherRow"
+    },
+    {
+      "feature": "rich_text.result",
+      "status": "complete",
+      "tests": [
+        "C11",
+        "A09"
+      ],
+      "source": "Creator text editor"
+    },
+    {
+      "feature": "images.assign_data_url_or_path",
+      "status": "complete",
+      "tests": [
+        "C11",
+        "A04",
+        "A12"
+      ],
+      "source": "Creator image controls"
+    },
+    {
+      "feature": "styling.clean_all_private",
+      "status": "complete",
+      "tests": [
+        "C11",
+        "A11"
+      ],
+      "source": "Features/AppSymbols.svelte cleanAllStyle"
+    },
+    {
+      "feature": "styling.design_import_export",
+      "status": "complete",
+      "tests": [
+        "C07"
+      ],
+      "source": "AppDesign.svelte, AppRowSettings.svelte, AppObjectSettings.svelte, Features/AppPrivateDesign.svelte"
+    },
+    {
+      "feature": "images.compress_convert",
+      "status": "complete",
+      "tests": [
+        "C11",
+        "A12"
+      ],
+      "source": "release asset workflow"
+    },
+    {
+      "feature": "images.interactive_crop",
+      "status": "complete",
+      "tests": [
+        "C11"
+      ],
+      "source": "store/ImageUpload.svelte"
+    },
+    {
+      "feature": "export.separate_images_zip",
+      "status": "complete",
+      "tests": [
+        "C12",
+        "A12"
+      ],
+      "source": "AppSaveLoad.svelte exportZip/imageSeparation"
+    },
+    {
+      "feature": "export.playable_web_package",
+      "status": "complete_with_input",
+      "tests": [
+        "C12",
+        "A12"
+      ],
+      "source": "AppSaveLoad.svelte exportWithViewer"
+    },
+    {
+      "feature": "build.native_build_form_import_export",
+      "status": "complete",
+      "tests": [
+        "R01-R32",
+        "A02",
+        "A04"
+      ],
+      "source": "AppBuildForm.svelte + store.svelte.ts getSelectedObjectId/loadActivated"
+    },
+    {
+      "feature": "build.human_summary",
+      "status": "complete",
+      "tests": [
+        "A02",
+        "A04"
+      ],
+      "source": "AppBuildForm.svelte getSelectedObjectName"
+    },
+    {
+      "feature": "viewer.row_buttons",
+      "status": "complete",
+      "tests": [
+        "A10",
+        "R32"
+      ],
+      "source": "viewer/AppRow.svelte buttonActivate"
+    },
+    {
+      "feature": "viewer.download_rendered_image",
+      "status": "browser_only",
+      "tests": [
+        "A09"
+      ],
+      "source": "DlgBackpack.svelte + store.svelte.ts downloadAsImage"
+    },
+    {
+      "feature": "preview.audio_media_controls",
+      "status": "browser_only",
+      "tests": [
+        "A05"
+      ],
+      "source": "CreatorMain.svelte and Features/AppSoundEffects.svelte"
+    },
+    {
+      "feature": "preview.browser_rendering",
+      "status": "browser_only",
+      "tests": [
+        "A03",
+        "A09",
+        "A11"
+      ],
+      "source": "Creator live preview"
+    },
+    {
+      "feature": "browser.theme_and_dialog_state",
+      "status": "not_project_data",
+      "tests": [
+        "C11"
+      ],
+      "source": "Creator UI"
+    }
+  ],
+  "runtime_case_count": 32,
+  "creator_case_count": 12,
+  "advanced_case_count": 12,
+  "completion_rule": "Every audited GUI feature has an explicit test mapping. A pass/fail only counts when it records an official-GUI observation from the packaged fixture and hash. Browser-only features require a direct GUI observation or an explicit blocked result with evidence."
+}

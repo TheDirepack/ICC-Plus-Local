@@ -1,0 +1,94 @@
+{
+  "format": "iccplus-structure-ops",
+  "format_version": 1,
+  "strict_fields": true,
+  "operations": [
+    {
+      "op": "add",
+      "kind": "row",
+      "values": {
+        "id": "row_origin",
+        "title": "Origin",
+        "titleText": "Choose where your traveler grew up."
+      }
+    },
+    {
+      "op": "add",
+      "kind": "choice",
+      "parent": "row_origin",
+      "values": {
+        "id": "origin_station",
+        "title": "Orbital station",
+        "text": "You grew up in a dense artificial habitat with reliable services."
+      }
+    },
+    {
+      "op": "add",
+      "kind": "choice",
+      "parent": "row_origin",
+      "values": {
+        "id": "origin_frontier",
+        "title": "Frontier settlement",
+        "text": "You grew up in a small settlement where repairs and self-reliance were routine."
+      }
+    },
+    {
+      "op": "add",
+      "kind": "row",
+      "values": {
+        "id": "row_specialty",
+        "title": "Specialty",
+        "titleText": "Choose your main field of training."
+      }
+    },
+    {
+      "op": "add",
+      "kind": "choice",
+      "parent": "row_specialty",
+      "values": {
+        "id": "specialty_engineer",
+        "title": "Engineer",
+        "text": "You can maintain machinery and diagnose common technical failures."
+      }
+    },
+    {
+      "op": "add",
+      "kind": "choice",
+      "parent": "row_specialty",
+      "values": {
+        "id": "specialty_scout",
+        "title": "Scout",
+        "text": "You are trained in navigation, field observation, and route planning."
+      }
+    },
+    {
+      "op": "add",
+      "kind": "row",
+      "values": {
+        "id": "row_gear",
+        "title": "Optional gear",
+        "titleText": "Spend any remaining points on extra equipment."
+      }
+    },
+    {
+      "op": "add",
+      "kind": "choice",
+      "parent": "row_gear",
+      "values": {
+        "id": "gear_drone",
+        "title": "Repair drone",
+        "text": "A compact maintenance drone assists with routine mechanical work."
+      }
+    },
+    {
+      "op": "add",
+      "kind": "choice",
+      "parent": "row_gear",
+      "values": {
+        "id": "gear_survey",
+        "title": "Survey kit",
+        "text": "Portable mapping and environmental sensors help with field work."
+      }
+    }
+  ]
+}

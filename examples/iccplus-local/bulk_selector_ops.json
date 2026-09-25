@@ -1,0 +1,20 @@
+{
+  "format": "iccplus-ops",
+  "format_version": 1,
+  "operations": [
+    {
+      "op": "update_many",
+      "where": {"kind": "choice", "row": "row_spells", "id_prefix": "spell_"},
+      "expect": 2,
+      "template": 2
+    },
+    {
+      "op": "effects",
+      "where": {"kind": "choice", "row": "row_spells", "id_prefix": "spell_"},
+      "expect": 2,
+      "effects": {
+        "confirm": true
+      }
+    }
+  ]
+}

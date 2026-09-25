@@ -1,0 +1,259 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ICC Plus local portable runtime state",
+  "type": "object",
+  "required": [
+    "format",
+    "format_version",
+    "project_fingerprint",
+    "seed",
+    "rng_state",
+    "runtime"
+  ],
+  "properties": {
+    "format": {
+      "const": "iccplus-cyoa-runtime-state"
+    },
+    "format_version": {
+      "const": 1
+    },
+    "tool_version": {
+      "type": "string"
+    },
+    "project_fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:"
+    },
+    "project_version": {
+      "type": [
+        "string",
+        "number",
+        "null"
+      ]
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "rng_state": {},
+    "runtime": {
+      "type": "object",
+      "required": [
+        "activations",
+        "points",
+        "variables",
+        "words",
+        "row_counts",
+        "selected_order",
+        "forced_by",
+        "score_ledger",
+        "allowed_deltas",
+        "point_effect_ledger"
+      ],
+      "properties": {
+        "activations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer"
+          }
+        },
+        "points": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "variables": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "boolean"
+          }
+        },
+        "words": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "row_counts": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer"
+          }
+        },
+        "selected_order": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "forced_by": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "score_ledger": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "allowed_deltas": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer"
+          }
+        },
+        "point_effect_ledger": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "items": false,
+                "minItems": 2,
+                "maxItems": 2
+              }
+            }
+          }
+        },
+        "events": {
+          "type": "array"
+        },
+        "activated_by": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "hidden_content": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "show_all_addons": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "random_score_ledger": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "patternProperties": {
+                "^[0-9]+$": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "random_activation_ledger": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "custom_words": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "uploaded_images": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "row_button_random_points": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "items": false,
+            "minItems": 2,
+            "maxItems": 2
+          }
+        },
+        "build_order": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "dynamic_rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "collection",
+              "index",
+              "row"
+            ],
+            "properties": {
+              "collection": {
+                "enum": [
+                  "rows",
+                  "backpack"
+                ]
+              },
+              "index": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "row": {
+                "type": "object"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

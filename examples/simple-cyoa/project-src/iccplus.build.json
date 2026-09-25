@@ -1,0 +1,9 @@
+{
+  "format": "iccplus-build",
+  "format_version": 2,
+  "steps": [
+    {"name": "content", "phase": "structure", "script": "10-structure.json"},
+    {"name": "mechanics", "phase": "rules", "script": "20-rules.json"},
+    {"name": "presentation", "phase": "style", "script": "90-style.json"}
+  ]
+}

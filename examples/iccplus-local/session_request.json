@@ -1,0 +1,8 @@
+{
+  "actions": [
+    {"action": "select", "id": "sword"},
+    {"action": "status", "id": "elite"},
+    {"action": "snapshot", "include_choice_status": false}
+  ],
+  "include_choice_status": true
+}

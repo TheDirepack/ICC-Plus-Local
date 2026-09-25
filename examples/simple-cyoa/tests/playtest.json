@@ -1,0 +1,27 @@
+{
+  "steps": [
+    {
+      "select": "origin_frontier",
+      "expect": {
+        "points": {"cp": 5},
+        "selected": ["origin_frontier"],
+        "choice_rows": {"origin_frontier": "row_origin"}
+      }
+    },
+    {
+      "select": "specialty_engineer",
+      "expect": {
+        "points": {"cp": 3},
+        "selected": ["origin_frontier", "specialty_engineer"],
+        "available": ["gear_drone", "gear_survey"]
+      }
+    },
+    {
+      "select": "gear_drone",
+      "expect": {
+        "points": {"cp": 1},
+        "selected": ["origin_frontier", "specialty_engineer", "gear_drone"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "ok": true,
+  "missing_total": 0,
+  "kinds": {
+    "project": {
+      "declared": 109,
+      "present": 109,
+      "missing": []
+    },
+    "requirement": {
+      "declared": 25,
+      "present": 25,
+      "missing": []
+    },
+    "score": {
+      "declared": 47,
+      "present": 47,
+      "missing": []
+    },
+    "choice": {
+      "declared": 186,
+      "present": 186,
+      "missing": []
+    },
+    "row": {
+      "declared": 76,
+      "present": 76,
+      "missing": []
+    },
+    "addon": {
+      "declared": 15,
+      "present": 15,
+      "missing": []
+    },
+    "selectable_addon": {
+      "declared": 175,
+      "present": 175,
+      "missing": []
+    },
+    "point": {
+      "declared": 43,
+      "present": 43,
+      "missing": []
+    },
+    "variable": {
+      "declared": 3,
+      "present": 3,
+      "missing": []
+    },
+    "group": {
+      "declared": 6,
+      "present": 6,
+      "missing": []
+    },
+    "global_requirement": {
+      "declared": 4,
+      "present": 4,
+      "missing": []
+    },
+    "word": {
+      "declared": 3,
+      "present": 3,
+      "missing": []
+    },
+    "row_design_group": {
+      "declared": 17,
+      "present": 17,
+      "missing": []
+    },
+    "choice_design_group": {
+      "declared": 15,
+      "present": 15,
+      "missing": []
+    },
+    "viewer_config": {
+      "declared": 13,
+      "present": 13,
+      "missing": []
+    },
+    "sound_effect": {
+      "declared": 10,
+      "present": 10,
+      "missing": []
+    },
+    "category": {
+      "declared": 3,
+      "present": 3,
+      "missing": []
+    },
+    "defaults": {
+      "declared": 30,
+      "present": 30,
+      "missing": []
+    },
+    "styling": {
+      "declared": 334,
+      "present": 334,
+      "missing": []
+    },
+    "backpack_row": {
+      "declared": 76,
+      "present": 76,
+      "missing": []
+    }
+  }
+}

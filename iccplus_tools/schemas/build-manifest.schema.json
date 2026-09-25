@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openai.local/iccplus/build-manifest.schema.json",
+  "title": "ICC Plus Local build manifest",
+  "description": "Repeatable builds start from the exact blank Creator project. Version 2 declares each authoring phase explicitly. Version 1 remains readable as a legacy all-raw manifest.",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "const": "iccplus-build"
+        },
+        "format_version": {
+          "const": 2
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "phase": {
+                "enum": [
+                  "structure",
+                  "rules",
+                  "style",
+                  "raw"
+                ]
+              },
+              "script": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Relative path. structure expects iccplus-structure-ops; rules expects iccplus-rules-ops; style expects iccplus-visual-manifest; raw expects iccplus-agent-ops."
+              }
+            },
+            "required": [
+              "phase",
+              "script"
+            ]
+          }
+        }
+      },
+      "required": [
+        "format",
+        "format_version",
+        "steps"
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "const": "iccplus-build"
+        },
+        "format_version": {
+          "const": 1
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "script": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "script"
+            ]
+          }
+        }
+      },
+      "required": [
+        "format",
+        "format_version",
+        "steps"
+      ],
+      "deprecated": true,
+      "description": "Legacy format. Every step is treated as raw iccplus-agent-ops."
+    }
+  ]
+}

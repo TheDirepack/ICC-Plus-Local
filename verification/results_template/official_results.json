@@ -1,0 +1,578 @@
+{
+  "format": "iccplus-official-gui-results-v2",
+  "tested_tool_version": "0.10.0rc11",
+  "official_gui_version": "2.10.6",
+  "official_gui_url_or_build": "",
+  "browser": "",
+  "tester": "",
+  "started_at": "",
+  "finished_at": "",
+  "runtime_results": {
+    "R01": {
+      "name": "sel_from_groups_overlap",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R01.json",
+      "fixture_sha256": "d4d8d95ede0c7786d7a1082cd1757423cc11755607866234f05224a8ed1a671a",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R02": {
+      "name": "point_compare_priority_zero",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R02.json",
+      "fixture_sha256": "a163901a7c4790137f6a6615ff00e589bb7472360b22ad1218ddb8304dc48e4e",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R03": {
+      "name": "malformed_repeat_noop",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R03.json",
+      "fixture_sha256": "ab96b780cc60ee02c7367999c4fe271c415c9021108cb5ecbc71fc22878185b6",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R04": {
+      "name": "point_backed_repeat",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R04.json",
+      "fixture_sha256": "646a6b709f2093b74ef3b46b6371d7498a2b8368a4122937514a16a43d5d2746",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R05": {
+      "name": "negative_repeat_cross_zero",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R05.json",
+      "fixture_sha256": "a2a0d21e9cbc26ca3db5afa02f46dadf1b07331b7230f5f85e65481dd6fd306f",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R06": {
+      "name": "repeat_add_to_allow",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R06.json",
+      "fixture_sha256": "3153e9f4cede291b8ffed114c92757b610d7402649a4b7a6d956bcda22aca759",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R07": {
+      "name": "repeat_does_not_run_point_modifier",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R07.json",
+      "fixture_sha256": "95967f8d37da13c002263f48fc794653f84a9f6034dd08307f380c67b0b837a3",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R08": {
+      "name": "point_modifier_can_cross_negative_guard",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R08.json",
+      "fixture_sha256": "6f22b4e60939535d19c118e65210c0673b89137c5cc1edc19c9985cc1fefb4bd",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R09": {
+      "name": "forced_parseint_prefix",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R09.json",
+      "fixture_sha256": "adcc1c591ea9c38a7100db69e6fd7ff9a3f7ee57298627a1efe464bf5889b43a",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R10": {
+      "name": "repeated_force_targets",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R10.json",
+      "fixture_sha256": "3b5f62fc97fd6c4550eef10779699183d4b67e440f67604f8c9b4da0e46c59d8",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R11": {
+      "name": "negative_forced_repeat_2106_noop",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R11.json",
+      "fixture_sha256": "d398d9eaf74bc75e2387613e119194e716c4aabb54c0c8496253e735c37f8487",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R12": {
+      "name": "ordinary_self_deactivate",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R12.json",
+      "fixture_sha256": "6ef16cc1382d586160f0fdb1b0976d1848f36a4e7ac741e21307822b48c87bbf",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R13": {
+      "name": "repeat_self_deactivate",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R13.json",
+      "fixture_sha256": "c5571f4d65729bf7ef5ccc270bf6f42937347ec05d2e8dae67a9e015dddca011",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R14": {
+      "name": "row_capacity_clears_positive_repeat",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R14.json",
+      "fixture_sha256": "0c128679cc1f644f7220d0468bcafd5a7f8134ac0a814cfaeaf39387df0e4d50",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R15": {
+      "name": "negative_repeat_cannot_free_row_capacity",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R15.json",
+      "fixture_sha256": "3d4d5140f8fbc3986d3bff53457023f33a50ea7bb801fc0f67400d9aa4e9bb36",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R16": {
+      "name": "preset_deactivate_then_set_order",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R16.json",
+      "fixture_sha256": "1b3367e22422394e5012dad4838c496ee16f1161432f7f1207ba9a50f6c41ea9",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R17": {
+      "name": "deactivate_direct_list",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R17.json",
+      "fixture_sha256": "ad2e26d8fd1b22f67b2aed601c5423befbe770bf82df2e43bac9560403d80698",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R18": {
+      "name": "deactivate_group",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R18.json",
+      "fixture_sha256": "55c767d5524ca3eb2e807f5a975a9d6b3c9a5bf498c1c38fd0566c20c1bed578",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R19": {
+      "name": "deactivate_repeat_count",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R19.json",
+      "fixture_sha256": "f37fba9816e63ff0ab0188adbb81ba0cc65c537863bbb8c653f484721dd0e3c6",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R20": {
+      "name": "basic_score_cost",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R20.json",
+      "fixture_sha256": "b255d906388f7b2f1194148e1f6266695928627ad7d4d242aa20f17f636b5e1c",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R21": {
+      "name": "below_zero_blocks_score_cost",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R21.json",
+      "fixture_sha256": "0e97662073fa804385830d342001f0bb017a0745ca6b6f57ab18e0c9eb5a63ce",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R22": {
+      "name": "multiply_by_times_one_based",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R22.json",
+      "fixture_sha256": "b7488ad18906cf453d95236f6f0bd4699318deab032342ca0e5c467d05956eb1",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R23": {
+      "name": "selectable_addon_activates_parent",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R23.json",
+      "fixture_sha256": "199d537296e3d8c0d657e2ad0e8476b9091a1c5995613e5d02b09cced453e13f",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R24": {
+      "name": "selectable_addon_deselect_parent",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R24.json",
+      "fixture_sha256": "08c3a9d061a9703e1520acc1b167d6ccab581f50a6a74e51fdc4f1368cdb013b",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R25": {
+      "name": "forced_nonselectable_target",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R25.json",
+      "fixture_sha256": "1842c2a56078ffc25319a5c1ec38bac33cc156ca421e6f882dc086db10ecc6bc",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R26": {
+      "name": "forced_nonselectable_target_blocked",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R26.json",
+      "fixture_sha256": "f2cd0a74ef90ef6b6d69df763f7564246e73201a16d2d498d79ed345f3e0aa9f",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R27": {
+      "name": "forced_allow_deselect",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R27.json",
+      "fixture_sha256": "b8be9876278cfe7c0edd2baa336b2816fea1709b3de5c673c92da14f9a7dbca2",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R28": {
+      "name": "requirement_cleanup_after_linked_deactivation",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R28.json",
+      "fixture_sha256": "0367ba8c9a3df7985c36e59a0858f7ac3b539e6c9ac98512a92fd8804bf36c6f",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R29": {
+      "name": "variable_toggle_and_word_change",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R29.json",
+      "fixture_sha256": "d45cbc1fd752c8103b380bd987517b7a94060c341ef0279c0b385c6754bc4375",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R30": {
+      "name": "requirement_type_matrix",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R30.json",
+      "fixture_sha256": "0fbb8cabc79159d31cd89a1458e2977aee626e1420469de0a925f0b9e202f4e2",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R31": {
+      "name": "random_activate_all_and_release",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R31.json",
+      "fixture_sha256": "8082dad2f7832f554ae59ac20fa55f6756305366253fe0f4d6b20aea714ae37d",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "R32": {
+      "name": "reset_init_auto_preserve",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/runtime_cases/R32.json",
+      "fixture_sha256": "f91bcb7bfb47990d4ace6f7cd08c513582e5d2bbae7c2abc3b49e3eb5470d45d",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    }
+  },
+  "creator_results": {
+    "C01": {
+      "name": "field retention and native JSON boundary",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/01_field_retention.json",
+      "fixture_sha256": "d77953868c5843d8ae89f8fa186f73ccebca97d896c48b89d71bc1a5643027c2",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "C02": {
+      "name": "nested entity CRUD and ordering",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/01_field_retention.json",
+      "fixture_sha256": "d77953868c5843d8ae89f8fa186f73ccebca97d896c48b89d71bc1a5643027c2",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "C03": {
+      "name": "top-level feature CRUD and ordering",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/01_field_retention.json",
+      "fixture_sha256": "d77953868c5843d8ae89f8fa186f73ccebca97d896c48b89d71bc1a5643027c2",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "C04": {
+      "name": "copy clone move row bulk operations",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/03_advanced_interaction_export.json",
+      "fixture_sha256": "1be3de5724bccef04d44bf33dae9ab66f3c97b3fe7802fa63da9651bf573d2cc",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "C05": {
+      "name": "fragment clipboard import export",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/03_advanced_interaction_export.json",
+      "fixture_sha256": "1be3de5724bccef04d44bf33dae9ab66f3c97b3fe7802fa63da9651bf573d2cc",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "C06": {
+      "name": "categories and feature membership",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/01_field_retention.json",
+      "fixture_sha256": "d77953868c5843d8ae89f8fa186f73ccebca97d896c48b89d71bc1a5643027c2",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "C07": {
+      "name": "design import export private styling and presets",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/03_advanced_interaction_export.json",
+      "fixture_sha256": "1be3de5724bccef04d44bf33dae9ab66f3c97b3fe7802fa63da9651bf573d2cc",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "C08": {
+      "name": "IDs from titles and ID CSV",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/03_advanced_interaction_export.json",
+      "fixture_sha256": "1be3de5724bccef04d44bf33dae9ab66f3c97b3fe7802fa63da9651bf573d2cc",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "C09": {
+      "name": "fonts custom CSS and sound effect upload",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/03_advanced_interaction_export.json",
+      "fixture_sha256": "1be3de5724bccef04d44bf33dae9ab66f3c97b3fe7802fa63da9651bf573d2cc",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "C10": {
+      "name": "backpack authoring",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/03_advanced_interaction_export.json",
+      "fixture_sha256": "1be3de5724bccef04d44bf33dae9ab66f3c97b3fe7802fa63da9651bf573d2cc",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "C11": {
+      "name": "project defaults stats search symbols media tools and viewer config",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/03_advanced_interaction_export.json",
+      "fixture_sha256": "1be3de5724bccef04d44bf33dae9ab66f3c97b3fe7802fa63da9651bf573d2cc",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "C12": {
+      "name": "save load and packaging workflows",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/03_advanced_interaction_export.json",
+      "fixture_sha256": "1be3de5724bccef04d44bf33dae9ab66f3c97b3fe7802fa63da9651bf573d2cc",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    }
+  },
+  "advanced_results": {
+    "A01": {
+      "name": "discount plus multi-select plus score",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/03_advanced_interaction_export.json",
+      "fixture_sha256": "1be3de5724bccef04d44bf33dae9ab66f3c97b3fe7802fa63da9651bf573d2cc",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "A02": {
+      "name": "random activation plus native build string",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/03_advanced_interaction_export.json",
+      "fixture_sha256": "1be3de5724bccef04d44bf33dae9ab66f3c97b3fe7802fa63da9651bf573d2cc",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "A03": {
+      "name": "template width background and point bar effects",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/03_advanced_interaction_export.json",
+      "fixture_sha256": "1be3de5724bccef04d44bf33dae9ab66f3c97b3fe7802fa63da9651bf573d2cc",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "A04": {
+      "name": "text prompt image upload confirmation build restore",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/03_advanced_interaction_export.json",
+      "fixture_sha256": "1be3de5724bccef04d44bf33dae9ab66f3c97b3fe7802fa63da9651bf573d2cc",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "A05": {
+      "name": "SFX BGM delay and fade",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/03_advanced_interaction_export.json",
+      "fixture_sha256": "1be3de5724bccef04d44bf33dae9ab66f3c97b3fe7802fa63da9651bf573d2cc",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "A06": {
+      "name": "row duplication and ID suffix behavior",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/03_advanced_interaction_export.json",
+      "fixture_sha256": "1be3de5724bccef04d44bf33dae9ab66f3c97b3fe7802fa63da9651bf573d2cc",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "A07": {
+      "name": "variable point transforms and reversal",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/03_advanced_interaction_export.json",
+      "fixture_sha256": "1be3de5724bccef04d44bf33dae9ab66f3c97b3fe7802fa63da9651bf573d2cc",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "A08": {
+      "name": "selectable addon parent cleanup",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/03_advanced_interaction_export.json",
+      "fixture_sha256": "1be3de5724bccef04d44bf33dae9ab66f3c97b3fe7802fa63da9651bf573d2cc",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "A09": {
+      "name": "result row group backpack search",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/03_advanced_interaction_export.json",
+      "fixture_sha256": "1be3de5724bccef04d44bf33dae9ab66f3c97b3fe7802fa63da9651bf573d2cc",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "A10": {
+      "name": "row button modes",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/03_advanced_interaction_export.json",
+      "fixture_sha256": "1be3de5724bccef04d44bf33dae9ab66f3c97b3fe7802fa63da9651bf573d2cc",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "A11": {
+      "name": "styling inheritance and custom CSS",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/03_advanced_interaction_export.json",
+      "fixture_sha256": "1be3de5724bccef04d44bf33dae9ab66f3c97b3fe7802fa63da9651bf573d2cc",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    },
+    "A12": {
+      "name": "separate images and playable viewer export",
+      "status": "pending",
+      "observation_source": "official_gui",
+      "fixture": "fixtures/03_advanced_interaction_export.json",
+      "fixture_sha256": "1be3de5724bccef04d44bf33dae9ab66f3c97b3fe7802fa63da9651bf573d2cc",
+      "observed": {},
+      "notes": "",
+      "artifacts": []
+    }
+  },
+  "returned_artifacts": [],
+  "global_notes": ""
+}

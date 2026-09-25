@@ -1,0 +1,701 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openai.local/iccplus/inspect-request.schema.json",
+  "title": "ICC Plus batched inspection request",
+  "description": "Read-only batch query contract for LLMs and automation. No query mutates the project.",
+  "oneOf": [
+    {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "check"
+            }
+          },
+          "required": [
+            "op"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "summary"
+            }
+          },
+          "required": [
+            "op"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "ids"
+            },
+            "all": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "required": [
+            "op"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "list"
+            },
+            "kind": {
+              "type": "string",
+              "description": "Use an exact indexed entity kind, or all where supported."
+            },
+            "row": {
+              "type": "string"
+            },
+            "parent": {
+              "type": "string"
+            },
+            "group": {
+              "type": "string"
+            },
+            "id_prefix": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "search"
+            },
+            "query": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "description": "Use an exact indexed entity kind, or all where supported."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500,
+              "default": 20
+            }
+          },
+          "required": [
+            "op",
+            "query"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "show"
+            },
+            "ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "description": "Use an exact indexed entity kind, or all where supported."
+            }
+          },
+          "required": [
+            "op",
+            "ref"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "get"
+            },
+            "pointer": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "pointer"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "match"
+            },
+            "where": {
+              "type": "object"
+            },
+            "expect": {},
+            "allow_empty": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "required": [
+            "op",
+            "where"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "stats"
+            }
+          },
+          "required": [
+            "op"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "visual"
+            },
+            "kind": {
+              "type": "string"
+            },
+            "kinds": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            },
+            "row": {
+              "type": "string"
+            },
+            "group": {
+              "type": "string"
+            },
+            "missing_images": {
+              "type": "boolean",
+              "default": false
+            },
+            "missing_assets": {
+              "type": "boolean",
+              "default": false
+            },
+            "unstyled": {
+              "type": "boolean",
+              "default": false
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "asset_root": {
+              "type": "string"
+            },
+            "manifest_stub": {
+              "type": "boolean",
+              "default": false
+            },
+            "style_values": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "required": [
+            "op"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "check"
+              }
+            },
+            "required": [
+              "op"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "summary"
+              }
+            },
+            "required": [
+              "op"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "ids"
+              },
+              "all": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            "required": [
+              "op"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "list"
+              },
+              "kind": {
+                "type": "string",
+                "description": "Use an exact indexed entity kind, or all where supported."
+              },
+              "row": {
+                "type": "string"
+              },
+              "parent": {
+                "type": "string"
+              },
+              "group": {
+                "type": "string"
+              },
+              "id_prefix": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "op"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "search"
+              },
+              "query": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "type": "string",
+                "description": "Use an exact indexed entity kind, or all where supported."
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 500,
+                "default": 20
+              }
+            },
+            "required": [
+              "op",
+              "query"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "show"
+              },
+              "ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "type": "string",
+                "description": "Use an exact indexed entity kind, or all where supported."
+              }
+            },
+            "required": [
+              "op",
+              "ref"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "get"
+              },
+              "pointer": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "op",
+              "pointer"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "match"
+              },
+              "where": {
+                "type": "object"
+              },
+              "expect": {},
+              "allow_empty": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            "required": [
+              "op",
+              "where"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "stats"
+              }
+            },
+            "required": [
+              "op"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "visual"
+              },
+              "kind": {
+                "type": "string"
+              },
+              "kinds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "uniqueItems": true
+              },
+              "row": {
+                "type": "string"
+              },
+              "group": {
+                "type": "string"
+              },
+              "missing_images": {
+                "type": "boolean",
+                "default": false
+              },
+              "missing_assets": {
+                "type": "boolean",
+                "default": false
+              },
+              "unstyled": {
+                "type": "boolean",
+                "default": false
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "asset_root": {
+                "type": "string"
+              },
+              "manifest_stub": {
+                "type": "boolean",
+                "default": false
+              },
+              "style_values": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            "required": [
+              "op"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "queries": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "op": {
+                    "const": "check"
+                  }
+                },
+                "required": [
+                  "op"
+                ]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "op": {
+                    "const": "summary"
+                  }
+                },
+                "required": [
+                  "op"
+                ]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "op": {
+                    "const": "ids"
+                  },
+                  "all": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                },
+                "required": [
+                  "op"
+                ]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "op": {
+                    "const": "list"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "description": "Use an exact indexed entity kind, or all where supported."
+                  },
+                  "row": {
+                    "type": "string"
+                  },
+                  "parent": {
+                    "type": "string"
+                  },
+                  "group": {
+                    "type": "string"
+                  },
+                  "id_prefix": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "op"
+                ]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "op": {
+                    "const": "search"
+                  },
+                  "query": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "description": "Use an exact indexed entity kind, or all where supported."
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 500,
+                    "default": 20
+                  }
+                },
+                "required": [
+                  "op",
+                  "query"
+                ]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "op": {
+                    "const": "show"
+                  },
+                  "ref": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "description": "Use an exact indexed entity kind, or all where supported."
+                  }
+                },
+                "required": [
+                  "op",
+                  "ref"
+                ]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "op": {
+                    "const": "get"
+                  },
+                  "pointer": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "op",
+                  "pointer"
+                ]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "op": {
+                    "const": "match"
+                  },
+                  "where": {
+                    "type": "object"
+                  },
+                  "expect": {},
+                  "allow_empty": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                },
+                "required": [
+                  "op",
+                  "where"
+                ]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "op": {
+                    "const": "stats"
+                  }
+                },
+                "required": [
+                  "op"
+                ]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "op": {
+                    "const": "visual"
+                  },
+                  "kind": {
+                    "type": "string"
+                  },
+                  "kinds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "uniqueItems": true
+                  },
+                  "row": {
+                    "type": "string"
+                  },
+                  "group": {
+                    "type": "string"
+                  },
+                  "missing_images": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "missing_assets": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "unstyled": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "asset_root": {
+                    "type": "string"
+                  },
+                  "manifest_stub": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "style_values": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                },
+                "required": [
+                  "op"
+                ]
+              }
+            ]
+          }
+        },
+        "stop_on_error": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": [
+        "queries"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "actions": [
+    {"action": "select", "id": "elite"},
+    {"action": "deselect", "id": "sword"}
+  ],
+  "include_choice_status": false
+}

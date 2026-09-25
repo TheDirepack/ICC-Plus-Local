@@ -1,0 +1,20 @@
+{
+  "format": "iccplus-rules-ops",
+  "format_version": 1,
+  "strict_fields": true,
+  "operations": [
+    {"op": "add", "kind": "point", "values": {"id": "cp", "name": "Choice Points", "startingSum": 6}},
+    {"op": "update", "kind": "row", "ref": "row_origin", "values": {"allowedChoices": 1}},
+    {"op": "update", "kind": "row", "ref": "row_specialty", "values": {"allowedChoices": 1}},
+    {"op": "update", "kind": "row", "ref": "row_gear", "values": {"allowedChoices": 2}},
+
+    {"op": "score_many", "target": "origin_station", "point": "cp", "value": 1},
+    {"op": "score_many", "target": "origin_frontier", "point": "cp", "value": 1},
+    {"op": "score_many", "target": "specialty_engineer", "point": "cp", "value": 2},
+    {"op": "score_many", "target": "specialty_scout", "point": "cp", "value": 2},
+    {"op": "score_many", "target": "gear_drone", "point": "cp", "value": 2},
+    {"op": "score_many", "target": "gear_survey", "point": "cp", "value": 1},
+
+    {"op": "require", "source": "specialty_engineer", "target": "gear_drone"}
+  ]
+}

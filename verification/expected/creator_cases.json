@@ -1,0 +1,189 @@
+[
+  {
+    "id": "C01",
+    "name": "field retention and native JSON boundary",
+    "fixture": "fixtures/01_field_retention.json",
+    "steps": [
+      "Load the fixture in ICC Plus Creator.",
+      "Do not edit it. Export it with Save to Disk.",
+      "Return the exported JSON unchanged.",
+      "Record any load errors, fields that disappear, fields whose type changes, or new fields that appear."
+    ],
+    "expected": "The project loads. Creator-side templates or test metadata do not appear in the exported project. Native ICC Plus fields remain native fields.",
+    "required_artifacts_min": 1
+  },
+  {
+    "id": "C02",
+    "name": "nested entity CRUD and ordering",
+    "fixture": "fixtures/01_field_retention.json",
+    "steps": [
+      "Create a Row, Choice, non-selectable Addon, selectable Addon, Score, and Requirement using Creator controls.",
+      "Move or reorder each structure where the GUI offers ordering controls.",
+      "Delete the newly created nested objects in reverse order.",
+      "Export the final project and return it."
+    ],
+    "expected": "Indexes and parentId values follow Creator behavior. Deleting test objects leaves the original fixture intact.",
+    "required_artifacts_min": 1
+  },
+  {
+    "id": "C03",
+    "name": "top-level feature CRUD and ordering",
+    "fixture": "fixtures/01_field_retention.json",
+    "steps": [
+      "Load fixtures/01_field_retention.json.",
+      "Open Features. For Points, Variables, Groups, Words, Design Groups, and Global Requirements, open the named manager and click the large Show All category tile. This opens the actual entity manager. Do not stop at the Categories dialog.",
+      "Create one Point Type, Variable, Word, Group, Row Design Group, Choice Design Group, and Global Requirement. Manage Design Groups has left/right arrows that switch Row and Choice Design Groups.",
+      "Open Manage Sound Effects and upload one tiny supported audio file to create a Sound Effect.",
+      "Move each new item up and down once when the entity manager provides chevrons. Rename its ID where the manager supports ID editing.",
+      "Delete the new items and export the project."
+    ],
+    "expected": "Creator updates collection order and native IDs without creating tool-specific metadata.",
+    "ui_hints": {
+      "features_labels": [
+        "Manage Points",
+        "Manage Variables",
+        "Manage Groups",
+        "Words",
+        "Manage Design Groups",
+        "Manage Global Requirements",
+        "Manage Sound Effects"
+      ],
+      "category_entry": "Click the large Show All tile to leave the category selector and enter the entity manager."
+    },
+    "required_artifacts_min": 1
+  },
+  {
+    "id": "C04",
+    "name": "copy clone move row bulk operations",
+    "fixture": "fixtures/03_advanced_interaction_export.json",
+    "steps": [
+      "Clone a normal Row and a Choice.",
+      "Copy one Choice into another Row.",
+      "Use Row Settings to sort Choices by width and by text length.",
+      "Use Row Settings Copy Choices Into Another Row, then Copy and Delete on a fresh reload.",
+      "Export each changed project."
+    ],
+    "expected": "Clones receive new IDs and nested selectable Addon and Score identities. Bulk copy keeps source content. Copy and Delete empties the source Row and appends its Choices to the target Row.",
+    "required_artifacts_min": 1
+  },
+  {
+    "id": "C05",
+    "name": "fragment clipboard import export",
+    "fixture": "fixtures/03_advanced_interaction_export.json",
+    "steps": [
+      "Use Creator context menus to export and import a Row, Choice, Requirements, Scores, and Addons where available.",
+      "Use copy and paste for Choice, Requirement, Score, Addon, Group membership, and Design Group membership.",
+      "Export the final project."
+    ],
+    "expected": "Imported and pasted identity-bearing objects get Creator-compatible new IDs. Structural parent references point to the new parent.",
+    "required_artifacts_min": 1
+  },
+  {
+    "id": "C06",
+    "name": "categories and feature membership",
+    "fixture": "fixtures/01_field_retention.json",
+    "steps": [
+      "Create categories for every category type offered by the Creator.",
+      "Assign matching feature items to those categories.",
+      "Rename a category, switch categories where the GUI permits it, then delete the categories.",
+      "Export the project."
+    ],
+    "expected": "Category identity remains type plus numeric idx. Deleting a category unassigns matching feature items instead of leaving a stale category number.",
+    "ui_hints": {
+      "category_creation": "The empty 100px tiles with plus icons create categories. Stored category tiles enter that category. Show All enters the entity manager without a category filter."
+    },
+    "required_artifacts_min": 1
+  },
+  {
+    "id": "C07",
+    "name": "design import export private styling and presets",
+    "fixture": "fixtures/03_advanced_interaction_export.json",
+    "steps": [
+      "Apply each of the eight built-in Style Templates one at a time on a fresh reload and export the project after each application.",
+      "Export global design JSON, Row private design JSON, Choice private design JSON, a Row Design Group design JSON, and a Choice Design Group design JSON.",
+      "Import each exported design into a compatible fresh target and export the resulting project."
+    ],
+    "expected": "Style Templates modify native styling fields only. Design files stay separate authoring files. A project export contains styling fields, not a serialized template or design-file object. Scope-incompatible styling fields are removed exactly as the Creator does.",
+    "ui_hints": {
+      "style_templates": "Features > Style Template",
+      "design_groups": "Features > Manage Design Groups, then click Show All. Use the left/right arrows in the category header to switch Row and Choice Design Groups."
+    },
+    "required_artifacts_min": 8
+  },
+  {
+    "id": "C08",
+    "name": "IDs from titles and ID CSV",
+    "fixture": "fixtures/03_advanced_interaction_export.json",
+    "steps": [
+      "On a copy, change several Row and Choice titles so they contain spaces, commas, and repeated names.",
+      "Run Change Ids to titles.",
+      "Export the ID CSV and the project JSON.",
+      "Return both files unchanged."
+    ],
+    "expected": "Creator title conversion and duplicate suffix behavior are observable. The CSV starts with id,title,debugTitle and covers normal Rows and their Choices.",
+    "required_artifacts_min": 2
+  },
+  {
+    "id": "C09",
+    "name": "fonts custom CSS and sound effect upload",
+    "fixture": "fixtures/03_advanced_interaction_export.json",
+    "steps": [
+      "Add one Google Font and one custom font stylesheet URL if network policy permits it.",
+      "Apply a small Custom CSS rule and save it.",
+      "Upload one tiny mp3, wav, ogg, m4a, or aac file as a Sound Effect.",
+      "Export the project and record browser errors separately."
+    ],
+    "expected": "Project JSON stores the font lists, customCSS string, and Sound Effect data URL. Browser CORS or autoplay errors do not change the expected JSON representation.",
+    "required_artifacts_min": 1
+  },
+  {
+    "id": "C10",
+    "name": "backpack authoring",
+    "fixture": "fixtures/03_advanced_interaction_export.json",
+    "steps": [
+      "Open Manage Backpack.",
+      "Create, clone, move, and delete Backpack Rows.",
+      "Create a Choice and selectable Addon in a Backpack Row.",
+      "Export the project."
+    ],
+    "expected": "Backpack Rows stay in app.backpack, carry isBackpack, and use normal native nested Choice and Addon data.",
+    "required_artifacts_min": 1
+  },
+  {
+    "id": "C11",
+    "name": "project defaults stats search symbols media tools and viewer config",
+    "fixture": "fixtures/03_advanced_interaction_export.json",
+    "steps": [
+      "Load fixtures/03_advanced_interaction_export.json.",
+      "Open Project Stats and record every displayed value.",
+      "Change a few Defaults, create a new Row and Choice, and confirm the new objects use those defaults.",
+      "Change Viewer Config title/loading settings and favicon.",
+      "Use Search and the Symbols reference. Confirm these navigation/reference actions do not alter project JSON.",
+      "On a fresh reload, enable private styling on a disposable Row or Choice, then use Features > Symbols and Image Compression > Clean All Private Styling. Export and record what styling was removed.",
+      "Assign a disposable data-URL image. Use Compress All Images and return the exported project so the resulting image format/data URL can be compared.",
+      "Use an image Change Image control and perform one real Creator crop. Return the exported project and record crop box/aspect/position settings used.",
+      "Export the final project."
+    ],
+    "expected": "Project-changing controls alter native ICC Plus fields only. Search, Symbols, Project Stats, and navigation state do not become project metadata. Clean Private Styling, image compression, and crop match the Creator result and do not serialize tool-only template objects.",
+    "ui_hints": {
+      "symbols_media": "Features > Symbols and Image Compression contains Compress All Images and Clean All Private Styling.",
+      "crop": "Open a normal Change Image control and use the Creator crop UI rather than editing the bound image string directly."
+    },
+    "required_artifacts_min": 2
+  },
+  {
+    "id": "C12",
+    "name": "save load and packaging workflows",
+    "fixture": "fixtures/03_advanced_interaction_export.json",
+    "steps": [
+      "Load fixtures/03_advanced_interaction_export.json.",
+      "Save the fixture to disk and load that exported JSON again.",
+      "If manual Creator save slots and autosave are available in this build, save to a slot, reload it, and record the slot/autosave behavior. These are browser-storage checks; do not insert slot metadata into project JSON.",
+      "Use Export Project with Separate Images after assigning at least four data-URL images, including duplicate image content in two fields.",
+      "Use Export Playable Web Package.",
+      "Return the saved JSON and both ZIP files unchanged, plus a text listing of every ZIP path."
+    ],
+    "expected": "Save to Disk uses native ICC Plus JSON. Separate-image export deduplicates equal image payloads using Creator behavior. The playable package contains the project in the same location/form expected by the selected official viewer template.",
+    "required_artifacts_min": 4
+  }
+]

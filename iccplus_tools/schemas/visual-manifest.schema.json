@@ -1,0 +1,297 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openai.local/iccplus/visual-manifest.schema.json",
+  "title": "ICC Plus visual manifest",
+  "type": "object",
+  "properties": {
+    "format": {
+      "const": "iccplus-visual-manifest"
+    },
+    "format_version": {
+      "const": 1
+    },
+    "project": {
+      "type": "object",
+      "properties": {
+        "styling": {
+          "$ref": "#/$defs/styling"
+        },
+        "customCSS": {
+          "type": "string"
+        },
+        "customCSSAppend": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "defaults": {
+      "$ref": "#/$defs/visualSpec"
+    },
+    "presets": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/visualSpec"
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/visualItem"
+      }
+    }
+  },
+  "required": [
+    "items"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "styling": {
+      "type": "object",
+      "description": "Native styling fields or objects keyed by native style-group names such as object_image, text, object, row, filter, background, point_bar, or backpack. Runtime validation checks exact field names."
+    },
+    "visualSpec": {
+      "type": "object",
+      "properties": {
+        "image": {
+          "type": "string"
+        },
+        "clear_image": {
+          "type": "boolean"
+        },
+        "template": {},
+        "width": {},
+        "styling": {
+          "$ref": "#/$defs/styling"
+        },
+        "copy_from": {
+          "type": "string",
+          "minLength": 1
+        },
+        "copy_image": {
+          "type": "boolean"
+        },
+        "replace_styling": {
+          "type": "boolean"
+        },
+        "unset_styling": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "not": {
+        "required": [
+          "image",
+          "clear_image"
+        ]
+      },
+      "additionalProperties": false
+    },
+    "visualItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "preset": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            }
+          ]
+        },
+        "presets": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            }
+          ]
+        },
+        "source": {},
+        "credit": {},
+        "notes": {},
+        "image": {
+          "type": "string"
+        },
+        "clear_image": {
+          "type": "boolean"
+        },
+        "template": {},
+        "width": {},
+        "styling": {
+          "$ref": "#/$defs/styling"
+        },
+        "copy_from": {
+          "type": "string",
+          "minLength": 1
+        },
+        "copy_image": {
+          "type": "boolean"
+        },
+        "replace_styling": {
+          "type": "boolean"
+        },
+        "unset_styling": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "where": {
+          "type": "object",
+          "description": "Bulk selector using the same selector fields as structure/rules/apply."
+        },
+        "expect": {
+          "description": "Expected selected count as an integer or {min,max}. Runtime rejects mismatches."
+        },
+        "allow_empty": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "id"
+          ],
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "ref"
+                ]
+              },
+              {
+                "required": [
+                  "refs"
+                ]
+              },
+              {
+                "required": [
+                  "where"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "required": [
+            "ref"
+          ],
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "id"
+                ]
+              },
+              {
+                "required": [
+                  "refs"
+                ]
+              },
+              {
+                "required": [
+                  "where"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "required": [
+            "refs"
+          ],
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "id"
+                ]
+              },
+              {
+                "required": [
+                  "ref"
+                ]
+              },
+              {
+                "required": [
+                  "where"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "required": [
+            "where"
+          ],
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "id"
+                ]
+              },
+              {
+                "required": [
+                  "ref"
+                ]
+              },
+              {
+                "required": [
+                  "refs"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "not": {
+        "required": [
+          "image",
+          "clear_image"
+        ]
+      },
+      "additionalProperties": false
+    }
+  }
+}
