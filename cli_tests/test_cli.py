@@ -187,7 +187,7 @@ class CliTests(unittest.TestCase):
             self.assertTrue(value['ok'])
             self.assertTrue(value['blank'])
             self.assertEqual(out.stat().st_size, 13414)
-            self.assertEqual(hashlib.sha256(out.read_bytes()).hexdigest(), '35ba40a5e4a39b41c79d5e0f929404d9789d3173331059c9e635e72187c86faf')
+            self.assertEqual(hashlib.sha256(out.read_bytes()).hexdigest(), '10e9b3ba3ccee2a9ca7e2ce2753e2f61fc2e289549629f2c2d6235cc0705f68d')
             self.assertFalse(out.read_bytes().endswith(b'\n'))
 
     def test_apply_jsonl_from_stdin(self):
@@ -1338,7 +1338,7 @@ class AgentAutomationExampleTests(unittest.TestCase):
         )
         self.assertEqual(proc.returncode, 0, proc.stderr)
         value = json.loads(proc.stdout)
-        self.assertEqual(value['capabilities']['tool_version'], '0.10.0rc11')
+        self.assertEqual(value['capabilities']['tool_version'], '0.10.0rc12')
         self.assertTrue(value['inspection']['ok'])
         self.assertTrue(value['dry_run']['ok'])
         self.assertTrue(value['dry_run']['dry_run'])
