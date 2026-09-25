@@ -4,11 +4,11 @@ The simulator is meant for logic testing, not pixel-perfect browser emulation.
 
 ## Modeled directly
 
-The following behaviors are implemented from the ICC Plus 2.10.6 source model and viewer logic:
+The following behaviors are implemented from the ICC Plus 2.10.7 source model and viewer logic:
 
 - Clean initial point, variable, and word state.
 - Choice and selectable-addon activations.
-- ICC Plus multiple counters in all three 2.10.6 modes: signed variable counts, point-backed counters, and the source no-op behavior when `isSelectableMultiple` has no repeat mode.
+- ICC Plus multiple counters in all three 2.10.7 modes: signed variable counts, point-backed counters, and the source no-op behavior when `isSelectableMultiple` has no repeat mode.
 - `id` requirements, including `/ON#N` counts.
 - `points` requirements.
 - `pointCompare` arithmetic.
@@ -38,7 +38,7 @@ The following behaviors are implemented from the ICC Plus 2.10.6 source model an
 - Row-Requirement visibility gating, Choice visibility filters, Addon reveal/removal rules, point-bar activation gates, `showAllAddons`, and non-image `isContentHidden` effects.
 - Viewer-style text replacement for Word placeholder IDs, including Point Type and multi-select Choice aliases.
 - Native Row-button execution for variable toggles, weighted/unweighted random Choice activation, and random Point changes, including Build Form row-button records.
-- Runtime Row duplication with ICC Plus `/D#N` IDs, insertion order, score-runtime cleanup, group/design membership, and the pinned 2.10.6 Requirement/function suffix rules. Duplicated Rows persist through serialized continuation state.
+- Runtime Row duplication with ICC Plus `/D#N` IDs, insertion order, score-runtime cleanup, group/design membership, and the pinned 2.10.7 Requirement/function suffix rules. Duplicated Rows persist through serialized continuation state.
 - Transactional player actions with semantic failure codes.
 
 ## Player-view boundary
@@ -63,9 +63,9 @@ These fields are detected and surfaced because browser rendering, media, interac
 
 They do not disappear from the project. The simulator lists them in `unsupported_effects` or validation diagnostics so tests can decide whether they matter.
 
-## 2.10.6 source-parity boundary
+## 2.10.7 source-parity boundary
 
-The parity suite is pinned to ICC Plus 2.10.6 commit `a420836248d32043ae45d03f1b93cdcb9e354663`. It preserves source quirks when they affect project behavior, including overlapping Group counts, JavaScript `parseInt` prefixes, literal comma target parsing, malformed repeat counters doing nothing, and the saved-empty-project `activated:[""]` value.
+The parity suite is pinned to ICC Plus 2.10.7 commit `1ea9db888cde2286d18d0d5de50933cb8773b739`. The 2.10.7 runtime diff is narrow: Score display adds optional `removeSpace`, autocomplete selection cleanup changes, and modern projects no longer receive the legacy Point Type hidden-flag migration on load. Existing source-parity cases preserve the unchanged behavioral quirks that still apply, including overlapping Group counts, JavaScript `parseInt` prefixes, literal comma target parsing, malformed repeat counters doing nothing, and the saved-empty-project `activated:[""]` value.
 
 The Revision 5 snapshot used for the original parity audit used none of the advanced mechanics listed above. That observation is historical project evidence, not a claim about every later project revision. These mechanics remain outside the exact gameplay-parity claim unless separately verified.
 
