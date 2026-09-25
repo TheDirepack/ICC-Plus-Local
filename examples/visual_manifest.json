@@ -28,14 +28,14 @@
     {
       "id": "sword",
       "preset": "portrait-card",
-      "image": "assets/sword.webp",
       "source": {
         "url": "https://example.invalid/source-page",
         "creator": "Example artist",
         "license": "Record the real license or permission here"
       },
       "credit": "Example artist",
-      "notes": "Crop around the blade and hand."
+      "notes": "Crop around the blade and hand.",
+      "image": "assets/sword.webp"
     },
     {
       "id": "shield",
@@ -43,7 +43,10 @@
       "image": "assets/shield.webp"
     },
     {
-      "refs": ["fire", "water"],
+      "refs": [
+        "fire",
+        "water"
+      ],
       "preset": "portrait-card"
     }
   ]

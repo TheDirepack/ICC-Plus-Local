@@ -1,4 +1,4 @@
-"""Small subprocess client for the canonical iccplus-local agent contract."""
+"""Small subprocess client for the canonical ICC Plus Local agent contract."""
 from __future__ import annotations
 
 import json
@@ -15,7 +15,7 @@ def _command() -> tuple[list[str], dict[str, str] | None]:
     if installed:
         return [installed], None
 
-    source_root = Path(__file__).resolve().parent.parent
+    source_root = Path(__file__).resolve().parents[1]
     if (source_root / "iccplus_tools").is_dir():
         env = os.environ.copy()
         current = env.get("PYTHONPATH")
@@ -46,31 +46,14 @@ def inspect(project: str | Path, queries: list[dict[str, Any]]) -> dict[str, Any
     return call_json(["inspect", str(project), "-"], {"queries": queries})
 
 
-def phase(project: str | Path, name: str, operations: list[dict[str, Any]], *, dry_run: bool = False) -> dict[str, Any]:
-    formats = {
-        "structure": "iccplus-structure-ops",
-        "rules": "iccplus-rules-ops",
-    }
+def structure(project: str | Path, operations: list[dict[str, Any]], *, dry_run: bool = False) -> dict[str, Any]:
     request = {
-        "format": formats[name],
+        "format": "iccplus-structure-ops",
         "format_version": 1,
         "strict_fields": True,
         "operations": operations,
     }
-    args = [name, str(project), "-"]
-    if dry_run:
-        args.append("--dry-run")
-    return call_json(args, request)
-
-
-def low_level_apply(project: str | Path, operations: list[dict[str, Any]], *, dry_run: bool = False) -> dict[str, Any]:
-    request = {
-        "format": "iccplus-agent-ops",
-        "format_version": 1,
-        "strict_fields": True,
-        "operations": operations,
-    }
-    args = ["apply", str(project), "-"]
+    args = ["structure", str(project), "-"]
     if dry_run:
         args.append("--dry-run")
     return call_json(args, request)
@@ -79,11 +62,10 @@ def low_level_apply(project: str | Path, operations: list[dict[str, Any]], *, dr
 if __name__ == "__main__":
     project = Path(__file__).with_name("demo_project.json")
     result = {
-        "capabilities": call_json(["capabilities", "--brief"]),
+        "capabilities": call_json(["reference", "capabilities", "--brief"]),
         "inspection": inspect(project, [{"op": "check"}, {"op": "search", "query": "gear", "kind": "row"}]),
-        "dry_run": phase(
+        "dry_run": structure(
             project,
-            "structure",
             [{"op": "update", "kind": "choice", "ref": "sword", "values": {"title": "Blade"}}],
             dry_run=True,
         ),

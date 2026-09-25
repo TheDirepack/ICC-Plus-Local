@@ -11,8 +11,9 @@ It is an independent local implementation. The official ICC Plus Creator and Vie
 - `skills/iccplus-local/functions/`, its focused guides for the 11 canonical command families.
 - `docs/`, the current ICC Plus Local documentation from the active CYOA New toolset.
 - `docs/cyoa/`, generic CYOA authoring, audit, and blind-playtest guidance.
-- `examples/iccplus-local/`, focused command and data examples.
-- `examples/simple-cyoa/`, a small phased CYOA with builder scripts and a player-safe smoke test.
+- The files under `examples/` provide tested rc11 command, selector, session, and automation examples.
+- `examples/simple-cyoa/` is a small phased CYOA with builder scripts and a player-safe smoke test.
+- `examples/main-cyoa-development/` is a validated standalone excerpt derived from the current 6.6.11 main CYOA.
 
 The older collection of separate CYOA lifecycle skills is not included. Their ICC Plus Local responsibilities were consolidated into the current `iccplus-local` skill and its function guides.
 
@@ -74,7 +75,17 @@ Start with these files when more detail is needed:
 
 Historical per-version audit reports are intentionally not carried in the working documentation set. Release history remains in [`RELEASE_NOTES.md`](RELEASE_NOTES.md).
 
-## Simple CYOA example
+## Examples
+
+Run every checked-in example from the repository root:
+
+```bash
+./examples/test_examples.sh
+```
+
+The command fixtures directly under `examples/` cover `inspect`, `structure`, `rules`, `style`, `play`, bounded selectors, private continuation state, and a Python subprocess client. Edit examples use `--dry-run` where appropriate.
+
+### Simple CYOA
 
 The small example under `examples/simple-cyoa/` shows a reproducible phased build rather than a project-specific compiler.
 
@@ -91,6 +102,15 @@ python build.py
 
 The scripts build `build/project.json` from the phase files in `project-src/` and run the player-safe test in `tests/playtest.json`.
 
+### Main CYOA development excerpt
+
+`examples/main-cyoa-development/` is derived from the in-development 6.6.11 main CYOA. It preserves seven real species-builder rows, 26 real Choices, current IDs, player-facing text, and the original row selection limits. Cross-section Requirements, Scores, Groups, and generated relationships are deliberately omitted so the excerpt remains standalone and reproducible.
+
+```bash
+cd examples/main-cyoa-development
+./build.sh
+```
+
 ## Reference projects
 
 ICC Plus Local was developed with these public projects and sources as references:
@@ -106,7 +126,7 @@ For prose cleanup, the recommended external companion is the [Unslop skill](http
 
 ## Verification
 
-The packaged rc11 release records 312 passing normal regression tests. The simple CYOA example also builds and completes its player-safe smoke test with this repository layout.
+The current repository passes the full rc11 normal regression suite: **312 tests passed**. `./examples/test_examples.sh` also passes and covers the command fixtures, both continuation-state requests, the simple CYOA, and the main-CYOA development excerpt.
 
 Local mechanical tests do not replace final checks in the official Creator or Viewer for browser rendering, responsive layout, CSS, animation, dialogs, network-loaded assets, or behavior outside documented local coverage.
 

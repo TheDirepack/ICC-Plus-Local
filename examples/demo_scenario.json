@@ -1,0 +1,43 @@
+{
+  "steps": [
+    {
+      "select": "sword",
+      "expect": {
+        "points": {"budget": 6},
+        "selected": ["sword"],
+        "not_available": ["shield"],
+        "available": ["elite"]
+      }
+    },
+    {
+      "select": "sharp",
+      "expect": {
+        "points": {"budget": 5},
+        "selected": ["sword", "sharp"]
+      }
+    },
+    {
+      "select": "switcher",
+      "expect": {
+        "variables": {"flag": true},
+        "available": ["flagged"]
+      }
+    },
+    {"select": "water"},
+    {
+      "select": "fire",
+      "expect": {
+        "selected": ["fire"],
+        "not_selected": ["water"]
+      }
+    },
+    {"select": "a"},
+    {
+      "select": "b",
+      "expect": {
+        "selected": ["b"],
+        "not_selected": ["a"]
+      }
+    }
+  ]
+}

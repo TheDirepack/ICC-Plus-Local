@@ -1,5 +1,5 @@
 {
-  "format": "iccplus-agent-ops",
+  "format": "iccplus-structure-ops",
   "format_version": 1,
   "strict_fields": true,
   "operations": [
@@ -10,10 +10,10 @@
       "values": {"title": "Blade"}
     },
     {
-      "op": "update_many",
+      "op": "update",
       "kind": "choice",
       "refs": ["shield", "elite"],
-      "values": {"template": 2}
+      "values": {"text": "Updated by the batched structure example."}
     }
   ]
 }
