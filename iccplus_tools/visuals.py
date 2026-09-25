@@ -661,6 +661,12 @@ def apply_visual_manifest(
         item_spec = {k: copy.deepcopy(v) for k, v in raw.items() if k in _VISUAL_SPEC_KEYS}
         combined = _deep_merge(combined, item_spec)
         _validate_visual_spec(combined, label=f'visual manifest items[{n}]')
+        inline_style = _flatten_styling(combined.get('styling'), label=f'visual manifest items[{n}].styling')
+        if inline_style and len(target_refs) > 1:
+            raise ValueError(
+                f'visual manifest items[{n}] applies private inline styling to {len(target_refs)} targets; '
+                'define an official Design Group and assign it instead'
+            )
         if 'design_group' in raw and 'design_groups' in raw:
             raise ValueError(f'visual manifest items[{n}] cannot set both design_group and design_groups')
         requested_design_groups = raw.get('design_groups', raw.get('design_group'))
