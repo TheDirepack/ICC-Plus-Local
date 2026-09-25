@@ -1,0 +1,194 @@
+{
+  "package": "ICC Plus Local workflow-centered phased authoring, automatic media optimization, and structure-aware player-audit candidate",
+  "tool_version": "0.10.0rc11",
+  "target_icc_plus_version": "2.10.6",
+  "target_source_commit": "a420836248d32043ae45d03f1b93cdcb9e354663",
+  "candidate_role": "LLM phased authoring with automatic validation/compression, normalized player-safe structure, progressive audit, and hardened official Creator/Viewer evidence validation",
+  "local_regression": {
+    "normal_tests": "312 passed",
+    "compression_tests": "not run for rc11 by request",
+    "default_export_bytes": 13414,
+    "default_export_sha256": "35ba40a5e4a39b41c79d5e0f929404d9789d3173331059c9e635e72187c86faf",
+    "isolated_runtime_replay": "32/32 cases; every intermediate and final expected state matched",
+    "installed_wheel_smoke": "passed for 11-command help surface, blank generation, version, active-project play structure, and absence of the old standalone cyoa-compress entry point",
+    "brief_capabilities_bytes": 2968,
+    "full_capabilities_bytes": 22021
+  },
+  "agent_contract": {
+    "command_inventory": "reference commands",
+    "discovery": "reference capabilities --brief",
+    "schema_index": "reference schema list",
+    "read_batch": "inspect PROJECT [REQUEST]",
+    "create_blank": "generate -o PROJECT",
+    "structure": "structure PROJECT [SCRIPT]",
+    "rules": "rules PROJECT [SCRIPT]",
+    "style": "style PROJECT [MANIFEST]",
+    "one_or_many": "phase and style paths handle one or many edits without separate bulk commands",
+    "progressive_player_audit": "play PROJECT [REQUEST] [--state FILE]; Rows, Choices, and Addons are separately indexed with explicit visible parent/child links",
+    "templates": "template entity|style|design",
+    "media": "media image|crop|font|sound|probe; local/embedded image compression is automatic",
+    "project_io": "project format|export|fragment|ids|build-summary|build-string",
+    "repeatable_build": "build BUILD.json -o PROJECT using iccplus-build v2",
+    "advertised_top_level_commands": 11,
+    "advertised_recursive_paths": 51,
+    "normal_writes_validate_automatically": true,
+    "image_compression_is_automatic": true,
+    "standalone_compression_entry_point": false,
+    "phase_tools_reject_cross_phase_fields": true,
+    "player_audit_is_player_visible_only": true,
+    "player_view_structure": "separate visible rows/choices/addons plus row.choice_ids, choice.row_id/addon_ids, and addon.choice_id/row_id",
+    "player_structure_expectations": "row_choices and choice_rows",
+    "skill": "skills/iccplus-local/SKILL.md",
+    "play_structure_reference": "docs/PLAY_STRUCTURE.md"
+  },
+  "official_web_gui_verification": {
+    "release_gate": "still incomplete",
+    "external_rc2_bundle": "audited",
+    "strong_evidence": "C01 official Creator export exactly equals the pinned 2.10.6 round-trip fixture",
+    "partial_evidence": "C02/C03 and several Viewer cases contain useful direct observations but do not satisfy rc10 structured completeness rules",
+    "result_validator": "requires per-action runtime snapshots, per-step Creator/advanced evidence, and physical artifact presence in JSON/directory/ZIP bundles"
+  },
+  "important_files": {
+    "docs/PHASED_AUTHORING.md": {
+      "sha256": "431f26702d487044bbdb608bcaeed30e7a4a969481f821a1470e6533e3eda132",
+      "bytes": 972
+    },
+    "docs/GAMEPLAY_RUNNER.md": {
+      "sha256": "ba37928f9f072d08a95da768aefe8873bea5049dc340fff3aeaaf0d1ab00d90b",
+      "bytes": 3800
+    },
+    "docs/BUILD_SYSTEM.md": {
+      "sha256": "4d2b878557154e241dc28e5c2bd8b6e1f9a7aaccdbb6d90f5321feaf1f6f022a",
+      "bytes": 4114
+    },
+    "docs/COMMAND_SURFACE_AUDIT.md": {
+      "sha256": "0f6b80540b489f2caac1756d49c785bd77912b092c7378a5037a104314214c70",
+      "bytes": 1589
+    },
+    "docs/EXTERNAL_RC2_RESULT_BUNDLE_AUDIT.md": {
+      "sha256": "d2d8a881028a9c82ffe137e0479e2b121beaaa2457b7bfae0f005d365c47e6cc",
+      "bytes": 2813
+    },
+    "docs/LLM_USAGE.md": {
+      "sha256": "79a2252cb2d962dab8febaa5c93c11824cc1e60cc31366a859d16569ae165c30",
+      "bytes": 2502
+    },
+    "docs/ASSET_COMPRESSION.md": {
+      "sha256": "0bc507e59b41fe62f80e8fa0c3566447c0240df1235b0cf09fd8d248ceb9c2bb",
+      "bytes": 617
+    },
+    "schemas/structure-operation-script.schema.json": {
+      "sha256": "23a04f0e8a74ca31f39367ea1a7104c4078d953cd3d06a03f2aa357b3a15ff7f",
+      "bytes": 38720
+    },
+    "schemas/rules-operation-script.schema.json": {
+      "sha256": "11c64f1babca53eba4557e2c8f93c0d625cfbf7554c5df212a2997ca3e443098",
+      "bytes": 50440
+    },
+    "schemas/visual-manifest.schema.json": {
+      "sha256": "92b3d2e58a0829607f7def4e1b23832c03f39c8146fa2f52365ecf930b2bbb74",
+      "bytes": 6375
+    },
+    "schemas/inspect-request.schema.json": {
+      "sha256": "54595e22fa2e33525c01a7182e44bf455750f27a02a086c26f9de5df9fc04846",
+      "bytes": 18006
+    },
+    "schemas/build-manifest.schema.json": {
+      "sha256": "542bea288ad3564de783f2613a31f3802ab9ea065f733ab93456c2ac67892582",
+      "bytes": 2558
+    },
+    "verification/scripts/verify_returned_results.py": {
+      "sha256": "5106b0acf79d819f51bb44c2fcff1dca09eda5271c69e8127a2e6db3e3ddbbbd",
+      "bytes": 15548
+    },
+    "verification/expected/runtime_cases.json": {
+      "sha256": "ea2122ea5b470be0b6f0f46bf3c9f7322d482947e34bac3748e72285923ea677",
+      "bytes": 74607
+    },
+    "verification/expected/creator_cases.json": {
+      "sha256": "a20b249f05cdd2ff06cf5147b2516ab16775e5ad939837b26a0c7993c632b13e",
+      "bytes": 10534
+    },
+    "verification/expected/advanced_cases.json": {
+      "sha256": "0577f29c34112ea27bf603353e9363f42395c5c9f4d1e34c45fb3baa42fb1c46",
+      "bytes": 4964
+    },
+    "tests/test_phase_authoring.py": {
+      "sha256": "bc6d761f53ef4bc1b1f725f72532f9fab3cb7e00de86d193f5d86cc6aba90975",
+      "bytes": 8965
+    },
+    "tests/test_player_audit.py": {
+      "sha256": "111a037a5e8b6875f1c6794f5614616584cb84d9fb6c1a591e741bc066e62ef9",
+      "bytes": 12933
+    },
+    "tests/test_command_surface.py": {
+      "sha256": "387ec41ddeff27a42f7a2c0ea17ac88c0aa440247506b72ac343ce7d05862a40",
+      "bytes": 3305
+    },
+    "tests/test_verification_runtime_replay.py": {
+      "sha256": "78f4ced12f17deca0cbeb976777d543d87081cab46217b4290d65d64a548851f",
+      "bytes": 2726
+    },
+    "tests/test_returned_results_validator.py": {
+      "sha256": "437ada44966cf7aa4bfb744518ac7c43938d0344e039b6c582c2865523be1940",
+      "bytes": 8808
+    },
+    "tests/test_visuals.py": {
+      "sha256": "e61e3c91121a7597c65c611d74728310024d146ed0f7d6cdd01a4f5f32410126",
+      "bytes": 11458
+    },
+    "dist/iccplus_cyoa_tools-0.10.0rc11-py3-none-any.whl": {
+      "sha256": "98f212a0c925fd8e1242c814d9a386f0466a11d677143b0751c6dcc79ebeee88",
+      "bytes": 216661
+    },
+    "docs/ICCPLUS_LOCAL_0.10.0rc11_AUDIT.md": {
+      "sha256": "363d25ed3a5d93798854d7dcf471be5f7bfcab0f94b97c9e7b3e36cb230cadc4",
+      "bytes": 2074
+    },
+    "README.md": {
+      "sha256": "68f8fc17fe5fbfbce99b394e58e956dcc1c2390a3e692e219d6146bfad786683",
+      "bytes": 5263
+    },
+    "START_HERE.md": {
+      "sha256": "fb2041d6a37367244dfc305a6d536b7f682d0c124dc7d963f171868c806d0211",
+      "bytes": 1311
+    },
+    "RELEASE_NOTES.md": {
+      "sha256": "02ecfdaefd8c850148723ce3b8b303e17d749826b66902988ccf247651e33d54",
+      "bytes": 36772
+    },
+    "SOURCE_NOTES.md": {
+      "sha256": "e63c44b49690d7df9a2854b2da5b1f7524cd80d1ce064ad39266278186704f5c",
+      "bytes": 1737
+    },
+    "skills/iccplus-local/SKILL.md": {
+      "sha256": "786b219c3145110f036471c51e8205cdccfac36158b6887055aa791c968ceecd",
+      "bytes": 6756
+    },
+    "docs/README.md": {
+      "sha256": "a01ec2bb34330f995f5e6376b279b3b6da2fb78dff8c5ccb332efca08b869cb9",
+      "bytes": 1054
+    },
+    "docs/PLAY_STRUCTURE.md": {
+      "sha256": "00e0fb0730f749f2b7b19f6b22522350980be59b827a395879d981c007d6b68b",
+      "bytes": 5757
+    },
+    "docs/CLI_REFERENCE.md": {
+      "sha256": "37921b3469ed52abdc03e94701f10f4a741e0e12914b2171355eaa71dea311ba",
+      "bytes": 3645
+    },
+    "docs/SESSION_PROTOCOL.md": {
+      "sha256": "4f2b32dfdee20988d0ba420e144f5e6c1005bebc604eeffd2d1c97e4592fa56a",
+      "bytes": 6362
+    }
+  },
+  "documentation": {
+    "skill": "skills/iccplus-local/SKILL.md",
+    "index": "docs/README.md",
+    "player_structure": "docs/PLAY_STRUCTURE.md",
+    "gameplay": "docs/GAMEPLAY_RUNNER.md",
+    "cli": "docs/CLI_REFERENCE.md",
+    "llm_usage": "docs/LLM_USAGE.md",
+    "session_protocol": "docs/SESSION_PROTOCOL.md"
+  }
+}

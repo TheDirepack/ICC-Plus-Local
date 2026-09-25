@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "iccplus-local command request",
+  "description": "Canonical workflow-centered command metadata. Resource, template, project-I/O, and reference helpers are grouped under focused namespaces.",
+  "type": "object",
+  "properties": {
+    "command": {
+      "enum": [
+        "reference",
+        "template",
+        "media",
+        "project",
+        "inspect",
+        "generate",
+        "build",
+        "structure",
+        "rules",
+        "style",
+        "play"
+      ]
+    },
+    "project": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "input": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "output": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "compact": {
+      "type": "boolean",
+      "default": true,
+      "description": "Force one-line JSON. Non-interactive stdout is compact by default."
+    },
+    "pretty": {
+      "type": "boolean",
+      "default": false,
+      "description": "Force pretty JSON output."
+    },
+    "dry_run": {
+      "type": "boolean",
+      "default": false,
+      "description": "Run supported generation or batch mutation without writing output."
+    }
+  },
+  "required": [
+    "command"
+  ],
+  "additionalProperties": true
+}

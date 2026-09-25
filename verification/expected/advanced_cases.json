@@ -1,0 +1,143 @@
+[
+  {
+    "id": "A01",
+    "name": "discount plus multi-select plus score",
+    "reload": true,
+    "steps": [
+      "Select adv_discount.",
+      "Select adv_target_a.",
+      "Select adv_multi twice.",
+      "Record Budget after each step, displayed discounted scores, active choices, and Build Form string.",
+      "Deselect in reverse order and record restoration."
+    ],
+    "required_artifacts_min": 0
+  },
+  {
+    "id": "A02",
+    "name": "random activation plus native build string",
+    "reload": true,
+    "steps": [
+      "Select adv_random.",
+      "Record exactly which two targets activate and the Build Form string.",
+      "Copy the Build Form string. Reload the fixture. Import that string in Build Form.",
+      "Confirm the same random targets and repeat counts restore.",
+      "Deselect adv_random and confirm its random targets release."
+    ],
+    "required_artifacts_min": 0
+  },
+  {
+    "id": "A03",
+    "name": "template width background and point bar effects",
+    "reload": true,
+    "steps": [
+      "Record templates, widths, project background and point bar colors for adv_target_a and adv_target_b.",
+      "Select adv_visual.",
+      "Record all changed values and a screenshot.",
+      "Deselect adv_visual and record whether each value restores."
+    ],
+    "required_artifacts_min": 1
+  },
+  {
+    "id": "A04",
+    "name": "text prompt image upload confirmation build restore",
+    "reload": true,
+    "steps": [
+      "Select adv_prompt. Accept confirmation. Enter a comma-containing text value such as Alpha,Beta. Upload a small image.",
+      "Record the visible word substitution/image and Build Form string.",
+      "Reload and import the Build Form string.",
+      "Confirm text and uploaded image restore."
+    ],
+    "required_artifacts_min": 0
+  },
+  {
+    "id": "A05",
+    "name": "SFX BGM delay and fade",
+    "reload": true,
+    "steps": [
+      "Select and deselect adv_audio.",
+      "Record whether select/deselect delay, fade transition, SFX trigger, and BGM state match the configured fields.",
+      "Record console/runtime errors if audio cannot play because the fixture intentionally uses a placeholder media ID."
+    ],
+    "required_artifacts_min": 0
+  },
+  {
+    "id": "A06",
+    "name": "row duplication and ID suffix behavior",
+    "reload": true,
+    "steps": [
+      "Select adv_duplicate.",
+      "Record the inserted Row position, all generated Row/Choice IDs, group membership, and any rewritten function/Requirement references.",
+      "Deselect if the GUI supports reversal and record resulting Rows."
+    ],
+    "required_artifacts_min": 0
+  },
+  {
+    "id": "A07",
+    "name": "variable point transforms and reversal",
+    "reload": true,
+    "steps": [
+      "Record Flag, Power and Budget.",
+      "Select adv_var_point. Record values.",
+      "Deselect it. Record values again."
+    ],
+    "required_artifacts_min": 0
+  },
+  {
+    "id": "A08",
+    "name": "selectable addon parent cleanup",
+    "reload": true,
+    "steps": [
+      "Select adv_addon directly.",
+      "Confirm parent activates and addon score applies.",
+      "Deselect adv_addon.",
+      "Confirm deselectParent/deselectWhenNoAddon cleanup and score reversal."
+    ],
+    "required_artifacts_min": 0
+  },
+  {
+    "id": "A09",
+    "name": "result row group backpack search",
+    "reload": true,
+    "steps": [
+      "Select adv_target_a and adv_target_b.",
+      "Open result row/view and confirm group-filtered entries.",
+      "Open Backpack and verify adv_backpack_choice behavior.",
+      "Use search to find searchable entries and record exclusions."
+    ],
+    "required_artifacts_min": 0
+  },
+  {
+    "id": "A10",
+    "name": "row button modes",
+    "reload": true,
+    "steps": [
+      "Use adv_button_var twice and record Flag each time.",
+      "Use adv_button_point several times and record Power values remain within configured increments.",
+      "Use adv_button_choice after reloading several times and record weighted/random selection behavior and only-unselected handling."
+    ],
+    "required_artifacts_min": 0
+  },
+  {
+    "id": "A11",
+    "name": "styling inheritance and custom CSS",
+    "reload": true,
+    "steps": [
+      "Record global selected/unmet styling and the custom CSS outline on adv_target_a.",
+      "Temporarily use Creator private styling/design-group controls on a copy of the fixture and record precedence global -> design group -> Row private -> Choice private.",
+      "Export the edited project and preserve it in returned artifacts."
+    ],
+    "required_artifacts_min": 2
+  },
+  {
+    "id": "A12",
+    "name": "separate images and playable viewer export",
+    "reload": true,
+    "steps": [
+      "Set or upload at least one Row image, Choice image, favicon, and loading background.",
+      "Export Project with Separate Images.",
+      "Export Playable Web Package.",
+      "Return both ZIPs unchanged and record their file lists."
+    ],
+    "required_artifacts_min": 2
+  }
+]

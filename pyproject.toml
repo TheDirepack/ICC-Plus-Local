@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "iccplus-cyoa-tools"
+version = "0.10.0rc11"
+description = "Script, edit, validate and headlessly test ICC Plus CYOA JSON from the command line"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [{name = "OpenAI"}]
+dependencies = []
+
+[project.scripts]
+iccplus-local = "iccplus_tools.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["iccplus_tools*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "cli_tests"]
+
+[tool.setuptools.package-data]
+"iccplus_tools" = ["schemas/*.json"]

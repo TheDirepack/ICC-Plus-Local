@@ -1,0 +1,224 @@
+{
+  "01_field_retention": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "02_runtime_matrix": {
+    "ok": false,
+    "errors": [
+      {
+        "code": "requirement.missing_selectable",
+        "severity": "error",
+        "path": "/rows/30/objects/2/requireds/0/reqId",
+        "message": "id requirement references missing selectable or variable 'missing'.",
+        "entity_id": "@/rows/30/objects/2/requireds/0"
+      },
+      {
+        "code": "requirement.missing_selectable",
+        "severity": "error",
+        "path": "/rows/30/objects/4/requireds/0/orRequireds/1/reqId",
+        "message": "id requirement references missing selectable or variable 'missing'.",
+        "entity_id": "@/rows/30/objects/4/requireds/0/orRequireds/1"
+      },
+      {
+        "code": "multiple.mode_missing",
+        "severity": "error",
+        "path": "/rows/2/objects/0/isSelectableMultiple",
+        "message": "isSelectableMultiple is enabled but neither isMultipleUseVariable nor multipleScoreId is configured; ICC Plus 2.10.6 renders the counter but +/- does not change this entity.",
+        "entity_id": "t03__x",
+        "suggestion": "Enable isMultipleUseVariable for a normal repeat counter, or set multipleScoreId for a point-backed counter."
+      }
+    ],
+    "warnings": []
+  },
+  "03_advanced_interaction_export": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R01": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R02": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R03": {
+    "ok": false,
+    "errors": [
+      {
+        "code": "multiple.mode_missing",
+        "severity": "error",
+        "path": "/rows/0/objects/0/isSelectableMultiple",
+        "message": "isSelectableMultiple is enabled but neither isMultipleUseVariable nor multipleScoreId is configured; ICC Plus 2.10.6 renders the counter but +/- does not change this entity.",
+        "entity_id": "t03__x",
+        "suggestion": "Enable isMultipleUseVariable for a normal repeat counter, or set multipleScoreId for a point-backed counter."
+      }
+    ],
+    "warnings": []
+  },
+  "runtime_cases/R04": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R05": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R06": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R07": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R08": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R09": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R10": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R11": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R12": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R13": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R14": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R15": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R16": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R17": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R18": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R19": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R20": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R21": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R22": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R23": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R24": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R25": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R26": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R27": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R28": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R29": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R30": {
+    "ok": false,
+    "errors": [
+      {
+        "code": "requirement.missing_selectable",
+        "severity": "error",
+        "path": "/rows/0/objects/2/requireds/0/reqId",
+        "message": "id requirement references missing selectable or variable 'missing'.",
+        "entity_id": "@/rows/0/objects/2/requireds/0"
+      },
+      {
+        "code": "requirement.missing_selectable",
+        "severity": "error",
+        "path": "/rows/0/objects/4/requireds/0/orRequireds/1/reqId",
+        "message": "id requirement references missing selectable or variable 'missing'.",
+        "entity_id": "@/rows/0/objects/4/requireds/0/orRequireds/1"
+      }
+    ],
+    "warnings": []
+  },
+  "runtime_cases/R31": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "runtime_cases/R32": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  }
+}

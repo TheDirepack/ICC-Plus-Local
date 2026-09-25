@@ -1,0 +1,8 @@
+{
+  "queries": [
+    {"op": "check"},
+    {"op": "search", "query": "gear", "kind": "row", "limit": 10},
+    {"op": "show", "ref": "sword", "kind": "choice"},
+    {"op": "match", "where": {"kind": "choice", "row": "gear"}, "expect": 3}
+  ]
+}

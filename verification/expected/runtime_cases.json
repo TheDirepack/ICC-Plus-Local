@@ -1,0 +1,3382 @@
+[
+  {
+    "id": "R01",
+    "name": "sel_from_groups_overlap",
+    "prefix": "t01",
+    "fixture": "fixtures/runtime_cases/R01.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t01__a"
+      }
+    ],
+    "check_requirements": [
+      "t01__target"
+    ],
+    "original_ids": {
+      "r": "t01__r",
+      "default_backpack_row": "t01__default_backpack_row",
+      "a": "t01__a",
+      "target": "t01__target",
+      "g1": "t01__g1",
+      "g2": "t01__g2"
+    },
+    "expected": {
+      "entities": {
+        "t01__a": {
+          "active": true,
+          "multiple": 0
+        },
+        "t01__target": {
+          "active": false,
+          "multiple": 0
+        }
+      },
+      "points": {},
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t01__r": {
+          "currentChoices": 1,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {
+        "t01__target": false
+      },
+      "build_string": "t01__a"
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t01__a": {
+            "active": true,
+            "multiple": 0
+          },
+          "t01__target": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t01__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {
+          "t01__target": false
+        },
+        "build_string": "t01__a"
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t01__a.active",
+        "rows.t01__r.currentChoices"
+      ]
+    ],
+    "fixture_sha256": "d4d8d95ede0c7786d7a1082cd1757423cc11755607866234f05224a8ed1a671a"
+  },
+  {
+    "id": "R02",
+    "name": "point_compare_priority_zero",
+    "prefix": "t02",
+    "fixture": "fixtures/runtime_cases/R02.json",
+    "actions": [],
+    "check_requirements": [
+      "t02__target"
+    ],
+    "original_ids": {
+      "r": "t02__r",
+      "default_backpack_row": "t02__default_backpack_row",
+      "target": "t02__target",
+      "a": "t02__a",
+      "b": "t02__b"
+    },
+    "expected": {
+      "entities": {
+        "t02__target": {
+          "active": false,
+          "multiple": 0
+        }
+      },
+      "points": {
+        "t02__a": 20.0,
+        "t02__b": 10.0
+      },
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t02__r": {
+          "currentChoices": 0,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {
+        "t02__target": false
+      },
+      "build_string": ""
+    },
+    "expected_after_actions": [],
+    "required_after_actions": [],
+    "fixture_sha256": "a163901a7c4790137f6a6615ff00e589bb7472360b22ad1218ddb8304dc48e4e"
+  },
+  {
+    "id": "R03",
+    "name": "malformed_repeat_noop",
+    "prefix": "t03",
+    "fixture": "fixtures/runtime_cases/R03.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t03__x"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t03__r",
+      "default_backpack_row": "t03__default_backpack_row",
+      "x": "t03__x"
+    },
+    "expected": {
+      "entities": {
+        "t03__x": {
+          "active": false,
+          "multiple": 0
+        }
+      },
+      "points": {},
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t03__r": {
+          "currentChoices": 0,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": ""
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t03__x": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t03__r": {
+            "currentChoices": 0,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": ""
+      }
+    ],
+    "required_after_actions": [
+      [
+        "entities.t03__x.active",
+        "entities.t03__x.multiple"
+      ]
+    ],
+    "fixture_sha256": "ab96b780cc60ee02c7367999c4fe271c415c9021108cb5ecbc71fc22878185b6"
+  },
+  {
+    "id": "R04",
+    "name": "point_backed_repeat",
+    "prefix": "t04",
+    "fixture": "fixtures/runtime_cases/R04.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t04__x"
+      },
+      {
+        "op": "deselect",
+        "id": "t04__x"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t04__r",
+      "default_backpack_row": "t04__default_backpack_row",
+      "x": "t04__x",
+      "p": "t04__p"
+    },
+    "expected": {
+      "entities": {
+        "t04__x": {
+          "active": false,
+          "multiple": 0
+        }
+      },
+      "points": {
+        "t04__p": 1.0
+      },
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t04__r": {
+          "currentChoices": 0,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": ""
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t04__x": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {
+          "t04__p": 2.0
+        },
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t04__r": {
+            "currentChoices": 0,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": ""
+      },
+      {
+        "entities": {
+          "t04__x": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {
+          "t04__p": 1.0
+        },
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t04__r": {
+            "currentChoices": 0,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": ""
+      }
+    ],
+    "required_after_actions": [
+      [
+        "points.t04__p"
+      ],
+      [
+        "points.t04__p"
+      ]
+    ],
+    "fixture_sha256": "646a6b709f2093b74ef3b46b6371d7498a2b8368a4122937514a16a43d5d2746"
+  },
+  {
+    "id": "R05",
+    "name": "negative_repeat_cross_zero",
+    "prefix": "t05",
+    "fixture": "fixtures/runtime_cases/R05.json",
+    "actions": [
+      {
+        "op": "deselect",
+        "id": "t05__x"
+      },
+      {
+        "op": "select",
+        "id": "t05__x"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t05__r",
+      "default_backpack_row": "t05__default_backpack_row",
+      "x": "t05__x"
+    },
+    "expected": {
+      "entities": {
+        "t05__x": {
+          "active": false,
+          "multiple": 0
+        }
+      },
+      "points": {},
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t05__r": {
+          "currentChoices": 0,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": ""
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t05__x": {
+            "active": true,
+            "multiple": -1
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t05__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t05__x/ON#-1"
+      },
+      {
+        "entities": {
+          "t05__x": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t05__r": {
+            "currentChoices": 0,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": ""
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t05__x.active",
+        "entities.t05__x.multiple",
+        "rows.t05__r.currentChoices"
+      ],
+      [
+        "build_string",
+        "entities.t05__x.active",
+        "entities.t05__x.multiple",
+        "rows.t05__r.currentChoices"
+      ]
+    ],
+    "fixture_sha256": "a2a0d21e9cbc26ca3db5afa02f46dadf1b07331b7230f5f85e65481dd6fd306f"
+  },
+  {
+    "id": "R06",
+    "name": "repeat_add_to_allow",
+    "prefix": "t06",
+    "fixture": "fixtures/runtime_cases/R06.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t06__x"
+      },
+      {
+        "op": "select",
+        "id": "t06__x"
+      },
+      {
+        "op": "deselect",
+        "id": "t06__x"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "source_row": "t06__source_row",
+      "target_row": "t06__target_row",
+      "default_backpack_row": "t06__default_backpack_row",
+      "x": "t06__x"
+    },
+    "expected": {
+      "entities": {
+        "t06__x": {
+          "active": true,
+          "multiple": 1
+        }
+      },
+      "points": {},
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t06__source_row": {
+          "currentChoices": 1,
+          "allowedChoices": 0
+        },
+        "t06__target_row": {
+          "currentChoices": 0,
+          "allowedChoices": 3
+        }
+      },
+      "requirements": {},
+      "build_string": "t06__x/ON#1"
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t06__x": {
+            "active": true,
+            "multiple": 1
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t06__source_row": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          },
+          "t06__target_row": {
+            "currentChoices": 0,
+            "allowedChoices": 3
+          }
+        },
+        "requirements": {},
+        "build_string": "t06__x/ON#1"
+      },
+      {
+        "entities": {
+          "t06__x": {
+            "active": true,
+            "multiple": 2
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t06__source_row": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          },
+          "t06__target_row": {
+            "currentChoices": 0,
+            "allowedChoices": 5
+          }
+        },
+        "requirements": {},
+        "build_string": "t06__x/ON#2"
+      },
+      {
+        "entities": {
+          "t06__x": {
+            "active": true,
+            "multiple": 1
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t06__source_row": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          },
+          "t06__target_row": {
+            "currentChoices": 0,
+            "allowedChoices": 3
+          }
+        },
+        "requirements": {},
+        "build_string": "t06__x/ON#1"
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t06__x.active",
+        "entities.t06__x.multiple",
+        "rows.t06__source_row.currentChoices",
+        "rows.t06__target_row.allowedChoices"
+      ],
+      [
+        "build_string",
+        "entities.t06__x.multiple",
+        "rows.t06__target_row.allowedChoices"
+      ],
+      [
+        "build_string",
+        "entities.t06__x.multiple",
+        "rows.t06__target_row.allowedChoices"
+      ]
+    ],
+    "fixture_sha256": "3153e9f4cede291b8ffed114c92757b610d7402649a4b7a6d956bcda22aca759"
+  },
+  {
+    "id": "R07",
+    "name": "repeat_does_not_run_point_modifier",
+    "prefix": "t07",
+    "fixture": "fixtures/runtime_cases/R07.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t07__x"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t07__r",
+      "default_backpack_row": "t07__default_backpack_row",
+      "x": "t07__x",
+      "p": "t07__p"
+    },
+    "expected": {
+      "entities": {
+        "t07__x": {
+          "active": true,
+          "multiple": 1
+        }
+      },
+      "points": {
+        "t07__p": 5.0
+      },
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t07__r": {
+          "currentChoices": 1,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": "t07__x/ON#1"
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t07__x": {
+            "active": true,
+            "multiple": 1
+          }
+        },
+        "points": {
+          "t07__p": 5.0
+        },
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t07__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t07__x/ON#1"
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t07__x.active",
+        "entities.t07__x.multiple",
+        "rows.t07__r.currentChoices"
+      ]
+    ],
+    "fixture_sha256": "95967f8d37da13c002263f48fc794653f84a9f6034dd08307f380c67b0b837a3"
+  },
+  {
+    "id": "R08",
+    "name": "point_modifier_can_cross_negative_guard",
+    "prefix": "t08",
+    "fixture": "fixtures/runtime_cases/R08.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t08__x"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t08__r",
+      "default_backpack_row": "t08__default_backpack_row",
+      "x": "t08__x",
+      "p": "t08__p"
+    },
+    "expected": {
+      "entities": {
+        "t08__x": {
+          "active": true,
+          "multiple": 0
+        }
+      },
+      "points": {
+        "t08__p": -2.0
+      },
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t08__r": {
+          "currentChoices": 1,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": "t08__x"
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t08__x": {
+            "active": true,
+            "multiple": 0
+          }
+        },
+        "points": {
+          "t08__p": -2.0
+        },
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t08__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t08__x"
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t08__x.active",
+        "points.t08__p",
+        "rows.t08__r.currentChoices"
+      ]
+    ],
+    "fixture_sha256": "6f22b4e60939535d19c118e65210c0673b89137c5cc1edc19c9985cc1fefb4bd"
+  },
+  {
+    "id": "R09",
+    "name": "forced_parseint_prefix",
+    "prefix": "t09",
+    "fixture": "fixtures/runtime_cases/R09.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t09__source"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t09__r",
+      "default_backpack_row": "t09__default_backpack_row",
+      "multi": "t09__multi",
+      "source": "t09__source"
+    },
+    "expected": {
+      "entities": {
+        "t09__multi": {
+          "active": true,
+          "multiple": 2
+        },
+        "t09__source": {
+          "active": true,
+          "multiple": 0
+        }
+      },
+      "points": {},
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t09__r": {
+          "currentChoices": 2,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": "t09__source,t09__multi/ON#2"
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t09__multi": {
+            "active": true,
+            "multiple": 2
+          },
+          "t09__source": {
+            "active": true,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t09__r": {
+            "currentChoices": 2,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t09__source,t09__multi/ON#2"
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t09__multi.active",
+        "entities.t09__multi.multiple",
+        "entities.t09__source.active",
+        "rows.t09__r.currentChoices"
+      ]
+    ],
+    "fixture_sha256": "adcc1c591ea9c38a7100db69e6fd7ff9a3f7ee57298627a1efe464bf5889b43a"
+  },
+  {
+    "id": "R10",
+    "name": "repeated_force_targets",
+    "prefix": "t10",
+    "fixture": "fixtures/runtime_cases/R10.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t10__source"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t10__r",
+      "default_backpack_row": "t10__default_backpack_row",
+      "multi": "t10__multi",
+      "source": "t10__source"
+    },
+    "expected": {
+      "entities": {
+        "t10__multi": {
+          "active": true,
+          "multiple": 2
+        },
+        "t10__source": {
+          "active": true,
+          "multiple": 0
+        }
+      },
+      "points": {},
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t10__r": {
+          "currentChoices": 2,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": "t10__source,t10__multi/ON#2"
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t10__multi": {
+            "active": true,
+            "multiple": 2
+          },
+          "t10__source": {
+            "active": true,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t10__r": {
+            "currentChoices": 2,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t10__source,t10__multi/ON#2"
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t10__multi.active",
+        "entities.t10__multi.multiple",
+        "entities.t10__source.active",
+        "rows.t10__r.currentChoices"
+      ]
+    ],
+    "fixture_sha256": "3b5f62fc97fd6c4550eef10779699183d4b67e440f67604f8c9b4da0e46c59d8"
+  },
+  {
+    "id": "R11",
+    "name": "negative_forced_repeat_2106_noop",
+    "prefix": "t11",
+    "fixture": "fixtures/runtime_cases/R11.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t11__source"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t11__r",
+      "default_backpack_row": "t11__default_backpack_row",
+      "multi": "t11__multi",
+      "source": "t11__source"
+    },
+    "expected": {
+      "entities": {
+        "t11__multi": {
+          "active": false,
+          "multiple": 0
+        },
+        "t11__source": {
+          "active": true,
+          "multiple": 0
+        }
+      },
+      "points": {},
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t11__r": {
+          "currentChoices": 1,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": "t11__source"
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t11__multi": {
+            "active": false,
+            "multiple": 0
+          },
+          "t11__source": {
+            "active": true,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t11__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t11__source"
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t11__source.active",
+        "rows.t11__r.currentChoices"
+      ]
+    ],
+    "fixture_sha256": "d398d9eaf74bc75e2387613e119194e716c4aabb54c0c8496253e735c37f8487"
+  },
+  {
+    "id": "R12",
+    "name": "ordinary_self_deactivate",
+    "prefix": "t12",
+    "fixture": "fixtures/runtime_cases/R12.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t12__x"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t12__r",
+      "default_backpack_row": "t12__default_backpack_row",
+      "x": "t12__x"
+    },
+    "expected": {
+      "entities": {
+        "t12__x": {
+          "active": false,
+          "multiple": 0
+        }
+      },
+      "points": {},
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t12__r": {
+          "currentChoices": 0,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": ""
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t12__x": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t12__r": {
+            "currentChoices": 0,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": ""
+      }
+    ],
+    "required_after_actions": [
+      [
+        "entities.t12__x.active",
+        "entities.t12__x.multiple"
+      ]
+    ],
+    "fixture_sha256": "6ef16cc1382d586160f0fdb1b0976d1848f36a4e7ac741e21307822b48c87bbf"
+  },
+  {
+    "id": "R13",
+    "name": "repeat_self_deactivate",
+    "prefix": "t13",
+    "fixture": "fixtures/runtime_cases/R13.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t13__x"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t13__r",
+      "default_backpack_row": "t13__default_backpack_row",
+      "x": "t13__x"
+    },
+    "expected": {
+      "entities": {
+        "t13__x": {
+          "active": false,
+          "multiple": 0
+        }
+      },
+      "points": {},
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t13__r": {
+          "currentChoices": 0,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": ""
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t13__x": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t13__r": {
+            "currentChoices": 0,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": ""
+      }
+    ],
+    "required_after_actions": [
+      [
+        "entities.t13__x.active",
+        "entities.t13__x.multiple"
+      ]
+    ],
+    "fixture_sha256": "c5571f4d65729bf7ef5ccc270bf6f42937347ec05d2e8dae67a9e015dddca011"
+  },
+  {
+    "id": "R14",
+    "name": "row_capacity_clears_positive_repeat",
+    "prefix": "t14",
+    "fixture": "fixtures/runtime_cases/R14.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t14__multi"
+      },
+      {
+        "op": "select",
+        "id": "t14__multi"
+      },
+      {
+        "op": "select",
+        "id": "t14__next"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t14__r",
+      "default_backpack_row": "t14__default_backpack_row",
+      "multi": "t14__multi",
+      "next": "t14__next"
+    },
+    "expected": {
+      "entities": {
+        "t14__multi": {
+          "active": false,
+          "multiple": 0
+        },
+        "t14__next": {
+          "active": true,
+          "multiple": 0
+        }
+      },
+      "points": {},
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t14__r": {
+          "currentChoices": 1,
+          "allowedChoices": 1
+        }
+      },
+      "requirements": {},
+      "build_string": "t14__next"
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t14__multi": {
+            "active": true,
+            "multiple": 1
+          },
+          "t14__next": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t14__r": {
+            "currentChoices": 1,
+            "allowedChoices": 1
+          }
+        },
+        "requirements": {},
+        "build_string": "t14__multi/ON#1"
+      },
+      {
+        "entities": {
+          "t14__multi": {
+            "active": true,
+            "multiple": 2
+          },
+          "t14__next": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t14__r": {
+            "currentChoices": 1,
+            "allowedChoices": 1
+          }
+        },
+        "requirements": {},
+        "build_string": "t14__multi/ON#2"
+      },
+      {
+        "entities": {
+          "t14__multi": {
+            "active": false,
+            "multiple": 0
+          },
+          "t14__next": {
+            "active": true,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t14__r": {
+            "currentChoices": 1,
+            "allowedChoices": 1
+          }
+        },
+        "requirements": {},
+        "build_string": "t14__next"
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t14__multi.active",
+        "entities.t14__multi.multiple",
+        "rows.t14__r.currentChoices"
+      ],
+      [
+        "build_string",
+        "entities.t14__multi.multiple"
+      ],
+      [
+        "build_string",
+        "entities.t14__multi.active",
+        "entities.t14__multi.multiple",
+        "entities.t14__next.active"
+      ]
+    ],
+    "fixture_sha256": "0c128679cc1f644f7220d0468bcafd5a7f8134ac0a814cfaeaf39387df0e4d50"
+  },
+  {
+    "id": "R15",
+    "name": "negative_repeat_cannot_free_row_capacity",
+    "prefix": "t15",
+    "fixture": "fixtures/runtime_cases/R15.json",
+    "actions": [
+      {
+        "op": "deselect",
+        "id": "t15__multi"
+      },
+      {
+        "op": "select",
+        "id": "t15__next"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t15__r",
+      "default_backpack_row": "t15__default_backpack_row",
+      "multi": "t15__multi",
+      "next": "t15__next"
+    },
+    "expected": {
+      "entities": {
+        "t15__multi": {
+          "active": true,
+          "multiple": -1
+        },
+        "t15__next": {
+          "active": false,
+          "multiple": 0
+        }
+      },
+      "points": {},
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t15__r": {
+          "currentChoices": 1,
+          "allowedChoices": 1
+        }
+      },
+      "requirements": {},
+      "build_string": "t15__multi/ON#-1"
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t15__multi": {
+            "active": true,
+            "multiple": -1
+          },
+          "t15__next": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t15__r": {
+            "currentChoices": 1,
+            "allowedChoices": 1
+          }
+        },
+        "requirements": {},
+        "build_string": "t15__multi/ON#-1"
+      },
+      {
+        "entities": {
+          "t15__multi": {
+            "active": true,
+            "multiple": -1
+          },
+          "t15__next": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t15__r": {
+            "currentChoices": 1,
+            "allowedChoices": 1
+          }
+        },
+        "requirements": {},
+        "build_string": "t15__multi/ON#-1"
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t15__multi.active",
+        "entities.t15__multi.multiple",
+        "rows.t15__r.currentChoices"
+      ],
+      [
+        "entities.t15__next.active",
+        "entities.t15__next.multiple"
+      ]
+    ],
+    "fixture_sha256": "3d4d5140f8fbc3986d3bff53457023f33a50ea7bb801fc0f67400d9aa4e9bb36"
+  },
+  {
+    "id": "R16",
+    "name": "preset_deactivate_then_set_order",
+    "prefix": "t16",
+    "fixture": "fixtures/runtime_cases/R16.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t16__standard"
+      },
+      {
+        "op": "select",
+        "id": "t16__generous"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t16__r",
+      "default_backpack_row": "t16__default_backpack_row",
+      "standard": "t16__standard",
+      "generous": "t16__generous",
+      "p": "t16__p"
+    },
+    "expected": {
+      "entities": {
+        "t16__standard": {
+          "active": false,
+          "multiple": 0
+        },
+        "t16__generous": {
+          "active": true,
+          "multiple": 0
+        }
+      },
+      "points": {
+        "t16__p": 370.0
+      },
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t16__r": {
+          "currentChoices": 1,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": "t16__generous"
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t16__standard": {
+            "active": true,
+            "multiple": 0
+          },
+          "t16__generous": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {
+          "t16__p": 290.0
+        },
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t16__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t16__standard"
+      },
+      {
+        "entities": {
+          "t16__standard": {
+            "active": false,
+            "multiple": 0
+          },
+          "t16__generous": {
+            "active": true,
+            "multiple": 0
+          }
+        },
+        "points": {
+          "t16__p": 370.0
+        },
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t16__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t16__generous"
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t16__standard.active",
+        "rows.t16__r.currentChoices"
+      ],
+      [
+        "build_string",
+        "entities.t16__generous.active",
+        "entities.t16__standard.active",
+        "points.t16__p"
+      ]
+    ],
+    "fixture_sha256": "1b3367e22422394e5012dad4838c496ee16f1161432f7f1207ba9a50f6c41ea9"
+  },
+  {
+    "id": "R17",
+    "name": "deactivate_direct_list",
+    "prefix": "t17",
+    "fixture": "fixtures/runtime_cases/R17.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t17__a"
+      },
+      {
+        "op": "select",
+        "id": "t17__b"
+      },
+      {
+        "op": "select",
+        "id": "t17__source"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t17__r",
+      "default_backpack_row": "t17__default_backpack_row",
+      "a": "t17__a",
+      "b": "t17__b",
+      "source": "t17__source"
+    },
+    "expected": {
+      "entities": {
+        "t17__a": {
+          "active": false,
+          "multiple": 0
+        },
+        "t17__b": {
+          "active": false,
+          "multiple": 0
+        },
+        "t17__source": {
+          "active": true,
+          "multiple": 0
+        }
+      },
+      "points": {},
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t17__r": {
+          "currentChoices": 1,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": "t17__source"
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t17__a": {
+            "active": true,
+            "multiple": 0
+          },
+          "t17__b": {
+            "active": false,
+            "multiple": 0
+          },
+          "t17__source": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t17__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t17__a"
+      },
+      {
+        "entities": {
+          "t17__a": {
+            "active": true,
+            "multiple": 0
+          },
+          "t17__b": {
+            "active": true,
+            "multiple": 0
+          },
+          "t17__source": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t17__r": {
+            "currentChoices": 2,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t17__a,t17__b"
+      },
+      {
+        "entities": {
+          "t17__a": {
+            "active": false,
+            "multiple": 0
+          },
+          "t17__b": {
+            "active": false,
+            "multiple": 0
+          },
+          "t17__source": {
+            "active": true,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t17__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t17__source"
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t17__a.active",
+        "rows.t17__r.currentChoices"
+      ],
+      [
+        "build_string",
+        "entities.t17__b.active",
+        "rows.t17__r.currentChoices"
+      ],
+      [
+        "build_string",
+        "entities.t17__a.active",
+        "entities.t17__b.active",
+        "entities.t17__source.active",
+        "rows.t17__r.currentChoices"
+      ]
+    ],
+    "fixture_sha256": "ad2e26d8fd1b22f67b2aed601c5423befbe770bf82df2e43bac9560403d80698"
+  },
+  {
+    "id": "R18",
+    "name": "deactivate_group",
+    "prefix": "t18",
+    "fixture": "fixtures/runtime_cases/R18.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t18__a"
+      },
+      {
+        "op": "select",
+        "id": "t18__b"
+      },
+      {
+        "op": "select",
+        "id": "t18__source"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t18__r",
+      "default_backpack_row": "t18__default_backpack_row",
+      "a": "t18__a",
+      "b": "t18__b",
+      "source": "t18__source",
+      "g": "t18__g"
+    },
+    "expected": {
+      "entities": {
+        "t18__a": {
+          "active": true,
+          "multiple": 0
+        },
+        "t18__b": {
+          "active": true,
+          "multiple": 0
+        },
+        "t18__source": {
+          "active": true,
+          "multiple": 0
+        }
+      },
+      "points": {},
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t18__r": {
+          "currentChoices": 3,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": "t18__a,t18__b,t18__source"
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t18__a": {
+            "active": true,
+            "multiple": 0
+          },
+          "t18__b": {
+            "active": false,
+            "multiple": 0
+          },
+          "t18__source": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t18__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t18__a"
+      },
+      {
+        "entities": {
+          "t18__a": {
+            "active": true,
+            "multiple": 0
+          },
+          "t18__b": {
+            "active": true,
+            "multiple": 0
+          },
+          "t18__source": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t18__r": {
+            "currentChoices": 2,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t18__a,t18__b"
+      },
+      {
+        "entities": {
+          "t18__a": {
+            "active": true,
+            "multiple": 0
+          },
+          "t18__b": {
+            "active": true,
+            "multiple": 0
+          },
+          "t18__source": {
+            "active": true,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t18__r": {
+            "currentChoices": 3,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t18__a,t18__b,t18__source"
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t18__a.active",
+        "rows.t18__r.currentChoices"
+      ],
+      [
+        "build_string",
+        "entities.t18__b.active",
+        "rows.t18__r.currentChoices"
+      ],
+      [
+        "build_string",
+        "entities.t18__source.active",
+        "rows.t18__r.currentChoices"
+      ]
+    ],
+    "fixture_sha256": "55c767d5524ca3eb2e807f5a975a9d6b3c9a5bf498c1c38fd0566c20c1bed578"
+  },
+  {
+    "id": "R19",
+    "name": "deactivate_repeat_count",
+    "prefix": "t19",
+    "fixture": "fixtures/runtime_cases/R19.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t19__multi"
+      },
+      {
+        "op": "select",
+        "id": "t19__multi"
+      },
+      {
+        "op": "select",
+        "id": "t19__multi"
+      },
+      {
+        "op": "select",
+        "id": "t19__multi"
+      },
+      {
+        "op": "select",
+        "id": "t19__source"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t19__r",
+      "default_backpack_row": "t19__default_backpack_row",
+      "multi": "t19__multi",
+      "source": "t19__source"
+    },
+    "expected": {
+      "entities": {
+        "t19__multi": {
+          "active": true,
+          "multiple": 2
+        },
+        "t19__source": {
+          "active": true,
+          "multiple": 0
+        }
+      },
+      "points": {},
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t19__r": {
+          "currentChoices": 2,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": "t19__multi/ON#2,t19__source"
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t19__multi": {
+            "active": true,
+            "multiple": 1
+          },
+          "t19__source": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t19__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t19__multi/ON#1"
+      },
+      {
+        "entities": {
+          "t19__multi": {
+            "active": true,
+            "multiple": 2
+          },
+          "t19__source": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t19__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t19__multi/ON#2"
+      },
+      {
+        "entities": {
+          "t19__multi": {
+            "active": true,
+            "multiple": 3
+          },
+          "t19__source": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t19__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t19__multi/ON#3"
+      },
+      {
+        "entities": {
+          "t19__multi": {
+            "active": true,
+            "multiple": 4
+          },
+          "t19__source": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t19__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t19__multi/ON#4"
+      },
+      {
+        "entities": {
+          "t19__multi": {
+            "active": true,
+            "multiple": 2
+          },
+          "t19__source": {
+            "active": true,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t19__r": {
+            "currentChoices": 2,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t19__multi/ON#2,t19__source"
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t19__multi.active",
+        "entities.t19__multi.multiple",
+        "rows.t19__r.currentChoices"
+      ],
+      [
+        "build_string",
+        "entities.t19__multi.multiple"
+      ],
+      [
+        "build_string",
+        "entities.t19__multi.multiple"
+      ],
+      [
+        "build_string",
+        "entities.t19__multi.multiple"
+      ],
+      [
+        "build_string",
+        "entities.t19__multi.multiple",
+        "entities.t19__source.active",
+        "rows.t19__r.currentChoices"
+      ]
+    ],
+    "fixture_sha256": "f37fba9816e63ff0ab0188adbb81ba0cc65c537863bbb8c653f484721dd0e3c6"
+  },
+  {
+    "id": "R20",
+    "name": "basic_score_cost",
+    "prefix": "t20",
+    "fixture": "fixtures/runtime_cases/R20.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t20__x"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t20__r",
+      "default_backpack_row": "t20__default_backpack_row",
+      "x": "t20__x",
+      "p": "t20__p",
+      "s": "t20__s"
+    },
+    "expected": {
+      "entities": {
+        "t20__x": {
+          "active": true,
+          "multiple": 0
+        }
+      },
+      "points": {
+        "t20__p": 7.0
+      },
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t20__r": {
+          "currentChoices": 1,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": "t20__x"
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t20__x": {
+            "active": true,
+            "multiple": 0
+          }
+        },
+        "points": {
+          "t20__p": 7.0
+        },
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t20__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t20__x"
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t20__x.active",
+        "points.t20__p",
+        "rows.t20__r.currentChoices"
+      ]
+    ],
+    "fixture_sha256": "b255d906388f7b2f1194148e1f6266695928627ad7d4d242aa20f17f636b5e1c"
+  },
+  {
+    "id": "R21",
+    "name": "below_zero_blocks_score_cost",
+    "prefix": "t21",
+    "fixture": "fixtures/runtime_cases/R21.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t21__x"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t21__r",
+      "default_backpack_row": "t21__default_backpack_row",
+      "x": "t21__x",
+      "p": "t21__p",
+      "s": "t21__s"
+    },
+    "expected": {
+      "entities": {
+        "t21__x": {
+          "active": false,
+          "multiple": 0
+        }
+      },
+      "points": {
+        "t21__p": 1.0
+      },
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t21__r": {
+          "currentChoices": 0,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": ""
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t21__x": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {
+          "t21__p": 1.0
+        },
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t21__r": {
+            "currentChoices": 0,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": ""
+      }
+    ],
+    "required_after_actions": [
+      [
+        "entities.t21__x.active",
+        "entities.t21__x.multiple"
+      ]
+    ],
+    "fixture_sha256": "0e97662073fa804385830d342001f0bb017a0745ca6b6f57ab18e0c9eb5a63ce"
+  },
+  {
+    "id": "R22",
+    "name": "multiply_by_times_one_based",
+    "prefix": "t22",
+    "fixture": "fixtures/runtime_cases/R22.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t22__multi"
+      },
+      {
+        "op": "select",
+        "id": "t22__multi"
+      },
+      {
+        "op": "select",
+        "id": "t22__multi"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t22__r",
+      "default_backpack_row": "t22__default_backpack_row",
+      "multi": "t22__multi",
+      "p": "t22__p",
+      "s": "t22__s"
+    },
+    "expected": {
+      "entities": {
+        "t22__multi": {
+          "active": true,
+          "multiple": 3
+        }
+      },
+      "points": {
+        "t22__p": 8.0
+      },
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t22__r": {
+          "currentChoices": 1,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": "t22__multi/ON#3"
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t22__multi": {
+            "active": true,
+            "multiple": 1
+          }
+        },
+        "points": {
+          "t22__p": 18.0
+        },
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t22__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t22__multi/ON#1"
+      },
+      {
+        "entities": {
+          "t22__multi": {
+            "active": true,
+            "multiple": 2
+          }
+        },
+        "points": {
+          "t22__p": 14.0
+        },
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t22__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t22__multi/ON#2"
+      },
+      {
+        "entities": {
+          "t22__multi": {
+            "active": true,
+            "multiple": 3
+          }
+        },
+        "points": {
+          "t22__p": 8.0
+        },
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t22__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t22__multi/ON#3"
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t22__multi.active",
+        "entities.t22__multi.multiple",
+        "points.t22__p",
+        "rows.t22__r.currentChoices"
+      ],
+      [
+        "build_string",
+        "entities.t22__multi.multiple",
+        "points.t22__p"
+      ],
+      [
+        "build_string",
+        "entities.t22__multi.multiple",
+        "points.t22__p"
+      ]
+    ],
+    "fixture_sha256": "b7488ad18906cf453d95236f6f0bd4699318deab032342ca0e5c467d05956eb1"
+  },
+  {
+    "id": "R23",
+    "name": "selectable_addon_activates_parent",
+    "prefix": "t23",
+    "fixture": "fixtures/runtime_cases/R23.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t23__addon"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t23__r",
+      "default_backpack_row": "t23__default_backpack_row",
+      "parent": "t23__parent",
+      "addon": "t23__addon"
+    },
+    "expected": {
+      "entities": {
+        "t23__parent": {
+          "active": true,
+          "multiple": 0
+        },
+        "t23__addon": {
+          "active": true,
+          "multiple": 0
+        }
+      },
+      "points": {},
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t23__r": {
+          "currentChoices": 1,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": "t23__parent,t23__addon"
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t23__parent": {
+            "active": true,
+            "multiple": 0
+          },
+          "t23__addon": {
+            "active": true,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t23__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t23__parent,t23__addon"
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t23__addon.active",
+        "entities.t23__parent.active",
+        "rows.t23__r.currentChoices"
+      ]
+    ],
+    "fixture_sha256": "199d537296e3d8c0d657e2ad0e8476b9091a1c5995613e5d02b09cced453e13f"
+  },
+  {
+    "id": "R24",
+    "name": "selectable_addon_deselect_parent",
+    "prefix": "t24",
+    "fixture": "fixtures/runtime_cases/R24.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t24__addon"
+      },
+      {
+        "op": "deselect",
+        "id": "t24__addon"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t24__r",
+      "default_backpack_row": "t24__default_backpack_row",
+      "parent": "t24__parent",
+      "addon": "t24__addon"
+    },
+    "expected": {
+      "entities": {
+        "t24__parent": {
+          "active": false,
+          "multiple": 0
+        },
+        "t24__addon": {
+          "active": false,
+          "multiple": 0
+        }
+      },
+      "points": {},
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t24__r": {
+          "currentChoices": 0,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": ""
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t24__parent": {
+            "active": true,
+            "multiple": 0
+          },
+          "t24__addon": {
+            "active": true,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t24__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t24__parent,t24__addon"
+      },
+      {
+        "entities": {
+          "t24__parent": {
+            "active": false,
+            "multiple": 0
+          },
+          "t24__addon": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t24__r": {
+            "currentChoices": 0,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": ""
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t24__addon.active",
+        "entities.t24__parent.active",
+        "rows.t24__r.currentChoices"
+      ],
+      [
+        "build_string",
+        "entities.t24__addon.active",
+        "entities.t24__parent.active",
+        "rows.t24__r.currentChoices"
+      ]
+    ],
+    "fixture_sha256": "08c3a9d061a9703e1520acc1b167d6ccab581f50a6a74e51fdc4f1368cdb013b"
+  },
+  {
+    "id": "R25",
+    "name": "forced_nonselectable_target",
+    "prefix": "t25",
+    "fixture": "fixtures/runtime_cases/R25.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t25__source"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t25__r",
+      "default_backpack_row": "t25__default_backpack_row",
+      "target": "t25__target",
+      "source": "t25__source"
+    },
+    "expected": {
+      "entities": {
+        "t25__target": {
+          "active": true,
+          "multiple": 0
+        },
+        "t25__source": {
+          "active": true,
+          "multiple": 0
+        }
+      },
+      "points": {},
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t25__r": {
+          "currentChoices": 2,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": "t25__source,t25__target"
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t25__target": {
+            "active": true,
+            "multiple": 0
+          },
+          "t25__source": {
+            "active": true,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t25__r": {
+            "currentChoices": 2,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t25__source,t25__target"
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t25__source.active",
+        "entities.t25__target.active",
+        "rows.t25__r.currentChoices"
+      ]
+    ],
+    "fixture_sha256": "1842c2a56078ffc25319a5c1ec38bac33cc156ca421e6f882dc086db10ecc6bc"
+  },
+  {
+    "id": "R26",
+    "name": "forced_nonselectable_target_blocked",
+    "prefix": "t26",
+    "fixture": "fixtures/runtime_cases/R26.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t26__source"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t26__r",
+      "default_backpack_row": "t26__default_backpack_row",
+      "target": "t26__target",
+      "source": "t26__source"
+    },
+    "expected": {
+      "entities": {
+        "t26__target": {
+          "active": false,
+          "multiple": 0
+        },
+        "t26__source": {
+          "active": true,
+          "multiple": 0
+        }
+      },
+      "points": {},
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t26__r": {
+          "currentChoices": 1,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": "t26__source"
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t26__target": {
+            "active": false,
+            "multiple": 0
+          },
+          "t26__source": {
+            "active": true,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t26__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t26__source"
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t26__source.active",
+        "rows.t26__r.currentChoices"
+      ]
+    ],
+    "fixture_sha256": "f2cd0a74ef90ef6b6d69df763f7564246e73201a16d2d498d79ed345f3e0aa9f"
+  },
+  {
+    "id": "R27",
+    "name": "forced_allow_deselect",
+    "prefix": "t27",
+    "fixture": "fixtures/runtime_cases/R27.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t27__source"
+      },
+      {
+        "op": "deselect",
+        "id": "t27__target"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t27__r",
+      "default_backpack_row": "t27__default_backpack_row",
+      "target": "t27__target",
+      "source": "t27__source"
+    },
+    "expected": {
+      "entities": {
+        "t27__target": {
+          "active": false,
+          "multiple": 0
+        },
+        "t27__source": {
+          "active": true,
+          "multiple": 0
+        }
+      },
+      "points": {},
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t27__r": {
+          "currentChoices": 1,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": "t27__source"
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t27__target": {
+            "active": true,
+            "multiple": 0
+          },
+          "t27__source": {
+            "active": true,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t27__r": {
+            "currentChoices": 2,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t27__source,t27__target"
+      },
+      {
+        "entities": {
+          "t27__target": {
+            "active": false,
+            "multiple": 0
+          },
+          "t27__source": {
+            "active": true,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t27__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t27__source"
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t27__source.active",
+        "entities.t27__target.active",
+        "rows.t27__r.currentChoices"
+      ],
+      [
+        "build_string",
+        "entities.t27__target.active",
+        "rows.t27__r.currentChoices"
+      ]
+    ],
+    "fixture_sha256": "b8be9876278cfe7c0edd2baa336b2816fea1709b3de5c673c92da14f9a7dbca2"
+  },
+  {
+    "id": "R28",
+    "name": "requirement_cleanup_after_linked_deactivation",
+    "prefix": "t28",
+    "fixture": "fixtures/runtime_cases/R28.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t28__gate"
+      },
+      {
+        "op": "select",
+        "id": "t28__target"
+      },
+      {
+        "op": "select",
+        "id": "t28__source"
+      }
+    ],
+    "check_requirements": [
+      "t28__target"
+    ],
+    "original_ids": {
+      "r": "t28__r",
+      "default_backpack_row": "t28__default_backpack_row",
+      "gate": "t28__gate",
+      "target": "t28__target",
+      "source": "t28__source"
+    },
+    "expected": {
+      "entities": {
+        "t28__gate": {
+          "active": false,
+          "multiple": 0
+        },
+        "t28__target": {
+          "active": false,
+          "multiple": 0
+        },
+        "t28__source": {
+          "active": true,
+          "multiple": 0
+        }
+      },
+      "points": {},
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t28__r": {
+          "currentChoices": 1,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {
+        "t28__target": false
+      },
+      "build_string": "t28__source"
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t28__gate": {
+            "active": true,
+            "multiple": 0
+          },
+          "t28__target": {
+            "active": false,
+            "multiple": 0
+          },
+          "t28__source": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t28__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {
+          "t28__target": true
+        },
+        "build_string": "t28__gate"
+      },
+      {
+        "entities": {
+          "t28__gate": {
+            "active": true,
+            "multiple": 0
+          },
+          "t28__target": {
+            "active": true,
+            "multiple": 0
+          },
+          "t28__source": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t28__r": {
+            "currentChoices": 2,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {
+          "t28__target": true
+        },
+        "build_string": "t28__gate,t28__target"
+      },
+      {
+        "entities": {
+          "t28__gate": {
+            "active": false,
+            "multiple": 0
+          },
+          "t28__target": {
+            "active": false,
+            "multiple": 0
+          },
+          "t28__source": {
+            "active": true,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t28__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {
+          "t28__target": false
+        },
+        "build_string": "t28__source"
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t28__gate.active",
+        "requirements.t28__target",
+        "rows.t28__r.currentChoices"
+      ],
+      [
+        "build_string",
+        "entities.t28__target.active",
+        "rows.t28__r.currentChoices"
+      ],
+      [
+        "build_string",
+        "entities.t28__gate.active",
+        "entities.t28__source.active",
+        "entities.t28__target.active",
+        "requirements.t28__target",
+        "rows.t28__r.currentChoices"
+      ]
+    ],
+    "fixture_sha256": "0367ba8c9a3df7985c36e59a0858f7ac3b539e6c9ac98512a92fd8804bf36c6f"
+  },
+  {
+    "id": "R29",
+    "name": "variable_toggle_and_word_change",
+    "prefix": "t29",
+    "fixture": "fixtures/runtime_cases/R29.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t29__x"
+      },
+      {
+        "op": "deselect",
+        "id": "t29__x"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t29__r",
+      "default_backpack_row": "t29__default_backpack_row",
+      "x": "t29__x",
+      "v": "t29__v",
+      "w": "t29__w"
+    },
+    "expected": {
+      "entities": {
+        "t29__x": {
+          "active": false,
+          "multiple": 0
+        }
+      },
+      "points": {},
+      "variables": {
+        "t29__v": false
+      },
+      "words": {
+        "t29__w": "deselected"
+      },
+      "rows": {
+        "t29__r": {
+          "currentChoices": 0,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": ""
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t29__x": {
+            "active": true,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {
+          "t29__v": true
+        },
+        "words": {
+          "t29__w": "selected"
+        },
+        "rows": {
+          "t29__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t29__x,t29__v"
+      },
+      {
+        "entities": {
+          "t29__x": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {
+          "t29__v": false
+        },
+        "words": {
+          "t29__w": "deselected"
+        },
+        "rows": {
+          "t29__r": {
+            "currentChoices": 0,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": ""
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t29__x.active",
+        "rows.t29__r.currentChoices",
+        "variables.t29__v",
+        "words.t29__w"
+      ],
+      [
+        "build_string",
+        "entities.t29__x.active",
+        "rows.t29__r.currentChoices",
+        "variables.t29__v",
+        "words.t29__w"
+      ]
+    ],
+    "fixture_sha256": "d45cbc1fd752c8103b380bd987517b7a94060c341ef0279c0b385c6754bc4375"
+  },
+  {
+    "id": "R30",
+    "name": "requirement_type_matrix",
+    "prefix": "t30",
+    "fixture": "fixtures/runtime_cases/R30.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t30__a"
+      }
+    ],
+    "check_requirements": [
+      "t30__id_req",
+      "t30__neg_id_req",
+      "t30__points_req",
+      "t30__or_req",
+      "t30__row_req",
+      "t30__whole_req",
+      "t30__gid_req",
+      "t30__word_req"
+    ],
+    "original_ids": {
+      "r": "t30__r",
+      "default_backpack_row": "t30__default_backpack_row",
+      "a": "t30__a",
+      "id_req": "t30__id_req",
+      "neg_id_req": "t30__neg_id_req",
+      "points_req": "t30__points_req",
+      "or_req": "t30__or_req",
+      "row_req": "t30__row_req",
+      "whole_req": "t30__whole_req",
+      "gid_req": "t30__gid_req",
+      "word_req": "t30__word_req",
+      "p": "t30__p",
+      "w": "t30__w",
+      "global": "t30__global"
+    },
+    "expected": {
+      "entities": {
+        "t30__a": {
+          "active": true,
+          "multiple": 0
+        },
+        "t30__id_req": {
+          "active": false,
+          "multiple": 0
+        },
+        "t30__neg_id_req": {
+          "active": false,
+          "multiple": 0
+        },
+        "t30__points_req": {
+          "active": false,
+          "multiple": 0
+        },
+        "t30__or_req": {
+          "active": false,
+          "multiple": 0
+        },
+        "t30__row_req": {
+          "active": false,
+          "multiple": 0
+        },
+        "t30__whole_req": {
+          "active": false,
+          "multiple": 0
+        },
+        "t30__gid_req": {
+          "active": false,
+          "multiple": 0
+        },
+        "t30__word_req": {
+          "active": false,
+          "multiple": 0
+        }
+      },
+      "points": {
+        "t30__p": 5.0
+      },
+      "variables": {},
+      "words": {
+        "t30__w": "yes"
+      },
+      "rows": {
+        "t30__r": {
+          "currentChoices": 1,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {
+        "t30__id_req": true,
+        "t30__neg_id_req": true,
+        "t30__points_req": true,
+        "t30__or_req": true,
+        "t30__row_req": true,
+        "t30__whole_req": true,
+        "t30__gid_req": true,
+        "t30__word_req": true
+      },
+      "build_string": "t30__a"
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t30__a": {
+            "active": true,
+            "multiple": 0
+          },
+          "t30__id_req": {
+            "active": false,
+            "multiple": 0
+          },
+          "t30__neg_id_req": {
+            "active": false,
+            "multiple": 0
+          },
+          "t30__points_req": {
+            "active": false,
+            "multiple": 0
+          },
+          "t30__or_req": {
+            "active": false,
+            "multiple": 0
+          },
+          "t30__row_req": {
+            "active": false,
+            "multiple": 0
+          },
+          "t30__whole_req": {
+            "active": false,
+            "multiple": 0
+          },
+          "t30__gid_req": {
+            "active": false,
+            "multiple": 0
+          },
+          "t30__word_req": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {
+          "t30__p": 5.0
+        },
+        "variables": {},
+        "words": {
+          "t30__w": "yes"
+        },
+        "rows": {
+          "t30__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {
+          "t30__id_req": true,
+          "t30__neg_id_req": true,
+          "t30__points_req": true,
+          "t30__or_req": true,
+          "t30__row_req": true,
+          "t30__whole_req": true,
+          "t30__gid_req": true,
+          "t30__word_req": true
+        },
+        "build_string": "t30__a"
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t30__a.active",
+        "requirements.t30__gid_req",
+        "requirements.t30__id_req",
+        "requirements.t30__or_req",
+        "requirements.t30__row_req",
+        "requirements.t30__whole_req",
+        "rows.t30__r.currentChoices"
+      ]
+    ],
+    "fixture_sha256": "0fbb8cabc79159d31cd89a1458e2977aee626e1420469de0a925f0b9e202f4e2"
+  },
+  {
+    "id": "R31",
+    "name": "random_activate_all_and_release",
+    "prefix": "t31",
+    "fixture": "fixtures/runtime_cases/R31.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t31__source"
+      },
+      {
+        "op": "deselect",
+        "id": "t31__source"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t31__r",
+      "default_backpack_row": "t31__default_backpack_row",
+      "a": "t31__a",
+      "b": "t31__b",
+      "source": "t31__source"
+    },
+    "expected": {
+      "entities": {
+        "t31__a": {
+          "active": false,
+          "multiple": 0
+        },
+        "t31__b": {
+          "active": false,
+          "multiple": 0
+        },
+        "t31__source": {
+          "active": false,
+          "multiple": 0
+        }
+      },
+      "points": {},
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t31__r": {
+          "currentChoices": 0,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": ""
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t31__a": {
+            "active": true,
+            "multiple": 0
+          },
+          "t31__b": {
+            "active": true,
+            "multiple": 0
+          },
+          "t31__source": {
+            "active": true,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t31__r": {
+            "currentChoices": 3,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t31__source/RND#t31__a/AND#t31__b,t31__a,t31__b"
+      },
+      {
+        "entities": {
+          "t31__a": {
+            "active": false,
+            "multiple": 0
+          },
+          "t31__b": {
+            "active": false,
+            "multiple": 0
+          },
+          "t31__source": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {},
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t31__r": {
+            "currentChoices": 0,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": ""
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t31__a.active",
+        "entities.t31__b.active",
+        "entities.t31__source.active",
+        "rows.t31__r.currentChoices"
+      ],
+      [
+        "build_string",
+        "entities.t31__a.active",
+        "entities.t31__b.active",
+        "entities.t31__source.active",
+        "rows.t31__r.currentChoices"
+      ]
+    ],
+    "fixture_sha256": "8082dad2f7832f554ae59ac20fa55f6756305366253fe0f4d6b20aea714ae37d"
+  },
+  {
+    "id": "R32",
+    "name": "reset_init_auto_preserve",
+    "prefix": "t32",
+    "fixture": "fixtures/runtime_cases/R32.json",
+    "actions": [
+      {
+        "op": "select",
+        "id": "t32__keep"
+      },
+      {
+        "op": "row_button",
+        "id": "t32__set_point_button"
+      },
+      {
+        "op": "reset"
+      }
+    ],
+    "check_requirements": [],
+    "original_ids": {
+      "r": "t32__r",
+      "default_backpack_row": "t32__default_backpack_row",
+      "keep": "t32__keep",
+      "auto": "t32__auto",
+      "p": "t32__p"
+    },
+    "expected": {
+      "entities": {
+        "t32__keep": {
+          "active": true,
+          "multiple": 0
+        },
+        "t32__auto": {
+          "active": true,
+          "multiple": 0
+        }
+      },
+      "points": {
+        "t32__p": 3.0
+      },
+      "variables": {},
+      "words": {},
+      "rows": {
+        "t32__r": {
+          "currentChoices": 2,
+          "allowedChoices": 0
+        },
+        "t32__set_point_button": {
+          "currentChoices": 0,
+          "allowedChoices": 0
+        }
+      },
+      "requirements": {},
+      "build_string": "t32__auto,t32__keep"
+    },
+    "expected_after_actions": [
+      {
+        "entities": {
+          "t32__keep": {
+            "active": true,
+            "multiple": 0
+          },
+          "t32__auto": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {
+          "t32__p": 7.0
+        },
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t32__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          },
+          "t32__set_point_button": {
+            "currentChoices": 0,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t32__keep"
+      },
+      {
+        "entities": {
+          "t32__keep": {
+            "active": true,
+            "multiple": 0
+          },
+          "t32__auto": {
+            "active": false,
+            "multiple": 0
+          }
+        },
+        "points": {
+          "t32__p": 99.0
+        },
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t32__r": {
+            "currentChoices": 1,
+            "allowedChoices": 0
+          },
+          "t32__set_point_button": {
+            "currentChoices": 0,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t32__keep,t32__set_point_button/RP#t32__p/NUM#92"
+      },
+      {
+        "entities": {
+          "t32__keep": {
+            "active": true,
+            "multiple": 0
+          },
+          "t32__auto": {
+            "active": true,
+            "multiple": 0
+          }
+        },
+        "points": {
+          "t32__p": 3.0
+        },
+        "variables": {},
+        "words": {},
+        "rows": {
+          "t32__r": {
+            "currentChoices": 2,
+            "allowedChoices": 0
+          },
+          "t32__set_point_button": {
+            "currentChoices": 0,
+            "allowedChoices": 0
+          }
+        },
+        "requirements": {},
+        "build_string": "t32__auto,t32__keep"
+      }
+    ],
+    "required_after_actions": [
+      [
+        "build_string",
+        "entities.t32__keep.active",
+        "rows.t32__r.currentChoices"
+      ],
+      [
+        "build_string",
+        "points.t32__p"
+      ],
+      [
+        "build_string",
+        "entities.t32__auto.active",
+        "points.t32__p",
+        "rows.t32__r.currentChoices"
+      ]
+    ],
+    "fixture_sha256": "f91bcb7bfb47990d4ace6f7cd08c513582e5d2bbae7c2abc3b49e3eb5470d45d"
+  }
+]

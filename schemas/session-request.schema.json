@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ICC Plus local session request",
+  "type": "object",
+  "properties": {
+    "state": {
+      "description": "Optional runtime state from a previous session response or export_state().",
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "seed": {
+      "type": "integer",
+      "default": 0
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "action": {
+                "const": "select"
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "times": {
+                "type": "integer",
+                "minimum": 1,
+                "default": 1
+              },
+              "force": {
+                "type": "boolean",
+                "default": false
+              },
+              "source": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "action",
+              "id"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "action": {
+                "const": "deselect"
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "action",
+              "id"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "action": {
+                "const": "row_button"
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "action",
+              "id"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "action": {
+                "const": "status"
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "action",
+              "id"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "action": {
+                "const": "snapshot"
+              },
+              "include_choice_status": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            "required": [
+              "action"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "action": {
+                "const": "view"
+              },
+              "verbose": {
+                "type": "boolean",
+                "default": false
+              },
+              "include_backpack": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            "required": [
+              "action"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "action": {
+                "const": "reset"
+              }
+            },
+            "required": [
+              "action"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "include_choice_status": {
+      "type": "boolean",
+      "default": false
+    },
+    "include_events_in_state": {
+      "type": "boolean",
+      "default": false
+    },
+    "player_safe": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, return only sanitized player action results and views. Snapshot, runtime_state, project fingerprint, and raw event details are omitted from stdout."
+    }
+  },
+  "additionalProperties": false
+}

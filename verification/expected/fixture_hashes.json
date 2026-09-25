@@ -1,0 +1,170 @@
+{
+  "fixtures/01_field_retention.json": {
+    "sha256": "d77953868c5843d8ae89f8fa186f73ccebca97d896c48b89d71bc1a5643027c2",
+    "bytes": 65069
+  },
+  "fixtures/02_runtime_matrix.json": {
+    "sha256": "c942686f161f6fa3197cb5f563f613764dd44569f076c58db4531c4dce646e5e",
+    "bytes": 85518
+  },
+  "fixtures/03_advanced_interaction_export.json": {
+    "sha256": "1be3de5724bccef04d44bf33dae9ab66f3c97b3fe7802fa63da9651bf573d2cc",
+    "bytes": 33544
+  },
+  "fixtures/runtime_cases/R01.json": {
+    "sha256": "d4d8d95ede0c7786d7a1082cd1757423cc11755607866234f05224a8ed1a671a",
+    "bytes": 18703
+  },
+  "fixtures/runtime_cases/R02.json": {
+    "sha256": "a163901a7c4790137f6a6615ff00e589bb7472360b22ad1218ddb8304dc48e4e",
+    "bytes": 18613
+  },
+  "fixtures/runtime_cases/R03.json": {
+    "sha256": "ab96b780cc60ee02c7367999c4fe271c415c9021108cb5ecbc71fc22878185b6",
+    "bytes": 17341
+  },
+  "fixtures/runtime_cases/R04.json": {
+    "sha256": "646a6b709f2093b74ef3b46b6371d7498a2b8368a4122937514a16a43d5d2746",
+    "bytes": 17575
+  },
+  "fixtures/runtime_cases/R05.json": {
+    "sha256": "a2a0d21e9cbc26ca3db5afa02f46dadf1b07331b7230f5f85e65481dd6fd306f",
+    "bytes": 17383
+  },
+  "fixtures/runtime_cases/R06.json": {
+    "sha256": "3153e9f4cede291b8ffed114c92757b610d7402649a4b7a6d956bcda22aca759",
+    "bytes": 18148
+  },
+  "fixtures/runtime_cases/R07.json": {
+    "sha256": "95967f8d37da13c002263f48fc794653f84a9f6034dd08307f380c67b0b837a3",
+    "bytes": 17720
+  },
+  "fixtures/runtime_cases/R08.json": {
+    "sha256": "6f22b4e60939535d19c118e65210c0673b89137c5cc1edc19c9985cc1fefb4bd",
+    "bytes": 17586
+  },
+  "fixtures/runtime_cases/R09.json": {
+    "sha256": "adcc1c591ea9c38a7100db69e6fd7ff9a3f7ee57298627a1efe464bf5889b43a",
+    "bytes": 17994
+  },
+  "fixtures/runtime_cases/R10.json": {
+    "sha256": "3b5f62fc97fd6c4550eef10779699183d4b67e440f67604f8c9b4da0e46c59d8",
+    "bytes": 18006
+  },
+  "fixtures/runtime_cases/R11.json": {
+    "sha256": "d398d9eaf74bc75e2387613e119194e716c4aabb54c0c8496253e735c37f8487",
+    "bytes": 17992
+  },
+  "fixtures/runtime_cases/R12.json": {
+    "sha256": "6ef16cc1382d586160f0fdb1b0976d1848f36a4e7ac741e21307822b48c87bbf",
+    "bytes": 17310
+  },
+  "fixtures/runtime_cases/R13.json": {
+    "sha256": "c5571f4d65729bf7ef5ccc270bf6f42937347ec05d2e8dae67a9e015dddca011",
+    "bytes": 17472
+  },
+  "fixtures/runtime_cases/R14.json": {
+    "sha256": "0c128679cc1f644f7220d0468bcafd5a7f8134ac0a814cfaeaf39387df0e4d50",
+    "bytes": 17896
+  },
+  "fixtures/runtime_cases/R15.json": {
+    "sha256": "3d4d5140f8fbc3986d3bff53457023f33a50ea7bb801fc0f67400d9aa4e9bb36",
+    "bytes": 17897
+  },
+  "fixtures/runtime_cases/R16.json": {
+    "sha256": "1b3367e22422394e5012dad4838c496ee16f1161432f7f1207ba9a50f6c41ea9",
+    "bytes": 18400
+  },
+  "fixtures/runtime_cases/R17.json": {
+    "sha256": "ad2e26d8fd1b22f67b2aed601c5423befbe770bf82df2e43bac9560403d80698",
+    "bytes": 18327
+  },
+  "fixtures/runtime_cases/R18.json": {
+    "sha256": "55c767d5524ca3eb2e807f5a975a9d6b3c9a5bf498c1c38fd0566c20c1bed578",
+    "bytes": 18444
+  },
+  "fixtures/runtime_cases/R19.json": {
+    "sha256": "f37fba9816e63ff0ab0188adbb81ba0cc65c537863bbb8c653f484721dd0e3c6",
+    "bytes": 17994
+  },
+  "fixtures/runtime_cases/R20.json": {
+    "sha256": "b255d906388f7b2f1194148e1f6266695928627ad7d4d242aa20f17f636b5e1c",
+    "bytes": 17646
+  },
+  "fixtures/runtime_cases/R21.json": {
+    "sha256": "0e97662073fa804385830d342001f0bb017a0745ca6b6f57ab18e0c9eb5a63ce",
+    "bytes": 17644
+  },
+  "fixtures/runtime_cases/R22.json": {
+    "sha256": "b7488ad18906cf453d95236f6f0bd4699318deab032342ca0e5c467d05956eb1",
+    "bytes": 17850
+  },
+  "fixtures/runtime_cases/R23.json": {
+    "sha256": "199d537296e3d8c0d657e2ad0e8476b9091a1c5995613e5d02b09cced453e13f",
+    "bytes": 17696
+  },
+  "fixtures/runtime_cases/R24.json": {
+    "sha256": "08c3a9d061a9703e1520acc1b167d6ccab581f50a6a74e51fdc4f1368cdb013b",
+    "bytes": 17734
+  },
+  "fixtures/runtime_cases/R25.json": {
+    "sha256": "1842c2a56078ffc25319a5c1ec38bac33cc156ca421e6f882dc086db10ecc6bc",
+    "bytes": 17866
+  },
+  "fixtures/runtime_cases/R26.json": {
+    "sha256": "f2cd0a74ef90ef6b6d69df763f7564246e73201a16d2d498d79ed345f3e0aa9f",
+    "bytes": 17909
+  },
+  "fixtures/runtime_cases/R27.json": {
+    "sha256": "b8be9876278cfe7c0edd2baa336b2816fea1709b3de5c673c92da14f9a7dbca2",
+    "bytes": 17901
+  },
+  "fixtures/runtime_cases/R28.json": {
+    "sha256": "0367ba8c9a3df7985c36e59a0858f7ac3b539e6c9ac98512a92fd8804bf36c6f",
+    "bytes": 18956
+  },
+  "fixtures/runtime_cases/R29.json": {
+    "sha256": "d45cbc1fd752c8103b380bd987517b7a94060c341ef0279c0b385c6754bc4375",
+    "bytes": 17729
+  },
+  "fixtures/runtime_cases/R30.json": {
+    "sha256": "0fbb8cabc79159d31cd89a1458e2977aee626e1420469de0a925f0b9e202f4e2",
+    "bytes": 28740
+  },
+  "fixtures/runtime_cases/R31.json": {
+    "sha256": "8082dad2f7832f554ae59ac20fa55f6756305366253fe0f4d6b20aea714ae37d",
+    "bytes": 18393
+  },
+  "fixtures/runtime_cases/R32.json": {
+    "sha256": "f91bcb7bfb47990d4ace6f7cd08c513582e5d2bbae7c2abc3b49e3eb5470d45d",
+    "bytes": 18872
+  },
+  "expected/advanced_cases.json": {
+    "sha256": "0577f29c34112ea27bf603353e9363f42395c5c9f4d1e34c45fb3baa42fb1c46",
+    "bytes": 4964
+  },
+  "expected/coverage_manifest.json": {
+    "sha256": "5a8862e07a9d156aa37706cb20b7ce31ee50f4949eb450b34c2405d975d6fc87",
+    "bytes": 12677
+  },
+  "expected/creator_cases.json": {
+    "sha256": "a20b249f05cdd2ff06cf5147b2516ab16775e5ad939837b26a0c7993c632b13e",
+    "bytes": 10534
+  },
+  "expected/field_coverage.json": {
+    "sha256": "2b16bcdeb4e7582c4995005ad9f4885273e88245badb7ce77b24d82922edf121",
+    "bytes": 1842
+  },
+  "expected/fixture_validation.json": {
+    "sha256": "957b50e91056356260bd17b8d49edaaf283887429d2d3ff81271679cda09977e",
+    "bytes": 5187
+  },
+  "expected/runtime_cases.json": {
+    "sha256": "ea2122ea5b470be0b6f0f46bf3c9f7322d482947e34bac3748e72285923ea677",
+    "bytes": 74607
+  },
+  "expected/template_boundary.json": {
+    "sha256": "639e4b22f0d6821672c98c95021f851b4a0a51254486fc06b5bcbe0d406806bd",
+    "bytes": 2152
+  }
+}

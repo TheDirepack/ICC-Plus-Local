@@ -1,0 +1,19 @@
+{
+  "format": "iccplus-agent-ops",
+  "format_version": 1,
+  "strict_fields": true,
+  "operations": [
+    {
+      "op": "update",
+      "kind": "choice",
+      "ref": "sword",
+      "values": {"title": "Blade"}
+    },
+    {
+      "op": "update_many",
+      "kind": "choice",
+      "refs": ["shield", "elite"],
+      "values": {"template": 2}
+    }
+  ]
+}
