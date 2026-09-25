@@ -30,7 +30,7 @@ _GUIDES: dict[str, dict[str, Any]] = {
         ],
     },
     'typed-authoring': {
-        'goal': 'Use pinned 2.10.6 field names and value types.',
+        'goal': 'Use pinned 2.10.7 field names and value types.',
         'commands': [
             'reference fields KIND --details', 'reference schema KIND',
             'reference types --format typescript|python', 'template entity KIND',
@@ -104,7 +104,7 @@ _GUIDES: dict[str, dict[str, Any]] = {
         'goal': 'Check what is source-pinned and what still needs browser verification.',
         'commands': ['reference parity', 'run-upstream-parity-tests'],
         'rules': [
-            'The local runtime is pinned to source commit a420836248d32043ae45d03f1b93cdcb9e354663.',
+            'The local runtime is pinned to source commit 1ea9db888cde2286d18d0d5de50933cb8773b739.',
             'A real Chromium differential remains the final runtime parity check.',
         ],
     },

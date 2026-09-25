@@ -88,7 +88,7 @@ def test_build_v2_uses_explicit_phase_tools(tmp_path: Path):
     (tmp_path / '90-style.json').write_text(json.dumps({
         'format': 'iccplus-visual-manifest',
         'format_version': 1,
-        'items': [{'ref': 'origin_human', 'template': 2, 'width': 4}],
+        'items': [{'ref': 'origin_human', 'template': 2, 'width': 'col-md-4'}],
     }), encoding='utf-8')
     manifest = {
         'format': 'iccplus-build',
@@ -106,7 +106,7 @@ def test_build_v2_uses_explicit_phase_tools(tmp_path: Path):
     choice = row['objects'][0]
     assert choice['scores'][0]['id'] == 'budget'
     assert choice['template'] == 2
-    assert choice['objectWidth'] == 4
+    assert choice['objectWidth'] == 'col-md-4'
 
 
 def test_build_v2_rejects_wrong_phase_file(tmp_path: Path):

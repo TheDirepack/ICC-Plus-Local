@@ -1,10 +1,10 @@
 # CLI reference
 
-The canonical rc11 surface has 11 top-level commands.
+The canonical rc12 surface has 11 top-level commands.
 
 ## `generate`
 
-Create the exact blank ICC Plus Creator project.
+Create the exact blank ICC Plus 2.10.7 Creator project and verify the result with complete-project validation.
 
 ```bash
 iccplus-local generate -o project.json
@@ -56,7 +56,7 @@ Audit requests use `steps` or `actions`. Each step may select, deselect, press a
 
 ## `build`
 
-Rebuild from the exact blank project using an ordered phase manifest. The final output validates before write.
+Rebuild from the exact blank project using an ordered phase manifest. Missing official sections are hydrated from Creator defaults and the final output must pass complete-project validation before write.
 
 ```bash
 iccplus-local build iccplus.build.json -o project.json
@@ -86,6 +86,8 @@ Image compression is automatic.
 
 ```text
 project format
+project validate [--compat]
+project hydrate
 project export
 project fragment export|import
 project ids export|from-titles
@@ -93,7 +95,7 @@ project build-summary
 project build-string
 ```
 
-These are serialization/interchange helpers, not alternate authoring paths.
+`project validate` is the canonical final-artifact completeness check. `project hydrate` fills missing official Creator sections and safe eager entity defaults without overwriting existing values or inventing IDs. The remaining project commands are serialization/interchange helpers, not alternate authoring paths.
 
 ## `reference`
 

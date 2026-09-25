@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "iccplus-cyoa-tools"
-version = "0.10.0rc11"
+version = "0.10.0rc12"
 description = "Script, edit, validate and headlessly test ICC Plus CYOA JSON from the command line"
 requires-python = ">=3.11"
 license = {text = "MIT"}

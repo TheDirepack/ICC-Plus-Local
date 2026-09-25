@@ -1,14 +1,14 @@
 ---
 name: iccplus-local
-description: Use when authoring, inspecting, testing, auditing, exporting, or otherwise working with ICC Plus 2.10.6 CYOA projects through ICC Plus Local 0.10.0rc11. This is the single general skill. Read the matching function guide under functions/ for the operation being performed.
+description: Use when authoring, inspecting, testing, auditing, exporting, or otherwise working with ICC Plus 2.10.7 CYOA projects through ICC Plus Local 0.10.0rc12. This is the single general skill. Read the matching function guide under functions/ for the operation being performed.
 ---
 
 # ICC Plus Local
 
 Use this as the one general ICC Plus Local skill. Do not treat the files under `functions/` as separate installed skills. They are focused operating guides that this skill routes to when a task needs that function.
 
-Current tool version: `0.10.0rc11`.
-Target ICC Plus version: `2.10.6`.
+Current tool version: `0.10.0rc12`.
+Target ICC Plus version: `2.10.7`.
 
 ## How to use this skill
 
@@ -40,7 +40,7 @@ Keep phase boundaries clear. Structure changes belong in `structure`, gameplay l
 
 For styling, use the broadest native ICC Plus scope that fits. Start with project-wide styling, then use official Row/Choice Design Groups for reusable visual families. Use private Row styling only for a true one-Row exception, and private Choice styling only for a true one-Choice exception when neither project styling nor a Design Group fits. Do not duplicate the same inline styling across many Choices. Use custom CSS only when native ICC Plus styling cannot express the required presentation.
 
-Normal writes validate before replacing the project. Do not add a separate validation pass after every write unless the task calls for one or a function guide says it is needed.
+Normal writes fill missing official Creator defaults and run complete-project validation before replacing the project. Do not add a separate validation pass after every write. Use `project validate` before final handoff/export of an externally supplied legacy project, and `project hydrate` when missing official baseline fields need repair.
 
 For broad edits, prefer batched `items`, explicit `refs`, or selectors. Add `expect` when the number of matches matters.
 
@@ -67,4 +67,4 @@ Useful starting documents include:
 
 ## Verification status
 
-The rc11 normal regression suite is `312 passed`. Compression tests were intentionally skipped for this rc11 documentation/skill update. Installed-wheel smoke testing passed against the active CYOA. Official Creator/Viewer browser verification remains a separate release gate.
+rc12 adds an automated GitHub Actions regression gate for the normal tests and checked-in examples. Official Creator/Viewer browser verification remains a separate release gate, especially for rendering and the fresh 2.10.7 browser round-trip.

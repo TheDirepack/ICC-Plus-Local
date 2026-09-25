@@ -50,9 +50,9 @@ def capabilities() -> dict[str, Any]:
         'tool': 'iccplus-local',
         'tool_version': __version__,
         'target': {
-            'icc_plus_version': '2.10.6',
+            'icc_plus_version': '2.10.7',
             'source_repository': 'wahaha303/ICC-Plus-Svelte',
-            'source_commit': 'a420836248d32043ae45d03f1b93cdcb9e354663',
+            'source_commit': '1ea9db888cde2286d18d0d5de50933cb8773b739',
         },
         'interface': 'command-line',
         'output': {
@@ -96,12 +96,15 @@ def capabilities() -> dict[str, Any]:
             'normal_writes_require_unique_identities': True,
             'validation_errors_write_by_default': False,
             'canonical_writes_validate_automatically': True,
+            'canonical_writes_hydrate_official_defaults': True,
+            'final_project_validation': 'Creator-complete; official baseline sections + native field types + Creator-eager entity fields',
+            'legacy_read_validation': 'compatibility mode remains available without hydration',
             'validation_bypass_is_compatibility_only': True,
         },
         'authoring': {
             'typed_native_fields': True,
             'phased_authoring_commands': ['structure', 'rules', 'style'],
-            'normal_edit_validation': 'automatic before write',
+            'normal_edit_validation': 'official-default hydration plus complete validation before write',
             'low_level_escape_hatch': 'hidden compatibility command apply; not part of the canonical surface',
             'row_bulk_operations': 'structure phase operations row_sort, row_copy_choices, row_move_choices',
             'entity_templates': 'template entity KIND',
@@ -111,7 +114,7 @@ def capabilities() -> dict[str, Any]:
             'font_tools': 'media font list|add|remove',
             'sound_tools': 'media sound import',
             'image_tools': 'media image import|clear; compression is automatic',
-            'project_io': 'project format|export|fragment|build-summary|build-string',
+            'project_io': 'project validate|hydrate|format|export|fragment|ids|build-summary|build-string',
         },
         'help_system': {
             'command_inventory': 'reference commands',
@@ -158,7 +161,7 @@ def capabilities() -> dict[str, Any]:
         },
         'build_system': {
             'blank_command': 'iccplus-local generate -o project.json',
-            'blank_source': 'exact ICC Plus 2.10.6 Creator default export',
+            'blank_source': 'exact ICC Plus 2.10.7 Creator default export',
             'mutation_commands': ['iccplus-local structure PROJECT SCRIPT', 'iccplus-local rules PROJECT SCRIPT', 'iccplus-local style PROJECT MANIFEST'],
             'repeatable_build_command': 'iccplus-local build BUILD.json -o project.json',
             'build_manifest_schema': 'iccplus-local reference schema build-manifest',
@@ -201,7 +204,7 @@ def capabilities() -> dict[str, Any]:
             'manifest_format': 'iccplus-visual-manifest v1',
             'supports': [
                 'project styling', 'customCSS', 'image assignment', 'template', 'width',
-                'grouped native styling', 'reusable presets', 'explicit refs batches', 'selector batches with expected counts', 'many distinct image assignments in one manifest',
+                'grouped native styling', 'official Row/Choice Design Groups', 'Design Groups linked to normal Groups', 'authoring presets for non-style repetition', 'explicit refs batches', 'selector batches with expected counts', 'many distinct image assignments in one manifest',
                 'copy_from visual treatment', 'replace/unset inline styling',
                 'source/credit sidecar records',
             ],
@@ -221,7 +224,7 @@ def capabilities() -> dict[str, Any]:
             'default_min_savings_percent': 2.0,
         },
         'discovery': {
-            'preflight': 'automatic on normal edits; use inspect op=check for a read-only report',
+            'preflight': 'automatic complete validation on canonical writes; use project validate for final artifacts or inspect op=check for compatibility/read-only diagnostics',
             'native_entity_shape': 'iccplus-local template entity KIND',
             'batched_read_only': 'iccplus-local inspect PROJECT [REQUEST]',
             'entity_details': 'inspect op=show',

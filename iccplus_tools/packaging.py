@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import copy
 import html
+from html.parser import HTMLParser
 import io
 import re
 import zipfile
@@ -20,7 +21,7 @@ _EXTENSIONS = {
 
 
 def _remove_nulls(value: Any) -> Any:
-    """Match ICC Plus 2.10.6 removeNulls for JSON-compatible values."""
+    """Match ICC Plus 2.10.7 removeNulls for JSON-compatible values."""
     if isinstance(value, list):
         out = []
         for item in value:
@@ -91,7 +92,7 @@ def viewer_image_separation(project: dict[str, Any], *, seen: dict[str, str] | N
 
 
 def image_separation(project: dict[str, Any]) -> tuple[dict[str, Any], dict[str, bytes]]:
-    """Mirror ICC Plus 2.10.6 Creator imageSeparation().
+    """Mirror ICC Plus 2.10.7 Creator imageSeparation().
 
     The input is not mutated. Paths intentionally preserve source quirks,
     including backpack change-background names that use the R prefix.
@@ -193,7 +194,7 @@ def _fill_creator_load_defaults(project: dict[str, Any]) -> dict[str, Any]:
     """Apply load-time defaults that materially change Creator Save-to-Disk output.
 
     This intentionally stays narrow. It mirrors defaults proven by the pinned
-    2.10.6 initializeApp path and the external Creator round-trip fixture rather
+    2.10.7 initializeApp path and the external Creator round-trip fixture rather
     than inventing a second full project migrator.
     """
     default_addon_justify = project.get('defaultAddonJustify')
@@ -215,8 +216,8 @@ def _fill_creator_load_defaults(project: dict[str, Any]) -> dict[str, Any]:
     return project
 
 
-def creator_save_payload(project: dict[str, Any]) -> dict[str, Any]:
-    """Mirror loading a project in Creator 2.10.6 and then Save to Disk.
+def creator_save_payload(project: dict[str, Any], *, target_version: str = ICCPLUS_VERSION) -> dict[str, Any]:
+    """Mirror loading a project in Creator 2.10.7 and then Save to Disk.
 
     The Creator removes null/empty object values on file import, runs its load
     initialization, updates ``activated`` from the live Build Form state, then
@@ -232,7 +233,7 @@ def creator_save_payload(project: dict[str, Any]) -> dict[str, Any]:
     activated = temp.get('activated')
     if not isinstance(activated, list) or len(activated) == 0:
         temp['activated'] = ['']
-    temp['version'] = ICCPLUS_VERSION
+    temp['version'] = target_version
     return temp
 
 
@@ -277,14 +278,82 @@ def export_project_zip(project: dict[str, Any], output: str | Path) -> dict[str,
     }
 
 
+_LOADING_ALLOWED_TAGS = {'b', 'strong', 'i', 'em', 'u', 'span', 'br', 'div', 'p', 'small', 'sub', 'sup'}
+_LOADING_DROP_CONTENT_TAGS = {'script', 'style', 'iframe', 'object', 'embed', 'svg', 'math'}
+
+
+class _LoadingHTMLSanitizer(HTMLParser):
+    """Small dependency-free sanitizer for Viewer loading text.
+
+    ICC Plus uses DOMPurify before assigning loadingText through innerHTML.
+    This fallback preserves a conservative formatting allowlist while dropping
+    active/embedded content entirely.
+    """
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=False)
+        self.out: list[str] = []
+        self.drop_depth = 0
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        tag = tag.lower()
+        if tag in _LOADING_DROP_CONTENT_TAGS:
+            self.drop_depth += 1
+            return
+        if self.drop_depth or tag not in _LOADING_ALLOWED_TAGS:
+            return
+        safe_attrs: list[str] = []
+        for key, value in attrs:
+            key = key.lower()
+            # Keep only inert class metadata in the stdlib fallback. DOMPurify
+            # handles a broader set when bleach is available.
+            if key == 'class' and value is not None and tag in {'span', 'div', 'p'}:
+                safe_attrs.append(f'class="{html.escape(value, quote=True)}"')
+        suffix = (' ' + ' '.join(safe_attrs)) if safe_attrs else ''
+        self.out.append(f'<{tag}{suffix}>')
+
+    def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        tag = tag.lower()
+        if not self.drop_depth and tag == 'br':
+            self.out.append('<br>')
+
+    def handle_endtag(self, tag: str) -> None:
+        tag = tag.lower()
+        if tag in _LOADING_DROP_CONTENT_TAGS:
+            if self.drop_depth:
+                self.drop_depth -= 1
+            return
+        if not self.drop_depth and tag in _LOADING_ALLOWED_TAGS and tag != 'br':
+            self.out.append(f'</{tag}>')
+
+    def handle_data(self, data: str) -> None:
+        if not self.drop_depth:
+            self.out.append(html.escape(data))
+
+    def handle_entityref(self, name: str) -> None:
+        if not self.drop_depth:
+            self.out.append(f'&{name};')
+
+    def handle_charref(self, name: str) -> None:
+        if not self.drop_depth:
+            self.out.append(f'&#{name};')
+
+
 def _sanitize_loading_html(value: str) -> str:
-    """Conservative DOMPurify-like sanitizer for the loading text fragment."""
+    """Sanitize loading text with DOMPurify-like safe formatting semantics."""
     try:
         import bleach  # type: ignore
-        return bleach.clean(value, tags=['b','strong','i','em','u','span','br','div','p','small','sub','sup'], attributes={'span':['class','style'],'div':['class','style'],'p':['class','style']}, strip=True)
+        return bleach.clean(
+            value,
+            tags=sorted(_LOADING_ALLOWED_TAGS),
+            attributes={'span': ['class'], 'div': ['class'], 'p': ['class']},
+            strip=True,
+        )
     except Exception:
-        # Safe fallback. It is intentionally more restrictive than DOMPurify.
-        return html.escape(value)
+        parser = _LoadingHTMLSanitizer()
+        parser.feed(value)
+        parser.close()
+        return ''.join(parser.out)
 
 
 def _replace_tag_text(source: str, tag: str, element_id: str, value: str) -> str:
@@ -344,7 +413,7 @@ def build_viewer_package(project: dict[str, Any], template_zip: str | Path, outp
     """Reproduce Creator exportWithViewer using an official viewer template ZIP.
 
     The official template is an explicit input so its version can be pinned.
-    Project/image transformations follow 2.10.6 source. HTML formatting and
+    Project/image transformations follow 2.10.7 source. HTML formatting and
     loading-text sanitization are semantic rather than byte-identical to the
     browser's DOMPurify + js-beautify pass.
     """
@@ -416,7 +485,7 @@ def build_viewer_package(project: dict[str, Any], template_zip: str | Path, outp
         'image_count': len(assets),
         'icc_plus_version': ICCPLUS_VERSION,
         'template': str(template_zip),
-        'content_parity': '2.10.6 exportWithViewer project/image/local-embed logic',
+        'content_parity': '2.10.7 exportWithViewer project/image/local-embed logic',
         'html_byte_parity': False,
         'html_note': 'HTML keeps template formatting; loading sanitization is conservative rather than DOMPurify byte parity.',
     }

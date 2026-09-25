@@ -212,7 +212,7 @@ class Simulator:
         self.rng.setstate(fresh.rng.getstate())
 
     def export_build_string(self) -> str:
-        """Return ICC Plus 2.10.6's native Build Form string for this state."""
+        """Return ICC Plus 2.10.7's native Build Form string for this state."""
         entries: list[NativeBuildEntry] = []
         selectable_ids = {x.id for x in self.index.selectables()}
         variable_ids = {x.id for x in self.index.by_kind.get('variable', [])}
@@ -258,7 +258,7 @@ class Simulator:
         return serialize_build_entries(entries)
 
     def load_build_string(self, value: str) -> None:
-        """Load an ICC Plus 2.10.6 Build Form string into the local runtime.
+        """Load an ICC Plus 2.10.7 Build Form string into the local runtime.
 
         The replay uses the native random Score and random-activation payloads as
         deterministic overrides. This makes a browser-produced build reproducible
@@ -1573,7 +1573,7 @@ class Simulator:
         return base + ('/ON#' + parts[1] if len(parts) > 1 else '')
 
     def _duplicate_row_requirements(self, value: Any, suffix: str) -> None:
-        """Apply the 2.10.6 duplicateRow ID suffix rule to native Requirement data."""
+        """Apply the 2.10.7 duplicateRow ID suffix rule to native Requirement data."""
         if not isinstance(value, list):
             return
         for req in value:
@@ -1586,7 +1586,7 @@ class Simulator:
                 for item in req['orRequired']:
                     if isinstance(item, dict) and isinstance(item.get('req'), str):
                         item['req'] = self._dup_suffix_ref(item['req'], suffix)
-            # The pinned 2.10.6 source does not successfully descend into nested
+            # The pinned 2.10.7 source does not successfully descend into nested
             # requirements here. Keep that behavior instead of repairing it.
 
     def _duplicate_row_functions(self, choice: dict[str, Any], suffix: str) -> None:
@@ -1619,7 +1619,7 @@ class Simulator:
         return candidate
 
     def _duplicate_row_effect(self, ent: Entity) -> str | None:
-        """Mirror ICC Plus 2.10.6 ``duplicateRow()`` for a selected entity."""
+        """Mirror ICC Plus 2.10.7 ``duplicateRow()`` for a selected entity."""
         choice = ent.value
         if not choice.get('duplicateRow'):
             return None
@@ -1856,7 +1856,7 @@ class Simulator:
         before_count = self._count(target)
         registered = False
         if target_ent.value.get('isSelectableMultiple'):
-            # Preserve the 2.10.6 source behavior. A bare multiple target has a
+            # Preserve the 2.10.7 source behavior. A bare multiple target has a
             # force count of zero and the negative loop is unreachable.
             if n is not None and n > 0:
                 for _ in range(n):
@@ -2604,7 +2604,7 @@ class Simulator:
         return self.select(choice.id, _internal=True, _dialogs=dialogs)
 
     def press_row_button(self, row_id: str, *, dialogs: dict[str, dict[str, Any]] | None = None) -> Event:
-        """Press an ICC Plus Row button using Viewer 2.10.6 buttonActivate rules."""
+        """Press an ICC Plus Row button using Viewer 2.10.7 buttonActivate rules."""
         before = self.state.clone()
         rng_before = self.rng.getstate()
         row = self.index.one(row_id, 'row') or self.index.one(row_id, 'backpack_row')

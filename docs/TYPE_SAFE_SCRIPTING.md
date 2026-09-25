@@ -1,6 +1,6 @@
 # Type-safe scripting and help
 
-The scripting interface derives field names and value shapes from the pinned ICC Plus 2.10.6 `types.ts` model. Scripts should query the tool instead of guessing field spellings or value types.
+The scripting interface derives field names and value shapes from the pinned ICC Plus 2.10.7 `types.ts` model. Scripts should query the tool instead of guessing field spellings or value types.
 
 Start with machine-readable discovery:
 

@@ -87,7 +87,7 @@ class CliTests(unittest.TestCase):
         self.assertGreater(value['count'], 10)
         self.assertTrue(all('discount' in name.lower() for name in value['fields']))
         self.assertIn('discountOther', value['fields'])
-        self.assertEqual(value['source']['icc_plus_version'], '2.10.6')
+        self.assertEqual(value['source']['icc_plus_version'], '2.10.7')
 
     def test_fields_command_suggests_close_names_when_filter_misses(self):
         result = run_cli('fields', 'choice', '--contains', 'titel')
@@ -187,8 +187,70 @@ class CliTests(unittest.TestCase):
             self.assertTrue(value['ok'])
             self.assertTrue(value['blank'])
             self.assertEqual(out.stat().st_size, 13414)
-            self.assertEqual(hashlib.sha256(out.read_bytes()).hexdigest(), '35ba40a5e4a39b41c79d5e0f929404d9789d3173331059c9e635e72187c86faf')
+            self.assertEqual(hashlib.sha256(out.read_bytes()).hexdigest(), '10e9b3ba3ccee2a9ca7e2ce2753e2f61fc2e289549629f2c2d6235cc0705f68d')
             self.assertFalse(out.read_bytes().endswith(b'\n'))
+
+    def test_project_validate_distinguishes_complete_from_compatibility(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / 'sparse.json'
+            project.write_text(json.dumps({'rows': []}), encoding='utf-8')
+
+            strict = run_cli('project', 'validate', str(project), '--compact')
+            self.assertEqual(strict.returncode, 2, strict.stderr)
+            strict_value = json.loads(strict.stdout)
+            self.assertFalse(strict_value['ok'])
+            self.assertEqual(strict_value['mode'], 'complete')
+            self.assertGreater(strict_value['completeness']['issue_count'], 0)
+
+            compat = run_cli('project', 'validate', str(project), '--compat', '--compact')
+            self.assertEqual(compat.returncode, 0, compat.stderr)
+            compat_value = json.loads(compat.stdout)
+            self.assertTrue(compat_value['ok'])
+            self.assertEqual(compat_value['mode'], 'compatibility')
+            self.assertFalse(compat_value['completeness']['complete'])
+
+    def test_project_hydrate_repairs_sparse_legacy_project(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / 'legacy.json'
+            project.write_text(json.dumps({
+                'version': '2.10.6',
+                'rows': [],
+                'viewerConfig': {'title': 'Legacy title'},
+            }), encoding='utf-8')
+
+            result = run_cli('project', 'hydrate', str(project), '--compact')
+            self.assertEqual(result.returncode, 0, result.stderr)
+            value = json.loads(result.stdout)
+            self.assertTrue(value['ok'])
+            self.assertGreater(value['change_count'], 0)
+            hydrated = json.loads(project.read_text(encoding='utf-8'))
+            self.assertEqual(hydrated['version'], '2.10.7')
+            self.assertEqual(hydrated['viewerConfig']['title'], 'Legacy title')
+            self.assertIn('loadingType', hydrated['viewerConfig'])
+            self.assertIn('styling', hydrated)
+            self.assertIn('backpack', hydrated)
+
+    def test_structure_write_completes_sparse_legacy_project(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / 'legacy.json'
+            project.write_text(json.dumps({'version': '2.10.6', 'rows': []}), encoding='utf-8')
+            script = json.dumps({
+                'format': 'iccplus-structure-ops',
+                'format_version': 1,
+                'strict_fields': True,
+                'operations': [
+                    {'op': 'add', 'kind': 'row', 'values': {'id': 'row_added', 'title': 'Added'}},
+                ],
+            })
+            result = run_cli('structure', str(project), '-', '--compact', stdin=script)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            value = json.loads(result.stdout)
+            self.assertTrue(value['ok'])
+            final = json.loads(project.read_text(encoding='utf-8'))
+            self.assertEqual(final['version'], '2.10.7')
+            self.assertIn('viewerConfig', final)
+            self.assertIn('styling', final)
+            self.assertEqual(final['rows'][0]['id'], 'row_added')
 
     def test_apply_jsonl_from_stdin(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -534,7 +596,7 @@ class CliTests(unittest.TestCase):
 
     def test_player_safe_session_normalizes_hidden_and_missing_targets(self):
         project = {
-            'version': '2.10.6', 'styling': {'reqFilterVisibleIsOn': True}, 'pointTypes': [],
+            'version': '2.10.7', 'styling': {'reqFilterVisibleIsOn': True}, 'pointTypes': [],
             'rows': [{'id': 'r', 'title': 'R', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [{
                 'id': 'hidden_secret_id', 'title': 'Hidden', 'text': 'Secret text',
                 'requireds': [{'id': '', 'type': 'id', 'required': True, 'reqId': 'missing_gate'}],
@@ -659,7 +721,7 @@ class CliTests(unittest.TestCase):
 
     def test_session_invalid_selection_returns_semantic_error_and_no_partial_state(self):
         project = {
-            'version': '2.10.6',
+            'version': '2.10.7',
             'pointTypes': [{'id': 'p', 'name': 'P', 'startingSum': 1, 'belowZeroNotAllowed': True}],
             'rows': [{'id': 'r', 'title': 'R', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [{
                 'id': 'x', 'title': 'X', 'text': '', 'requireds': [], 'addons': [],
@@ -679,7 +741,7 @@ class CliTests(unittest.TestCase):
 
     def test_run_invalid_selection_exits_three_with_semantic_error(self):
         project = {
-            'version': '2.10.6', 'pointTypes': [],
+            'version': '2.10.7', 'pointTypes': [],
             'rows': [{'id': 'r', 'title': 'R', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [{
                 'id': 'blocked', 'title': 'Blocked', 'text': '', 'isNotSelectable': True,
                 'requireds': [], 'scores': [], 'addons': [],
@@ -696,7 +758,7 @@ class CliTests(unittest.TestCase):
 
     def test_view_after_invalid_selection_exits_three_without_leaking_state(self):
         project = {
-            'version': '2.10.6', 'styling': {'reqFilterVisibleIsOn': True}, 'pointTypes': [],
+            'version': '2.10.7', 'styling': {'reqFilterVisibleIsOn': True}, 'pointTypes': [],
             'rows': [{'id': 'r', 'title': 'R', 'titleText': '', 'allowedChoices': 0, 'requireds': [], 'objects': [{
                 'id': 'hidden', 'title': 'Hidden', 'text': 'Secret',
                 'requireds': [{'id': 'req', 'type': 'id', 'required': True, 'reqId': 'missing'}],
@@ -818,7 +880,7 @@ class PackagingCliTests(unittest.TestCase):
 
     def test_build_string_preserves_mixed_native_entry_order(self):
         project_value = {
-            'version': '2.10.6', 'styling': {},
+            'version': '2.10.7', 'styling': {},
             'pointTypes': [{'id': 'p', 'name': 'P', 'startingSum': 0, 'allowFloat': False}],
             'variables': [{'id': 'v', 'name': 'V', 'isTrue': False}],
             'rows': [
@@ -942,7 +1004,7 @@ class PackagingCliTests(unittest.TestCase):
             value = json.loads(DEMO.read_text(encoding='utf-8'))
             project.write_text(json.dumps(value), encoding='utf-8')
             design.write_text(json.dumps({
-                'version': '2.10.6',
+                'version': '2.10.7',
                 'styling': {
                     'rowMargin': '12',
                     'objectMargin': '7',
@@ -974,7 +1036,7 @@ class PackagingCliTests(unittest.TestCase):
             self.assertEqual(exported_result.returncode, 0, exported_result.stderr)
             self.assertFalse(exported.read_bytes().endswith(b'\n'))
             exported_value = json.loads(exported.read_text(encoding='utf-8'))
-            self.assertEqual(exported_value['version'], '2.10.6')
+            self.assertEqual(exported_value['version'], '2.10.7')
             self.assertEqual(exported_value['styling'], gear['styling'])
 
     def test_design_import_export_supports_design_groups(self):
@@ -985,7 +1047,7 @@ class PackagingCliTests(unittest.TestCase):
             value['rowDesignGroups'] = [{'id': 'rdg', 'name': 'Row design', 'elements': [], 'backpackElements': [], 'groupElements': [], 'styling': {}}]
             value['objectDesignGroups'] = [{'id': 'cdg', 'name': 'Choice design', 'elements': [], 'backpackElements': [], 'groupElements': [], 'styling': {}}]
             project.write_text(json.dumps(value), encoding='utf-8')
-            design.write_text(json.dumps({'version': '2.10.6', 'styling': {'rowMargin': 8, 'objectMargin': 5, 'barTextSize': 99}}), encoding='utf-8')
+            design.write_text(json.dumps({'version': '2.10.7', 'styling': {'rowMargin': 8, 'objectMargin': 5, 'barTextSize': 99}}), encoding='utf-8')
             row_result = run_cli('design', 'import', str(project), 'rdg', str(design), '--compact')
             self.assertEqual(row_result.returncode, 0, row_result.stderr)
             choice_result = run_cli('design', 'import', str(project), 'cdg', str(design), '--compact')
@@ -1059,7 +1121,7 @@ class PackagingCliTests(unittest.TestCase):
         def choice(ident):
             return {'id': ident, 'title': ident, 'text': '', 'requireds': [], 'scores': [], 'addons': []}
         project_value = {
-            'version': '2.10.6',
+            'version': '2.10.7',
             'styling': {},
             'pointTypes': [{'id': 'p', 'name': 'P', 'startingSum': 0, 'allowFloat': False}],
             'variables': [{'id': 'v', 'name': 'V', 'isTrue': False}],
@@ -1338,7 +1400,7 @@ class AgentAutomationExampleTests(unittest.TestCase):
         )
         self.assertEqual(proc.returncode, 0, proc.stderr)
         value = json.loads(proc.stdout)
-        self.assertEqual(value['capabilities']['tool_version'], '0.10.0rc11')
+        self.assertEqual(value['capabilities']['tool_version'], '0.10.0rc12')
         self.assertTrue(value['inspection']['ok'])
         self.assertTrue(value['dry_run']['ok'])
         self.assertTrue(value['dry_run']['dry_run'])

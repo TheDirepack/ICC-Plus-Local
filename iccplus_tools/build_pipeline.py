@@ -11,14 +11,15 @@ from .operations import apply_operation_script, load_operation_script
 from .phase_ops import PHASE_FORMATS, apply_phase_script, load_phase_script
 from .simulator import project_fingerprint
 from .upstream_2106 import default_export_project
-from .validation import validate
+from .validation import validate_complete
+from .project_integrity import hydrate_project
 from .version import __version__
 from .visuals import apply_visual_manifest
 
 BUILD_FORMAT = 'iccplus-build'
 BUILD_FORMAT_VERSION = 2
-TARGET_VERSION = '2.10.6'
-TARGET_COMMIT = 'a420836248d32043ae45d03f1b93cdcb9e354663'
+TARGET_VERSION = '2.10.7'
+TARGET_COMMIT = '1ea9db888cde2286d18d0d5de50933cb8773b739'
 BUILD_PHASES = {'structure', 'rules', 'style', 'raw'}
 
 
@@ -176,7 +177,8 @@ def build_from_manifest(manifest: dict[str, Any], *, base: Path) -> tuple[dict[s
         })
         fingerprint_parts.append({'phase': step['phase'], 'script': step['script'], 'sha256': script_sha})
 
-    validation = validate(project)
+    hydration_changes = hydrate_project(project)
+    validation = validate_complete(project)
     build_fingerprint = 'sha256:' + _sha256_bytes(_canonical_json({
         'format': BUILD_FORMAT,
         'format_version': manifest_version,
@@ -195,6 +197,7 @@ def build_from_manifest(manifest: dict[str, Any], *, base: Path) -> tuple[dict[s
         'build_fingerprint': build_fingerprint,
         'project_fingerprint': project_fingerprint(project),
         'steps': receipts,
+        'hydration_changes': hydration_changes,
         'summary': ProjectIndex(project).summary(),
         'validation': validation,
     }

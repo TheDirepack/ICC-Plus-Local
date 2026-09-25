@@ -1,6 +1,8 @@
 # ICC Plus Local
 
-ICC Plus Local is a local command-line authoring and mechanical-testing tool for ICC Plus 2 projects. The current source in this repository is ICC Plus Local 0.10.0rc11, targeting ICC Plus 2.10.6 and pinned to upstream source commit `a420836248d32043ae45d03f1b93cdcb9e354663`.
+**Version 0.10.0rc12**
+
+ICC Plus Local is a local command-line authoring and mechanical-testing tool for ICC Plus 2 projects. The current source in this repository is ICC Plus Local 0.10.0rc12, targeting ICC Plus 2.10.7 and pinned to upstream source commit `1ea9db888cde2286d18d0d5de50933cb8773b739`.
 
 It is an independent local implementation. The official ICC Plus Creator and Viewer remain the authority for browser rendering and behavior outside the local tool's verified coverage.
 
@@ -11,7 +13,7 @@ It is an independent local implementation. The official ICC Plus Creator and Vie
 - `skills/iccplus-local/functions/`, its focused guides for the 11 canonical command families.
 - `docs/`, the current ICC Plus Local documentation from the active CYOA New toolset.
 - `docs/cyoa/`, generic CYOA authoring, audit, and blind-playtest guidance.
-- The files under `examples/` provide tested rc11 command, selector, session, and automation examples.
+- The files under `examples/` provide tested rc12 command, selector, session, and automation examples.
 - `examples/simple-cyoa/` is a small phased CYOA with builder scripts and a player-safe smoke test.
 - `examples/main-cyoa-development/` is a validated standalone excerpt derived from the current 6.6.11 main CYOA.
 
@@ -36,7 +38,7 @@ python -m iccplus_tools style project.json @style.json
 python -m iccplus_tools play project.json
 ```
 
-`structure`, `rules`, and `style` validate before replacing the target project. For styling, prefer project-wide native styling and official Row/Choice Design Groups; private per-entity styling is for genuine one-off exceptions. Image compression is automatic when local or embedded images are assigned through the current media/style workflow.
+`structure`, `rules`, and `style` fill missing official Creator defaults and require complete-project validation before replacing the target project. For an imported legacy project, `project validate` reports final-artifact completeness and `project hydrate` repairs missing official sections without inventing IDs. For styling, prefer project-wide native styling and official Row/Choice Design Groups; private per-entity styling is for genuine one-off exceptions. Image compression is automatic when local or embedded images are assigned through the current media/style workflow.
 
 ## Agent skill
 
@@ -126,7 +128,7 @@ For prose cleanup, the recommended external companion is the [Unslop skill](http
 
 ## Verification
 
-The current repository passes the full rc11 normal regression suite: **312 tests passed**. `./examples/test_examples.sh` also passes and covers the command fixtures, both continuation-state requests, the simple CYOA, and the main-CYOA development excerpt.
+The current repository passes the rc12 automated regression gate: **327 tests passed**. `./examples/test_examples.sh` also passes and covers the command fixtures, both continuation-state requests, the simple CYOA, and the main-CYOA development excerpt.
 
 Local mechanical tests do not replace final checks in the official Creator or Viewer for browser rendering, responsive layout, CSS, animation, dialogs, network-loaded assets, or behavior outside documented local coverage.
 
