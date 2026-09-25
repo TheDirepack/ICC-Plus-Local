@@ -2,7 +2,7 @@
 
 Read this file when rebuilding a project from a repeatable ordered build manifest.
 
-`build` starts from the exact blank project and applies the declared phases in order. The final output validates before write.
+`build` starts from the exact blank project and applies the declared phases in order. Before write it hydrates missing official Creator sections/defaults and requires complete-project validation, so build output cannot silently be a sparse `rows`-only project.
 
 ```bash
 iccplus-local build iccplus.build.json -o project.json
