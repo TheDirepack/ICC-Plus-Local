@@ -18,7 +18,7 @@ Use the broadest native ICC Plus scope that fits the design:
 4. **Private Choice styling** only when one Choice genuinely needs an exception and neither project styling nor a Choice Design Group can express it.
 5. **Custom CSS** only for presentation the native ICC Plus styling fields cannot express.
 
-Do not repeat the same `styling` object on many Choices. That creates private per-Choice styling and makes later changes harder. Create one Choice Design Group and assign it instead.
+Do not repeat the same `styling` object on many Choices. That creates private per-Choice styling and makes later changes harder. Create one Choice Design Group and assign it instead. The style command rejects a private inline `styling` block when one manifest item targets multiple entities, specifically to keep reusable styling on Design Groups.
 
 ## Reusable Design Groups
 
