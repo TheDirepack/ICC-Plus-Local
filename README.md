@@ -13,7 +13,7 @@ It is an independent local implementation. The official ICC Plus Creator and Vie
 - `skills/iccplus-local/functions/`, its focused guides for the 11 canonical command families.
 - `docs/`, the current ICC Plus Local documentation from the active CYOA New toolset.
 - `docs/cyoa/`, generic CYOA authoring, audit, and blind-playtest guidance.
-- The files under `examples/` provide tested rc11 command, selector, session, and automation examples.
+- The files under `examples/` provide tested rc12 command, selector, session, and automation examples.
 - `examples/simple-cyoa/` is a small phased CYOA with builder scripts and a player-safe smoke test.
 - `examples/main-cyoa-development/` is a validated standalone excerpt derived from the current 6.6.11 main CYOA.
 
@@ -128,7 +128,7 @@ For prose cleanup, the recommended external companion is the [Unslop skill](http
 
 ## Verification
 
-The current repository passes the full rc11 normal regression suite: **312 tests passed**. `./examples/test_examples.sh` also passes and covers the command fixtures, both continuation-state requests, the simple CYOA, and the main-CYOA development excerpt.
+The current repository passes the rc12 automated regression gate: **324 tests passed**. `./examples/test_examples.sh` also passes and covers the command fixtures, both continuation-state requests, the simple CYOA, and the main-CYOA development excerpt.
 
 Local mechanical tests do not replace final checks in the official Creator or Viewer for browser rendering, responsive layout, CSS, animation, dialogs, network-loaded assets, or behavior outside documented local coverage.
 
