@@ -1,4 +1,4 @@
-# ICC Plus Local 0.10.0rc11 handoff
+# ICC Plus Local 0.10.0rc12 handoff
 
 Use the workflow-centered interface only.
 
