@@ -168,6 +168,8 @@ def _entity_defaults(project: dict[str, Any], kind: str, value: dict[str, Any], 
             'addonWidth': project.get('defaultAddonWidth', 'col-12'),
             'image': '', 'requireds': [],
         }
+        if kind == 'addon':
+            out['id'] = ''
         if parent_id is not None:
             out['parentId'] = parent_id
         if project.get('defaultUseShowAddon'):
