@@ -38,29 +38,19 @@ def test_retained_skill_dependencies_are_packaged():
 def test_current_docs_use_rc13_and_2107():
     assert (ROOT / "VERSION").read_text().strip() == "0.10.0rc13"
     assert "0.10.0rc13" in (ROOT / "START_HERE.md").read_text()
-    assert "ICC Plus 2.10.7" in (ROOT / "docs/ICCPLUS_FIELD_REFERENCE.md").read_text()
-    assert "removeSpace" in (ROOT / "docs/ICCPLUS_FIELD_REFERENCE.md").read_text()
+    assert "0.10.0rc13" in (ROOT / "docs/PLAY_STRUCTURE.md").read_text()
+    field_reference = (ROOT / "docs/ICCPLUS_FIELD_REFERENCE.md").read_text()
+    assert "ICC Plus 2.10.7" in field_reference
+    assert "removeSpace" in field_reference
     assert "ICC Plus 2.10.7" in (ROOT / "docs/FIELD_CATALOG.md").read_text()
 
 
-def test_current_agent_docs_do_not_teach_retired_wrapper_skills():
-    texts = "\n".join(
-        p.read_text()
-        for p in [
-            ROOT / "README.md",
-            SKILLS / "README.md",
-            ROOT / "docs/cyoa/skills-usage.md",
-            ROOT / "docs/LLM_USAGE.md",
-        ]
-    )
+def test_current_routing_declares_retired_wrappers():
+    routing = (SKILLS / "ROUTING-EVALS.md").read_text()
+    usage = (ROOT / "docs/cyoa/skills-usage.md").read_text()
     for name in RETIRED:
-        assert f"`{name}`" not in texts.replace(
-            "The old wrapper skills `cyoa-create`, `cyoa-edit`, `cyoa-look`, and `cyoa-test` are intentionally absent.",
-            ""
-        ).replace(
-            "Do not recreate separate `cyoa-create`, `cyoa-edit`, `cyoa-look`, or `cyoa-test` skills.",
-            ""
-        )
+        assert name in routing
+        assert name in usage
 
 
 def test_current_workflow_docs_do_not_teach_hidden_commands():

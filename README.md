@@ -16,7 +16,7 @@ It is an independent local implementation. The official ICC Plus Creator and Vie
 - `docs/cyoa/guide/`, the complete generic CYOA design, authoring, testing, and release guide.
 - `docs/cyoa/legacy/`, the legacy ICC migration reference used by `cyoa-migrate`.
 - `docs/cyoa/`, generic audit rules, authoring rules, skill usage, and playtest prompts.
-- The files under `examples/` provide tested rc12 command, selector, session, and automation examples.
+- The files under `examples/` provide tested command, selector, continuation-state, and automation examples.
 - `examples/simple-cyoa/` is a small phased CYOA with builder scripts and a player-safe smoke test.
 - `examples/main-cyoa-development/` is a validated standalone excerpt derived from the current 6.6.11 main CYOA.
 
@@ -75,12 +75,12 @@ Start with these files when more detail is needed:
 - [`docs/LLM_USAGE.md`](docs/LLM_USAGE.md) for the agent workflow.
 - [`docs/PHASED_AUTHORING.md`](docs/PHASED_AUTHORING.md) and [`docs/AUTHORING_SCRIPTS.md`](docs/AUTHORING_SCRIPTS.md) for structured edits.
 - [`docs/FIELD_CATALOG.md`](docs/FIELD_CATALOG.md) and [`docs/ICCPLUS_FIELD_REFERENCE.md`](docs/ICCPLUS_FIELD_REFERENCE.md) for native fields.
-- [`docs/PLAY_STRUCTURE.md`](docs/PLAY_STRUCTURE.md) for the rc11 player-visible Row, Choice, and Addon model.
+- [`docs/PLAY_STRUCTURE.md`](docs/PLAY_STRUCTURE.md) for the current player-visible Row, Choice, and Addon model.
 - [`docs/GAMEPLAY_RUNNER.md`](docs/GAMEPLAY_RUNNER.md) for progressive player-safe tests.
 - [`docs/VISUAL_WORKFLOW.md`](docs/VISUAL_WORKFLOW.md) for images and presentation work.
 - [`COVERAGE.md`](COVERAGE.md) for the local simulator boundary.
 
-Historical per-version audit reports are intentionally not carried in the working documentation set. Release history remains in [`RELEASE_NOTES.md`](RELEASE_NOTES.md).
+Historical per-version audit reports are retained as evidence and labeled by the version they audited. Current workflow instructions live in the non-historical docs and [`RELEASE_NOTES.md`](RELEASE_NOTES.md).
 
 ## Examples
 
@@ -111,7 +111,7 @@ The scripts build `build/project.json` from the phase files in `project-src/` an
 
 ### Main CYOA development excerpt
 
-`examples/main-cyoa-development/` is derived from the in-development 6.6.11 main CYOA. It preserves seven real species-builder rows, 26 real Choices, current IDs, player-facing text, and the original row selection limits. Cross-section Requirements, Scores, Groups, and generated relationships are deliberately omitted so the excerpt remains standalone and reproducible.
+`examples/main-cyoa-development/` is an earlier development excerpt derived from the 6.6.11 main CYOA. It preserves seven real species-builder rows, 26 real Choices, current IDs, player-facing text, and the original row selection limits. Cross-section Requirements, Scores, Groups, and generated relationships are deliberately omitted so the excerpt remains standalone and reproducible.
 
 ```bash
 cd examples/main-cyoa-development
