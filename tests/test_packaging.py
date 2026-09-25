@@ -114,4 +114,4 @@ def test_creator_save_payload_matches_returned_official_2106_field_roundtrip():
     root = Path(__file__).resolve().parents[1]
     source = json.loads((root / 'verification' / 'fixtures' / '01_field_retention.json').read_text(encoding='utf-8'))
     expected = json.loads((root / 'tests' / 'fixtures' / 'official_2106_field_roundtrip.json').read_text(encoding='utf-8'))
-    assert creator_save_payload(source) == expected
+    assert creator_save_payload(source, target_version='2.10.6') == expected
