@@ -222,7 +222,7 @@ Playback belongs to Viewer testing.
 
 ## Category
 
-ICC Plus categories do not use a string ID in the reviewed 2.10.6 type. Their identity is `(type, idx)`:
+ICC Plus categories do not use a string ID in the reviewed 2.10.7 type. Their identity is `(type, idx)`:
 
 ```json
 {
