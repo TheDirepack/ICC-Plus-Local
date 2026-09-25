@@ -1323,7 +1323,47 @@ def cmd_summary(a: argparse.Namespace) -> int:
 
 
 def cmd_validate(a: argparse.Namespace) -> int:
-    report = validate(load(a.project, require_iccplus=False)); emit(report); return 0 if report['valid'] else 2
+    report = validate(load(a.project, require_iccplus=False), complete=bool(getattr(a, 'complete', False)))
+    emit(report)
+    return 0 if report['valid'] else 2
+
+
+def cmd_project_validate(a: argparse.Namespace) -> int:
+    project = load(a.project, require_iccplus=False)
+    complete = not bool(getattr(a, 'compat', False))
+    report = validate(project, complete=complete)
+    out = {
+        'ok': report['valid'],
+        'mode': 'complete' if complete else 'compatibility',
+        'target_version': ICCPLUS_VERSION,
+        'summary': ProjectIndex(project).summary(),
+        'validation': report,
+        'completeness': completeness_summary(project),
+    }
+    emit(out)
+    return 0 if out['ok'] else 2
+
+
+def cmd_project_hydrate(a: argparse.Namespace) -> int:
+    project = load(a.project, require_iccplus=False)
+    changes = hydrate_project(project, upgrade_version=True)
+    report = validate_complete(project)
+    written = None
+    if not a.dry_run and report['valid']:
+        written = a.output or a.project
+        save(written, project)
+    out = {
+        'ok': report['valid'],
+        'target_version': ICCPLUS_VERSION,
+        'written': written,
+        'dry_run': bool(a.dry_run),
+        'change_count': len(changes),
+        'changes': changes,
+        'validation': report,
+        'completeness': completeness_summary(project),
+    }
+    emit(out)
+    return 0 if out['ok'] else 2
 
 
 def cmd_list(a: argparse.Namespace) -> int:
