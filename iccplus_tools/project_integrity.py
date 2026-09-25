@@ -117,7 +117,7 @@ def _same_wire_type(expected: Any, actual: Any) -> bool:
     return isinstance(actual, type(expected))
 
 
-def hydrate_project(project: dict[str, Any]) -> list[dict[str, Any]]:
+def hydrate_project(project: dict[str, Any], *, upgrade_version: bool = False) -> list[dict[str, Any]]:
     """Fill missing official project-level fields in place.
 
     Existing values always win. Nested official objects (currently global
@@ -143,6 +143,16 @@ def hydrate_project(project: dict[str, Any]) -> list[dict[str, Any]]:
                 fill(current, default, p)
 
     fill(project, baseline)
+    if upgrade_version and project.get('version') != ICCPLUS_VERSION:
+        previous = project.get('version')
+        project['version'] = ICCPLUS_VERSION
+        changes.append({
+            'path': '/version',
+            'action': 'upgraded',
+            'from': previous,
+            'to': ICCPLUS_VERSION,
+            'source': 'pinned_official_target',
+        })
     return changes
 
 
