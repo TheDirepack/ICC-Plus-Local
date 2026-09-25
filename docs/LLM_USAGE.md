@@ -27,7 +27,7 @@ iccplus-local reference schema structure-ops
 
 Single and bulk edits use the same phase commands. Prefer `items`, `refs`, and `where` selectors over issuing many one-object commands. Use `expect` when selector cardinality matters.
 
-Normal edits validate automatically before write. Do not plan a separate validation command after each edit.
+Normal edits hydrate missing official Creator defaults and complete-validate automatically before write. Do not plan a separate validation command after each edit. Before handing off, packaging, or publishing an externally supplied legacy project, use `project validate`; use `project hydrate` first only when the report shows missing official baseline fields.
 
 ## Style and images
 
@@ -64,7 +64,7 @@ When an audit depends on hierarchy, assert `row_choices` and `choice_rows` rathe
 
 - `template`: entity defaults, style presets, design files
 - `media`: images, crops, fonts, sound, asset probing
-- `project`: formatting, export, fragments, IDs, Build Form serialization
+- `project`: complete validation/hydration, formatting, export, fragments, IDs, Build Form serialization
 - `reference`: commands, capabilities, schemas, fields, types, guides, parity, symbols
 
 Compatibility aliases are for old scripts only and should not be emitted by new automation.
