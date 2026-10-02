@@ -147,21 +147,23 @@ def omission_probe_cases() -> list[dict[str, Any]]:
         note='Pinned global default is 1 while the private missing-field initializer is 0. Keep explicit 1 unless Viewer testing disproves the source-derived mismatch.',
     ))
 
-    for case_id, array_value, removed_index, label in (
-        ('array-null-entry', [None, {'keep': 'yes'}], 0, 'null array member'),
-        ('array-empty-object-entry', [{}, {'keep': 'yes'}], 0, 'empty-object array member'),
+    # Use a real native ICC Plus array for removeNulls probes so the experiment
+    # does not also depend on unknown top-level-key handling.
+    for case_id, array_value, label in (
+        ('array-null-entry', [None, {'id': 'probe-md'}], 'null array member'),
+        ('array-empty-object-entry', [{}, {'id': 'probe-md'}], 'empty-object array member'),
     ):
         baseline = _base_project()
-        baseline['probeArray'] = copy.deepcopy(array_value)
+        baseline['mdObjects'] = copy.deepcopy(array_value)
         candidate = copy.deepcopy(baseline)
-        candidate['probeArray'].pop(removed_index)
+        candidate['mdObjects'].pop(0)
         cases.append(_case(
             case_id,
             baseline,
             candidate,
-            path=f'/probeArray/{removed_index}',
+            path='/mdObjects/0',
             category='remove-nulls-array-filtering',
-            note=f'Confirm that the Viewer import path filters a {label} exactly as if it had been omitted before serialization.',
+            note=f'Confirm that the Viewer import path filters a {label} from native mdObjects exactly as if it had been omitted before serialization.',
         ))
 
     return cases
