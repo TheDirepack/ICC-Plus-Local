@@ -25,6 +25,11 @@ RUNTIME_DISCARDED_TOP_LEVEL = frozenset({
     'objectMap', 'pointTypeMap', 'wordMap',
 })
 
+CREATOR_ONLY_TOP_LEVEL = frozenset({'isEditModeOnAll'})
+ROW_CREATOR_ONLY_FIELDS = frozenset({'isEditModeOn', 'isSimpleEditMode', 'isRequirementOpen'})
+CHOICE_CREATOR_ONLY_FIELDS = frozenset({'isEditModeOn'})
+ADDON_CREATOR_ONLY_FIELDS = frozenset({'isEditModeOn'})
+
 RETAINED_STYLING_DEFAULTS: dict[str, Any] = {
     'customMultiTextFont': False,
     'multiChoiceCounterPosition': 0,
@@ -108,6 +113,19 @@ def _strip_null_object_members(value: Any, path: str, removals: list[dict[str, s
             _strip_null_object_members(item, f'{path}/{index}', removals)
 
 
+def _strip_creator_only_fields(
+    entity: Any,
+    fields: frozenset[str],
+    path: str,
+    removals: list[dict[str, str]],
+) -> None:
+    if not isinstance(entity, dict):
+        return
+    for key in fields:
+        if key in entity:
+            _remove(entity, key, f'{path}/{key}', 'viewer_ignores_creator_edit_state', removals)
+
+
 def _strip_creator_category_metadata(app: dict[str, Any], removals: list[dict[str, str]]) -> None:
     # Categories organize Creator dialogs only. The pinned Viewer store never
     # reads app.categories or an entity's category index.
@@ -126,6 +144,19 @@ def _strip_creator_category_metadata(app: dict[str, Any], removals: list[dict[st
                     'viewer_ignores_creator_category_metadata',
                     removals,
                 )
+
+
+def _strip_redundant_legacy_sfx_id(entity: Any, path: str, removals: list[dict[str, str]]) -> None:
+    if not isinstance(entity, dict) or 'sfxId' not in entity:
+        return
+    # initializeApp only uses legacy sfxId to backfill a missing direction ID,
+    # then unconditionally deletes sfxId. If every enabled direction already
+    # has an explicit modern ID, the legacy source field cannot affect runtime.
+    if entity.get('sfxOnSelect') and 'sfxIdOnSelect' not in entity:
+        return
+    if entity.get('sfxOnDeselect') and 'sfxIdOnDeselect' not in entity:
+        return
+    _remove(entity, 'sfxId', f'{path}/sfxId', 'legacy_sfx_id_redundant_after_explicit_direction_ids', removals)
 
 
 def _strip_private_filter_defaults(entity: Any, path: str, removals: list[dict[str, str]]) -> None:
@@ -228,6 +259,8 @@ def _strip_loader_migrated_or_requireds(requireds: Any, path: str, removals: lis
 def _strip_addon(addon: Any, path: str, removals: list[dict[str, str]]) -> None:
     if not isinstance(addon, dict):
         return
+    _strip_creator_only_fields(addon, ADDON_CREATOR_ONLY_FIELDS, path, removals)
+    _strip_redundant_legacy_sfx_id(addon, path, removals)
     # Pinned Viewer normalizes both missing and explicit 0 to template 1.
     if addon.get('template', _MISSING) in {0, 1}:
         _remove(addon, 'template', f'{path}/template', 'addon_template_normalizes_to_one', removals)
@@ -246,6 +279,8 @@ def _strip_choice(
 ) -> None:
     if not isinstance(choice, dict):
         return
+    _strip_creator_only_fields(choice, CHOICE_CREATOR_ONLY_FIELDS, path, removals)
+    _strip_redundant_legacy_sfx_id(choice, path, removals)
     if 'index' in choice:
         _remove(choice, 'index', f'{path}/index', 'choice_index_rebuilt_from_position', removals)
 
@@ -287,6 +322,7 @@ def _strip_row(
 ) -> None:
     if not isinstance(row, dict):
         return
+    _strip_creator_only_fields(row, ROW_CREATOR_ONLY_FIELDS, path, removals)
     if 'index' in row:
         _remove(row, 'index', f'{path}/index', 'row_index_rebuilt_from_position', removals)
     if backpack and row.get('isBackpack') is True:
@@ -332,8 +368,12 @@ def sparsify_project(
         if key in sparse:
             _remove(sparse, key, f'/{key}', 'viewer_discards_top_level_runtime_field', removals)
 
+    for key in sorted(CREATOR_ONLY_TOP_LEVEL):
+        if key in sparse:
+            _remove(sparse, key, f'/{key}', 'viewer_ignores_creator_edit_state', removals)
+
     for key, default in DEFAULT_APP.items():
-        if key in _SPECIAL_TOP_LEVEL or key in RUNTIME_DISCARDED_TOP_LEVEL:
+        if key in _SPECIAL_TOP_LEVEL or key in RUNTIME_DISCARDED_TOP_LEVEL or key in CREATOR_ONLY_TOP_LEVEL:
             continue
         if sparse.get(key, _MISSING) == default:
             _remove(sparse, key, f'/{key}', 'top_level_exact_default_app_value', removals)
