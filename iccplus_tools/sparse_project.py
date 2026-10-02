@@ -25,7 +25,28 @@ RUNTIME_DISCARDED_TOP_LEVEL = frozenset({
     'objectMap', 'pointTypeMap', 'wordMap',
 })
 
-CREATOR_ONLY_TOP_LEVEL = frozenset({'isEditModeOnAll'})
+# These values belong to Creator authoring state or entity-construction defaults.
+# The pinned standalone Viewer never consumes them. Keep Viewer-sensitive app
+# defaults such as defaultChoiceMaxNum, defaultAddonJustify, requirement text
+# ordering, cropperPosition, tooltipDelay, and display/runtime settings explicit.
+CREATOR_ONLY_TOP_LEVEL = frozenset({
+    'isEditModeOnAll',
+    'tmpRow', 'tmpChoice', 'tmpRequired', 'tmpScore', 'tmpAddon', 'tmpGroup', 'tmpDesignGroup',
+    'printThis',
+    'autoSaveIsOn', 'buildAutoSaveIsOn', 'buildAutoSaveInterval',
+    'checkDeleteRow', 'checkDeleteObject', 'checkSelectAll',
+    'compressImageAuto', 'useTextEditor', 'useChoiceEditBtn', 'enableShortcut',
+    'defaultRowTitle', 'defaultRowText',
+    'defaultChoiceTitle', 'defaultChoiceText',
+    'defaultBeforePoint', 'defaultAfterPoint',
+    'defaultBeforeReq', 'defaultAfterReq',
+    'defaultAddonTitle', 'defaultAddonText',
+    'defaultRowTemplate', 'defaultRowWidth', 'defaultRowJustify', 'defaultRowAllowedChoices',
+    'defaultChoiceTemplate', 'defaultChoiceWidth',
+    'defaultAddonTemplate', 'defaultAddonWidth',
+    'defaultUseSeperateAddon', 'defaultUseShowAddon', 'defaultUseHideAddon',
+    'defaultUseShowScore', 'defaultUseHideValue', 'defaultUseShowReq',
+})
 ROW_CREATOR_ONLY_FIELDS = frozenset({'isEditModeOn', 'isSimpleEditMode', 'isRequirementOpen'})
 CHOICE_CREATOR_ONLY_FIELDS = frozenset({'isEditModeOn'})
 ADDON_CREATOR_ONLY_FIELDS = frozenset({'isEditModeOn'})
