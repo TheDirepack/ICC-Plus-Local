@@ -44,37 +44,49 @@ Normal writes fill missing official Creator defaults and run complete-project va
 
 Local and embedded images are compressed automatically when assigned. Do not add a manual compression step to ordinary authoring.
 
-## Large-project normalization rules
+## Compiler boundary
 
-For a compiler-driven or otherwise source-driven project, normalize the semantic model before trying to reduce raw JSON bytes. Read `../../docs/cyoa/guide/21-large-project-normalization.md` before a large structural or release-compaction pass.
+ICC Plus Local is the native ICC Plus compatibility, validation, serialization, and local-runtime layer. It should reproduce native behavior and validate native projects without guessing higher-level author intent.
 
-Use these defaults unless the project has a tested reason not to:
+Read `../../docs/COMPILER_BOUNDARY.md` before changing large-project normalization behavior.
 
-- Keep readable semantic IDs in the authoritative source.
-- Treat generated `project.json` as output, not a second editable master.
-- Put ordinary presentation in project styling; use official Design Groups for reusable exceptions; use private styling only for real one-offs.
-- Prefer linking a Design Group through an existing semantic ICC Group instead of repeating the Design Group ID on every member.
-- Hide a branch at the deepest Row that owns the gate. A Mouth detail Row should normally require Mouth, not Mouth plus Head plus Species plus every ancestor.
-- If every Choice in a multi-Choice Row has the same visibility Requirement, promote that Requirement to the Row once. Keep Choice-level gates only when choices inside the visible Row genuinely differ.
-- Do not confuse visibility with cleanup. A Row becoming hidden does not prove already selected children were deselected.
-- Set `allowedChoices` to the real maximum for Pick 1 / Pick N direct-Choice Rows. `0` means unlimited.
-- Merge one-card Rows only when the neighboring Row has compatible visibility, selection limits, layout role, and explanatory text.
-- Keep source-only semantic tags out of runtime Groups unless some runtime feature consumes the Group.
-- If a release pipeline compacts runtime identities, make the mapping deterministic, stable, reversible, and complete. Never randomize public runtime IDs on every build.
+The source compiler or lowering layer owns transformations that require semantic knowledge not present in arbitrary ICC Plus JSON. In particular, ICC Plus Local must not silently:
 
-### Target-version caveat: selectable Addons
+- remove redundant ancestor Requirements;
+- promote identical Choice gates to a Row;
+- deduplicate project styling into Design Groups;
+- decide that source taxonomy should or should not become runtime Groups;
+- merge one-card Rows or unrelated axes;
+- infer Pick 1 / Pick N intent from presentation;
+- compact public runtime IDs or remap a project's identity graph.
 
-The current tool target is ICC Plus 2.10.7. Do not assume Row choice limits can replace selectable-Addon radio/exclusion logic on this target. Upstream 2.10.8 specifically fixed an issue where changing choices per Row could not change Addons per Row. Keep a verified explicit Addon mechanism until the project target is upgraded and tested.
+ICC Plus Local may validate the native output of those transformations. It may also report native facts such as `allowedChoices: 0` meaning unlimited, dangling references, malformed Requirements, or Creator-incomplete structure. The compiler decides how to fix source-level redundancy or layout.
+
+## Native semantic rules relevant to compilers
+
+A Row becoming hidden does not prove that selected children were deselected. Visibility and cleanup are separate mechanics. If provider loss should invalidate a child selection, the compiler must emit and test an explicit native cleanup mechanism.
+
+`allowedChoices: 0` means unlimited. ICC Plus Local preserves and simulates that meaning. A source compiler that knows a Row is Pick 1 or Pick N should emit the real positive maximum instead of expecting the local runtime to infer intent.
+
+Creator-complete fields are part of native compatibility. Do not strip official eager/default fields merely to reduce JSON size. The compiler should remove duplicated author intent before generation rather than deleting required native structure afterwards.
+
+### ICC Plus 2.10.8 Addon changelog correction
+
+Upstream 2.10.8 says “Change choices per row could not change addons per row.” The corresponding source change updates width application so selectable Addons use `addonWidth` while Rows and Choices use `objectWidth`. It is a layout-width fix, not evidence of a change to `allowedChoices` selection limits.
+
+Do not use that changelog entry as justification for replacing tested selectable-Addon exclusion logic with Row selection limits. Such a replacement requires direct target-Viewer evidence for the actual mechanic.
 
 ## Styling rule
 
-Use the broadest native ICC Plus scope that fits. Start with project-wide styling, then use official Row/Choice Design Groups for reusable visual families. Link Design Groups through ordinary ICC Groups when Group membership itself defines the visual family. Use private Row styling only for a true one-Row exception, and private Choice styling only for a true one-Choice exception when neither project styling nor a Design Group fits. Do not duplicate the same inline styling across many Choices. Use custom CSS only when native ICC Plus styling cannot express the required presentation.
+Use the broadest native ICC Plus scope that fits when directly authoring a native project: project-wide styling, then official Row/Choice Design Groups for reusable visual families, then private Row/Choice exceptions. Link Design Groups through ordinary ICC Groups when Group membership itself defines the visual family. Use custom CSS only when native ICC Plus styling cannot express the required presentation.
+
+For source-driven projects, deciding when to consolidate repeated style intent is a compiler responsibility. ICC Plus Local only applies and validates the native styling operations it is given.
 
 ## Player-view rule
 
 When using `play`, Rows, direct Choices, and Addons are separate entity types. The current player view exposes flat `rows`, `choices`, and `addons` lists plus explicit parent/child IDs. Do not reconstruct the hierarchy from the legacy nested compatibility field when the explicit links are available.
 
-For normalized projects, test effective behavior rather than old physical storage. A gate promoted from every Choice to its Row is still the same player rule if the visible and selectable states match. Conversely, test cleanup separately because hidden selected state can persist.
+Test effective behavior rather than assuming a particular source-level transformation. Test cleanup separately because hidden selected state can persist.
 
 Read `functions/play.md` before doing player simulation or play audits. The full data model is documented in `../../docs/PLAY_STRUCTURE.md`.
 
@@ -92,8 +104,9 @@ Useful starting documents include:
 - `LLM_USAGE.md` for the broader agent workflow.
 - `PHASED_AUTHORING.md` and `AUTHORING_SCRIPTS.md` for edits.
 - `FIELD_CATALOG.md` and `ICCPLUS_FIELD_REFERENCE.md` for native fields.
-- `cyoa/guide/21-large-project-normalization.md` for structural normalization and release compaction.
+- `COMPILER_BOUNDARY.md` for the boundary between native ICC Plus behavior and source-level lowering/normalization.
+- `cyoa/guide/21-large-project-normalization.md` for compiler/build normalization guidance.
 
 ## Verification status
 
-rc13 keeps the automated GitHub Actions regression gate and checks for the compressed CYOA skill/documentation package. Official Creator/Viewer browser verification remains a separate release gate, especially for rendering, selectable-Addon target-version behavior, and the fresh 2.10.7 browser round-trip.
+rc13 keeps the automated GitHub Actions regression gate and checks for the compressed CYOA skill/documentation package. Local simulation is not browser proof. Official Creator/Viewer verification remains a separate release gate for rendering, browser-only behavior, and target-version details that are not covered by source-derived local parity.
