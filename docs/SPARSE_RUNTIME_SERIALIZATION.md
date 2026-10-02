@@ -58,7 +58,17 @@ The same generator is available as:
 python -m iccplus_tools.omission_probe -o verification/sparse-omission
 ```
 
-The generated manifest reports a case count and per-category counts. The default matrix covers:
+For incremental testing, restrict output by exact case ID or manifest category:
+
+```text
+iccplus-omission-probe --case viewer-config-title -o verification/one-case
+iccplus-omission-probe --category private-style-enable-inference -o verification/private-flags
+iccplus-omission-probe --core-only -o verification/core-omissions
+```
+
+The generated `manifest.json` reports a case count and per-category counts. `results.json` is a matching test ledger with every case initially marked `untested`; record the Viewer build, browser, rendering/interaction/save-reload equivalence, console errors, and notes there. Valid statuses are `equivalent`, `behavior-change`, `load-failure`, and `needs-more-testing` in addition to `untested`.
+
+The default exhaustive matrix covers:
 
 - every member of a retained custom `viewerConfig`;
 - every not-yet-proven stock-valued member of a retained custom global `styling` object;
