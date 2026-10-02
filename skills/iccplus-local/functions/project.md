@@ -7,10 +7,18 @@ Use `project validate` for final Creator-complete validation of an imported or e
 For source-driven large projects, distinguish three artifacts when useful:
 
 - authoritative semantic source,
-- readable semantic/test `project.json`,
-- optional compact runtime release `project.json`.
+- readable Creator-complete semantic/test `project.json`,
+- compact runtime release `project.json`.
 
 Do not edit the compact release artifact as a second source.
+
+## Runtime serialization
+
+Player-facing runtime serialization omits every native value currently proven behavior-equivalent when absent in the pinned ICC Plus 2.10.7 Viewer. This is the default runtime policy, not an optional generic cleanup pass.
+
+Creator Save-to-Disk and Creator-compatible exports remain Creator-complete. Runtime omission happens after the native authoring artifact has been validated. The serializer uses an explicit, version-pinned whitelist and conditional rules rather than treating schema-optional fields or Creator construction defaults as automatically removable.
+
+Read `../../../docs/SPARSE_RUNTIME_SERIALIZATION.md` for the proven omission set. For unresolved cases, generate one-omission-at-a-time browser artifacts with `python -m iccplus_tools.omission_probe -o verification/sparse-omission`. Promote a new omission only after the candidate behaves like its baseline in the pinned Viewer; load success alone is insufficient.
 
 ## Runtime ID compaction boundary
 
@@ -27,6 +35,6 @@ If a source compiler or release pipeline compacts runtime IDs, that layer must:
 
 After that transformation, use ICC Plus Local to validate the compact native artifact, exercise relevant runtime/save-load paths, and inspect references. Reverse-mapped semantic equivalence is a compiler/release-pipeline proof, not a hidden `project` rewrite.
 
-Do not strip official Creator-complete eager/default fields only to reduce file size. Remaining schema overhead is preferable to a smaller project that the target Creator cannot round-trip safely.
+Do not remove native fields from Creator-complete authoring artifacts merely for size. Runtime release payloads may omit only values covered by the pinned Viewer behavior-equivalence rules.
 
-Read `../../../docs/COMPILER_BOUNDARY.md` and `../../../docs/cyoa/guide/21-large-project-normalization.md` for the source-compiler boundary and release-compaction rules.
+Read `../../../docs/COMPILER_BOUNDARY.md`, `../../../docs/SPARSE_RUNTIME_SERIALIZATION.md`, and `../../../docs/cyoa/guide/21-large-project-normalization.md` for the serialization/compiler boundary and release-compaction rules.

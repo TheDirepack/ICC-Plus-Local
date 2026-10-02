@@ -11,6 +11,7 @@ Source-driven project optimization belongs in the compiler or lowering layer in 
 - Native Row, Choice, selectable-Addon, Requirement, Group, Score, Point, effect, and build-string semantics.
 - Player-safe local simulation and deterministic regression support.
 - Serialization, import/export, and reference-integrity checks.
+- Viewer-runtime omission rules when absence is proven behavior-equivalent for the pinned target.
 - Diagnostics for ambiguous or unsafe native states when they can be identified without guessing author intent.
 - Explicit documentation of where local simulation is not browser or target-Viewer proof.
 
@@ -43,9 +44,13 @@ Upstream ICC Plus 2.10.8's changelog says that “Change choices per row could n
 
 Do not use the 2.10.8 changelog entry as justification for replacing tested selectable-Addon exclusion logic with Row selection limits. Any such replacement needs direct target-Viewer evidence for the actual mechanic.
 
-### Creator-complete size
+### Creator-complete authoring versus sparse runtime serialization
 
-Creator-eager/default fields are native project structure. ICC Plus Local should preserve required compatibility fields. A compiler may reduce duplicated author intent before generation, but byte reduction alone is not a reason to strip native fields from the final project.
+Creator-eager/default fields are native authoring structure. Creator-complete projects, Creator Save-to-Disk output, and Creator-compatible exports should preserve the fields required for reliable Creator round-tripping.
+
+The player-facing runtime payload is a different serialization target. ICC Plus Local may omit a native field there only when its absence is proven behavior-equivalent in the pinned Viewer. This is native serialization, not source-level normalization. Schema optionality, matching a Creator construction default, or saving bytes is not enough evidence on its own.
+
+The default runtime serializer therefore strips the pinned 2.10.7 omission whitelist automatically while retaining unproven fields. Read `SPARSE_RUNTIME_SERIALIZATION.md` for the current rules and the generated browser-verification kit.
 
 ### Local simulation versus browser proof
 

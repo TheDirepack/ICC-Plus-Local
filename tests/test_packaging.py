@@ -46,7 +46,7 @@ class PackagingTests(unittest.TestCase):
         self.assertEqual(list(assets), ['images/Bg.png', 'images/R1.png'])
         self.assertEqual(assets['images/Bg.png'], b'PNGDATA')
 
-    def test_export_project_zip_contains_compact_project_and_assets(self):
+    def test_export_project_zip_contains_complete_creator_project_and_assets(self):
         p = new_project()
         p['viewerConfig']['loadingBgImage'] = data_url(b'BG')
         with tempfile.TemporaryDirectory() as td:
@@ -61,6 +61,11 @@ class PackagingTests(unittest.TestCase):
                 project = json.loads(raw)
                 self.assertEqual(project['viewerConfig']['loadingBgImage'], 'images/Loading.png')
                 self.assertEqual(project['version'], '2.10.7')
+                # Creator-compatible export remains complete rather than using
+                # the runtime omission serializer.
+                self.assertIn('rows', project)
+                self.assertIn('styling', project)
+                self.assertIn('backpack', project)
 
     def _template(self, path: Path, *, local: bool = False) -> None:
         html = '<!doctype html><html><head><title>Old</title></head><body><span id="projectSize">0</span><div id="indicator" class="old">old</div></body></html>'
@@ -71,7 +76,7 @@ class PackagingTests(unittest.TestCase):
             if local:
                 zf.writestr('js/app.js', 'x\n/*! Delete and replace project below */\n{}\n/*! End */\ny')
 
-    def test_build_web_viewer_writes_project_and_loading_config(self):
+    def test_build_web_viewer_writes_sparse_project_and_loading_config(self):
         p = new_project()
         p['viewerConfig']['title'] = 'My CYOA'
         p['viewerConfig']['loadingText'] = '<b>Loading</b><script>bad()</script>'
@@ -82,8 +87,17 @@ class PackagingTests(unittest.TestCase):
             out = td / 'built.zip'
             report = build_viewer_package(p, template, out, mode='web', separate_images=False)
             self.assertEqual(report['mode'], 'web')
+            self.assertTrue(report['runtime_sparse'])
+            self.assertGreater(report['runtime_omissions'], 0)
+            self.assertGreater(report['runtime_bytes_removed'], 0)
             with zipfile.ZipFile(out) as zf:
                 self.assertIn('project.json', zf.namelist())
+                runtime = json.loads(zf.read('project.json'))
+                self.assertEqual(runtime['version'], '2.10.7')
+                self.assertNotIn('rows', runtime)
+                self.assertNotIn('styling', runtime)
+                # viewerConfig remains because this test deliberately customizes it.
+                self.assertEqual(runtime['viewerConfig']['title'], 'My CYOA')
                 html_text = zf.read('index.html').decode()
                 self.assertIn('<title>My CYOA</title>', html_text)
                 self.assertIn('class="spinner"', html_text)
@@ -91,17 +105,20 @@ class PackagingTests(unittest.TestCase):
                 self.assertNotIn('<script>', html_text)
                 self.assertIn('--bg:', zf.read('css/loading.css').decode())
 
-    def test_build_local_viewer_embeds_project_marker(self):
+    def test_build_local_viewer_embeds_sparse_project_marker(self):
         p = new_project()
         with tempfile.TemporaryDirectory() as td:
             td = Path(td)
             template = td / 'local.zip'; self._template(template, local=True)
             out = td / 'built.zip'
-            build_viewer_package(p, template, out, mode='local', separate_images=False)
+            report = build_viewer_package(p, template, out, mode='local', separate_images=False)
+            self.assertTrue(report['runtime_sparse'])
             with zipfile.ZipFile(out) as zf:
                 self.assertNotIn('project.json', zf.namelist())
                 js = zf.read('js/app.js').decode()
                 self.assertIn('"version":"2.10.7"', js)
+                self.assertNotIn('"rows":[]', js)
+                self.assertNotIn('"viewerConfig":', js)
                 self.assertIn('/*! End */', js)
 
 

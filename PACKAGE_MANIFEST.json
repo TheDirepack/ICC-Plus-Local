@@ -5,13 +5,11 @@
   "target_source_commit": "1ea9db888cde2286d18d0d5de50933cb8773b739",
   "candidate_role": "LLM-first ICC Plus 2.10.7 authoring plus a compressed high-level CYOA planning/review/migration/release skill set",
   "local_regression": {
-    "normal_tests": "332 passed",
-    "checked_in_examples": "all passed",
+    "normal_tests": "CI workflow is authoritative for the current branch",
+    "checked_in_examples": "CI workflow is authoritative for the current branch",
     "ci_workflow": ".github/workflows/tests.yml",
-    "ci_verified_on_pr": 5,
     "default_export_bytes": 13414,
-    "default_export_sha256": "10e9b3ba3ccee2a9ca7e2ce2753e2f61fc2e289549629f2c2d6235cc0705f68d",
-    "rc13_workflow_run": 36196654260
+    "default_export_sha256": "10e9b3ba3ccee2a9ca7e2ce2753e2f61fc2e289549629f2c2d6235cc0705f68d"
   },
   "project_integrity": {
     "canonical_final_validation": "project validate",
@@ -20,6 +18,14 @@
     "compatibility_validation": "available for legacy read-only inspection with project validate --compat",
     "identity_policy": "hydration never invents missing entity identities",
     "version_policy": "older supported projects may upgrade to 2.10.7; future versions are never downgraded"
+  },
+  "runtime_serialization": {
+    "policy": "player-facing Viewer payloads omit every pinned 2.10.7 field currently proven behavior-equivalent when absent",
+    "creator_artifacts": "Creator Save-to-Disk and Creator-compatible project exports remain complete",
+    "standalone_command": "iccplus-sparse",
+    "verification_command": "iccplus-omission-probe",
+    "verification_policy": "unproven omissions require isolated pinned-Viewer baseline/candidate testing before promotion",
+    "rules_document": "docs/SPARSE_RUNTIME_SERIALIZATION.md"
   },
   "style_policy": {
     "default_scope_order": [
@@ -73,6 +79,8 @@
     "cyoa_guide": "docs/cyoa/guide/",
     "legacy_migration_reference": "docs/cyoa/legacy/legacy-icc-migration-reference.md",
     "skill_routing": "docs/cyoa/skills-usage.md",
+    "compiler_boundary": "docs/COMPILER_BOUNDARY.md",
+    "runtime_serialization": "docs/SPARSE_RUNTIME_SERIALIZATION.md",
     "current_target": "ICC Plus 2.10.7"
   }
 }
