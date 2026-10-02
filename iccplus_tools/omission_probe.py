@@ -2,10 +2,12 @@ from __future__ import annotations
 
 """Generate isolated ICC Plus 2.10.7 Viewer omission verification artifacts.
 
-Each case contains a Creator-complete baseline and a candidate that differs by
-one omission under test. The suite is intentionally browser-facing: unknown
-cases must not be promoted into the default sparse serializer until the pinned
-Viewer has shown equivalent behavior.
+Ordinary omission cases contain a Creator-complete baseline and a candidate
+that differs by one omission under test. Import-cleanup cases deliberately put
+the null/empty member under test in the baseline and use the cleaned project as
+the valid control. The suite is browser-facing: unknown cases must not be
+promoted into the default sparse serializer until the pinned Viewer has shown
+equivalent behavior.
 """
 
 import copy
@@ -174,9 +176,9 @@ def _readme(case_count: int) -> str:
 
 This directory contains {case_count} isolated browser-verification cases generated against ICC Plus {ICCPLUS_VERSION} commit `{ICCPLUS_COMMIT}`.
 
-For each case, load `baseline.json` and `candidate.json` separately in the pinned Viewer. Compare load success, visible layout/text/style, selection behavior, counters/scores, and browser console errors. Record the result in `results.json` or your test log.
+For ordinary omission cases, load `baseline.json` and `candidate.json` separately in the pinned Viewer and compare load success, visible layout/text/style, selection behavior, counters/scores, and browser console errors. For `remove-nulls-array-filtering` cases, the baseline deliberately contains the pre-import null/empty array member and the candidate is the cleaned control; compare the post-load result and console behavior.
 
-A candidate may be promoted into the default sparse serializer only when its behavior is indistinguishable from the baseline for the behavior the omitted field controls. Load success alone is not sufficient.
+A candidate may be promoted into the default sparse serializer only when its behavior is indistinguishable from the baseline/control for the behavior the omitted field controls. Load success alone is not sufficient.
 
 The `behavior-change-likely` case is deliberately included as a negative control. It should remain explicit unless testing proves the source-derived mismatch irrelevant.
 """
@@ -205,7 +207,7 @@ def write_omission_probe_suite(output: str | Path) -> dict[str, Any]:
         'format_version': 1,
         'target': {'icc_plus_version': ICCPLUS_VERSION, 'source_commit': ICCPLUS_COMMIT},
         'case_count': len(manifest_cases),
-        'promotion_rule': 'Only promote an omission after pinned-Viewer behavior matches the baseline; load success alone is insufficient.',
+        'promotion_rule': 'Only promote an omission after pinned-Viewer behavior matches the baseline/control; load success alone is insufficient.',
         'cases': manifest_cases,
     }
     (output / 'manifest.json').write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
