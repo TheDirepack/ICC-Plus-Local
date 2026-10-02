@@ -1,4 +1,0 @@
-[console_scripts]
-iccplus-local = iccplus_tools.cli:main
-iccplus-omission-probe = iccplus_tools.omission_probe:main
-iccplus-sparse = iccplus_tools.sparse_project:main
