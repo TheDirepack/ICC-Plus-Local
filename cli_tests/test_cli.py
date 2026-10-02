@@ -178,7 +178,7 @@ class CliTests(unittest.TestCase):
             self.assertEqual(result.returncode, 1)
             self.assertIn('expects number', json.loads(result.stderr)['error'])
 
-    def test_generate_creates_exact_blank_project(self):
+    def test_generate_creates_sparse_blank_project(self):
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / 'project.json'
             result = run_cli('generate', '-o', str(out), '--compact')
@@ -186,28 +186,49 @@ class CliTests(unittest.TestCase):
             value = json.loads(result.stdout)
             self.assertTrue(value['ok'])
             self.assertTrue(value['blank'])
-            self.assertEqual(out.stat().st_size, 13414)
-            self.assertEqual(hashlib.sha256(out.read_bytes()).hexdigest(), '10e9b3ba3ccee2a9ca7e2ce2753e2f61fc2e289549629f2c2d6235cc0705f68d')
+            self.assertEqual(value['serialization']['mode'], 'sparse')
+            saved = json.loads(out.read_text(encoding='utf-8'))
+            self.assertEqual(saved['version'], '2.10.7')
+            self.assertNotIn('viewerConfig', saved)
+            self.assertNotIn('styling', saved)
+            self.assertGreater(value['serialization']['removed_count'], 0)
             self.assertFalse(out.read_bytes().endswith(b'\n'))
 
-    def test_project_validate_distinguishes_complete_from_compatibility(self):
+    def test_generate_not_sparse_requires_explicit_flag(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / 'project.json'
+            result = run_cli('generate', '-o', str(out), '--not-sparse', '--compact')
+            self.assertEqual(result.returncode, 0, result.stderr)
+            value = json.loads(result.stdout)
+            self.assertEqual(value['serialization']['mode'], 'not-sparse')
+            saved = json.loads(out.read_text(encoding='utf-8'))
+            self.assertIn('rows', saved)
+            self.assertIn('viewerConfig', saved)
+            self.assertIn('styling', saved)
+
+            alias = Path(tmp) / 'project-alias.json'
+            alias_result = run_cli('generate', '-o', str(alias), '--not_sparse', '--compact')
+            self.assertEqual(alias_result.returncode, 0, alias_result.stderr)
+            self.assertIn('rows', json.loads(alias.read_text(encoding='utf-8')))
+
+    def test_project_validate_defaults_to_sparse_compatibility_and_can_require_complete(self):
         with tempfile.TemporaryDirectory() as tmp:
             project = Path(tmp) / 'sparse.json'
             project.write_text(json.dumps({'rows': []}), encoding='utf-8')
 
-            strict = run_cli('project', 'validate', str(project), '--compact')
-            self.assertEqual(strict.returncode, 2, strict.stderr)
-            strict_value = json.loads(strict.stdout)
-            self.assertFalse(strict_value['ok'])
-            self.assertEqual(strict_value['mode'], 'complete')
-            self.assertGreater(strict_value['completeness']['issue_count'], 0)
-
-            compat = run_cli('project', 'validate', str(project), '--compat', '--compact')
+            compat = run_cli('project', 'validate', str(project), '--compact')
             self.assertEqual(compat.returncode, 0, compat.stderr)
             compat_value = json.loads(compat.stdout)
             self.assertTrue(compat_value['ok'])
             self.assertEqual(compat_value['mode'], 'compatibility')
             self.assertFalse(compat_value['completeness']['complete'])
+
+            strict = run_cli('project', 'validate', str(project), '--complete', '--compact')
+            self.assertEqual(strict.returncode, 2, strict.stderr)
+            strict_value = json.loads(strict.stdout)
+            self.assertFalse(strict_value['ok'])
+            self.assertEqual(strict_value['mode'], 'complete')
+            self.assertGreater(strict_value['completeness']['issue_count'], 0)
 
     def test_project_hydrate_repairs_sparse_legacy_project(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -227,10 +248,24 @@ class CliTests(unittest.TestCase):
             self.assertEqual(hydrated['version'], '2.10.7')
             self.assertEqual(hydrated['viewerConfig']['title'], 'Legacy title')
             self.assertIn('loadingType', hydrated['viewerConfig'])
-            self.assertIn('styling', hydrated)
-            self.assertIn('backpack', hydrated)
+            self.assertNotIn('styling', hydrated)
+            self.assertNotIn('backpack', hydrated)
+            self.assertEqual(value['serialization']['mode'], 'sparse')
 
-    def test_structure_write_completes_sparse_legacy_project(self):
+            full = Path(tmp) / 'legacy-full.json'
+            full.write_text(json.dumps({
+                'version': '2.10.6',
+                'rows': [],
+                'viewerConfig': {'title': 'Legacy title'},
+            }), encoding='utf-8')
+            full_result = run_cli('project', 'hydrate', str(full), '--not-sparse', '--compact')
+            self.assertEqual(full_result.returncode, 0, full_result.stderr)
+            full_saved = json.loads(full.read_text(encoding='utf-8'))
+            self.assertIn('styling', full_saved)
+            self.assertIn('backpack', full_saved)
+            self.assertEqual(json.loads(full_result.stdout)['serialization']['mode'], 'not-sparse')
+
+    def test_structure_write_validates_complete_then_saves_sparse(self):
         with tempfile.TemporaryDirectory() as tmp:
             project = Path(tmp) / 'legacy.json'
             project.write_text(json.dumps({'version': '2.10.6', 'rows': []}), encoding='utf-8')
@@ -246,11 +281,14 @@ class CliTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             value = json.loads(result.stdout)
             self.assertTrue(value['ok'])
+            self.assertEqual(value['serialization']['mode'], 'sparse')
             final = json.loads(project.read_text(encoding='utf-8'))
             self.assertEqual(final['version'], '2.10.7')
-            self.assertIn('viewerConfig', final)
-            self.assertIn('styling', final)
+            self.assertNotIn('viewerConfig', final)
+            self.assertNotIn('styling', final)
             self.assertEqual(final['rows'][0]['id'], 'row_added')
+            self.assertEqual(run_cli('project', 'validate', str(project), '--compact').returncode, 0)
+            self.assertEqual(run_cli('project', 'validate', str(project), '--complete', '--compact').returncode, 2)
 
     def test_apply_jsonl_from_stdin(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -288,7 +326,7 @@ class CliTests(unittest.TestCase):
             result = run_cli('normalize', str(source), '-o', str(output))
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertTrue(output.exists())
-            self.assertEqual(json.loads(output.read_text())['rows'][0]['index'], 0)
+            self.assertNotIn('index', json.loads(output.read_text())['rows'][0])
             self.assertEqual(json.loads(source.read_text())['rows'][0]['index'], 99)
 
     def test_summary_and_ids_reject_non_iccplus_shape(self):
@@ -495,6 +533,28 @@ class CliTests(unittest.TestCase):
             self.assertTrue((Path(tmp) / 'project.json').exists())
             self.assertTrue((Path(tmp) / 'project-2.json').exists())
 
+    def test_generated_sparse_blank_can_start_normal_authoring(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / 'project.json'
+            generated = run_cli('generate', '-o', str(project), '--compact')
+            self.assertEqual(generated.returncode, 0, generated.stderr)
+            self.assertNotIn('rows', json.loads(project.read_text(encoding='utf-8')))
+
+            script = json.dumps({
+                'format': 'iccplus-structure-ops',
+                'format_version': 1,
+                'strict_fields': True,
+                'operations': [
+                    {'op': 'add', 'kind': 'row', 'values': {'id': 'row_a', 'title': 'A'}},
+                ],
+            })
+            structured = run_cli('structure', str(project), '-', '--compact', stdin=script)
+            self.assertEqual(structured.returncode, 0, structured.stderr)
+            saved = json.loads(project.read_text(encoding='utf-8'))
+            self.assertEqual(saved['rows'][0]['id'], 'row_a')
+            self.assertNotIn('index', saved['rows'][0])
+            self.assertEqual(run_cli('project', 'validate', str(project), '--compact').returncode, 0)
+
     def test_build_replays_strict_apply_scripts_from_blank(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -520,7 +580,30 @@ class CliTests(unittest.TestCase):
             self.assertTrue(receipt['ok'])
             self.assertEqual(len(receipt['steps']), 2)
             self.assertTrue(receipt['build_fingerprint'].startswith('sha256:'))
+            self.assertEqual(receipt['serialization']['mode'], 'sparse')
+            saved = json.loads(out.read_text(encoding='utf-8'))
+            self.assertNotIn('viewerConfig', saved)
+            self.assertNotIn('styling', saved)
+            self.assertNotIn('index', saved['rows'][0])
             self.assertEqual(json.loads(run_cli('show', str(out), 'choice_a').stdout)['value']['title'], 'Choice')
+
+    def test_normal_edit_save_is_sparse_and_remains_editable(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / 'project.json'
+            project.write_bytes(DEMO.read_bytes())
+            first = run_cli('update', str(project), 'sword', '--field', 'title="Blade"', '--compact')
+            self.assertEqual(first.returncode, 0, first.stderr)
+            first_value = json.loads(first.stdout)
+            self.assertEqual(first_value['validation']['serialization']['mode'], 'sparse')
+            sparse = json.loads(project.read_text(encoding='utf-8'))
+            self.assertNotIn('autoSaveInterval', sparse)
+            self.assertNotIn('index', sparse['rows'][0])
+
+            second = run_cli('update', str(project), 'sword', '--field', 'text="Still editable"', '--compact')
+            self.assertEqual(second.returncode, 0, second.stderr)
+            shown = json.loads(run_cli('show', str(project), 'sword', '--compact').stdout)
+            self.assertEqual(shown['value']['title'], 'Blade')
+            self.assertEqual(shown['value']['text'], 'Still editable')
 
     def test_build_rejects_non_strict_script_and_writes_nothing(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -830,6 +913,13 @@ class PackagingCliTests(unittest.TestCase):
             self.assertNotIn(b'\n', raw)
             check2 = run_cli('format', str(project), '--style', 'creator', '--check', '--compact')
             self.assertEqual(check2.returncode, 0, check2.stderr)
+            sparse_saved = json.loads(project.read_text(encoding='utf-8'))
+            self.assertNotIn('index', sparse_saved['rows'][0])
+
+            full = run_cli('format', str(project), '--style', 'creator', '--not-sparse', '--compact')
+            self.assertEqual(full.returncode, 0, full.stderr)
+            full_saved = json.loads(project.read_text(encoding='utf-8'))
+            self.assertIn('index', full_saved['rows'][0])
 
     def test_export_project_and_build_viewer_commands(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -840,6 +930,13 @@ class PackagingCliTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             with zipfile.ZipFile(exported) as zf:
                 self.assertIn('project.json', zf.namelist())
+                self.assertNotIn('index', json.loads(zf.read('project.json'))['rows'][0])
+
+            exported_full = tmp / 'export-full.zip'
+            result_full = run_cli('export-project', str(project), '-o', str(exported_full), '--not-sparse', '--compact')
+            self.assertEqual(result_full.returncode, 0, result_full.stderr)
+            with zipfile.ZipFile(exported_full) as zf:
+                self.assertIn('index', json.loads(zf.read('project.json'))['rows'][0])
 
             template = tmp / 'web.zip'
             with zipfile.ZipFile(template, 'w') as zf:

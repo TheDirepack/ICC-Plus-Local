@@ -12,10 +12,10 @@
     "default_export_sha256": "10e9b3ba3ccee2a9ca7e2ce2753e2f61fc2e289549629f2c2d6235cc0705f68d"
   },
   "project_integrity": {
-    "canonical_final_validation": "project validate",
+    "canonical_final_validation": "project validate --complete",
     "repair": "project hydrate",
-    "canonical_writes": "hydrate missing official Creator defaults, then require complete-project validation",
-    "compatibility_validation": "available for legacy read-only inspection with project validate --compat",
+    "canonical_writes": "hydrate and complete-validate in memory, then save the pinned sparse representation by default",
+    "compatibility_validation": "normal saved-project validation is project validate; use --complete for explicit Creator completeness",
     "identity_policy": "hydration never invents missing entity identities",
     "version_policy": "older supported projects may upgrade to 2.10.7; future versions are never downgraded"
   },
@@ -25,8 +25,8 @@
     "rules_document": "docs/COMPILER_BOUNDARY.md"
   },
   "runtime_serialization": {
-    "policy": "player-facing Viewer payloads omit every pinned 2.10.7 field currently proven behavior-equivalent when absent",
-    "creator_artifacts": "Creator Save-to-Disk and Creator-compatible project exports remain complete",
+    "policy": "normal saved project JSON and player-facing Viewer payloads omit every pinned 2.10.7 field currently proven behavior-equivalent when absent",
+    "non_sparse_opt_out": "all full-project JSON outputs are sparse by default; --not-sparse / --not_sparse is the only opt-out on commands that write project JSON",
     "standalone_command": "iccplus-sparse",
     "verification_command": "iccplus-omission-probe",
     "verification_policy": "unproven omissions require isolated pinned-Viewer baseline/candidate testing before promotion",
@@ -50,11 +50,13 @@
     "structure": "structure PROJECT [SCRIPT]",
     "rules": "rules PROJECT [SCRIPT]",
     "style": "style PROJECT [MANIFEST]",
-    "final_validation": "project validate PROJECT",
+    "final_validation": "project validate PROJECT (normal sparse compatibility)",
     "hydrate_legacy": "project hydrate PROJECT",
     "repeatable_build": "build BUILD.json -o PROJECT",
     "player_audit": "play PROJECT [REQUEST] [--state FILE]",
-    "advertised_top_level_commands": 11
+    "advertised_top_level_commands": 11,
+    "complete_validation": "project validate PROJECT --complete",
+    "normal_saved_project": "sparse after successful Creator-complete in-memory validation"
   },
   "official_web_gui_verification": {
     "current_2_10_7": "source-audited against upstream commit; fresh browser round-trip still required for browser verification",

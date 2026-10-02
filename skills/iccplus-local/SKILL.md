@@ -40,7 +40,7 @@ Keep phase boundaries clear. Structure changes belong in `structure`, gameplay l
 
 For broad edits, prefer batched `items`, explicit `refs`, or selectors. Add `expect` when the number of matches matters.
 
-Normal writes fill missing official Creator defaults and run complete-project validation before replacing the project. Do not add a separate validation pass after every write. Use `project validate` before final handoff/export of an externally supplied legacy project, and `project hydrate` when missing official baseline fields need repair.
+Normal writes fill missing official Creator defaults, run complete-project validation in memory, and then save the pinned sparse project representation. Do not add a separate validation pass after every write. Use `project validate` for the normal saved artifact and `project validate --complete` for the materialized Creator shape. `project hydrate` still writes sparse by default; add `--not-sparse` only when you need that materialized shape on disk.
 
 Local and embedded images are compressed automatically when assigned. Do not add a manual compression step to ordinary authoring.
 
@@ -68,7 +68,7 @@ A Row becoming hidden does not prove that selected children were deselected. Vis
 
 `allowedChoices: 0` means unlimited. ICC Plus Local preserves and simulates that meaning. A source compiler that knows a Row is Pick 1 or Pick N should emit the real positive maximum instead of expecting the local runtime to infer intent.
 
-Creator-complete fields are part of native compatibility. Do not strip official eager/default fields merely to reduce JSON size. The compiler should remove duplicated author intent before generation rather than deleting required native structure afterwards.
+Creator-complete fields remain part of native compatibility and are materialized for validation and explicit Creator operations. Normal saved project JSON may omit only fields covered by the pinned Viewer behavior-equivalence serializer. The compiler should still remove duplicated author intent before generation rather than using serialization omissions as a substitute for semantic normalization.
 
 ### ICC Plus 2.10.8 Addon changelog correction
 

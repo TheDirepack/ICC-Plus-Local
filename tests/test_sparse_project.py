@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import copy
 import json
 
 from iccplus_tools.sparse_project import main, runtime_project_text, sparsify_project
+from iccplus_tools.project_integrity import hydrate_project
 from iccplus_tools.upstream_2106 import ICCPLUS_VERSION, default_export_project
 
 
@@ -302,6 +304,17 @@ def test_wrong_target_version_is_rejected() -> None:
         assert 'pinned to ICC Plus 2.10.7' in str(exc)
     else:
         raise AssertionError('expected target-version rejection')
+
+
+
+def test_sparse_hydrate_sparse_roundtrip_is_idempotent_for_saved_project(tmp_path) -> None:
+    source = json.loads((__import__('pathlib').Path(__file__).parents[1] / 'examples' / 'demo_project.json').read_text(encoding='utf-8'))
+    hydrate_project(source, upgrade_version=True)
+    first, _ = sparsify_project(source)
+    materialized = copy.deepcopy(first)
+    hydrate_project(materialized, upgrade_version=True)
+    second, _ = sparsify_project(materialized)
+    assert second == first
 
 
 def test_cli_writes_separate_sparse_artifact(tmp_path) -> None:

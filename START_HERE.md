@@ -10,7 +10,7 @@ generate -> structure -> rules -> style -> play
 
 Use `inspect` for read-only project discovery. Use `reference commands` for the complete command tree, `reference fields` for native fields, and `reference schema` for machine-readable contracts. Template operations live under `template`, media under `media`, and project validation, hydration, serialization, import, and export under `project`.
 
-Normal `structure`, `rules`, and `style` writes fill missing official Creator defaults and require complete-project validation before replacement. Use `project validate` for a final Creator-complete check and `project hydrate` to repair supported sparse or legacy ICC Plus 2 input without inventing missing IDs.
+Normal project writes hydrate official Creator defaults and require complete-project validation in memory, then save the proven-safe sparse representation. Use `project validate` for the normal sparse/compatibility check and `project validate --complete` when you explicitly need to check the full Creator shape. `project hydrate` reconstructs that shape in memory without inventing missing IDs but still saves sparse unless `--not-sparse` is supplied.
 
 For styling, use project styling first, then official Row/Choice Design Groups. Use private Row or Choice styling only for genuine one-off exceptions. Use custom CSS only when native ICC Plus styling cannot express the result.
 
@@ -18,7 +18,7 @@ For styling, use project styling first, then official Row/Choice Design Groups. 
 
 ## Runtime release serialization
 
-Creator authoring files and Creator-compatible project exports stay complete. Player-facing Viewer packages use the pinned behavior-preserving sparse serializer by default. `iccplus-sparse` can write that runtime artifact directly, and `iccplus-omission-probe` generates isolated Viewer tests for fields whose omission is not yet proven safe. Read `docs/SPARSE_RUNTIME_SERIALIZATION.md` before extending the omission set.
+Every full-project JSON output uses the pinned behavior-preserving sparse serializer by default. Formatting, hydration, separate-image exports, and Viewer packages are also sparse unless the producing command explicitly uses `--not-sparse`. `iccplus-sparse` can write the sparse artifact directly, and `iccplus-omission-probe` generates isolated Viewer tests for fields whose omission is not yet proven safe. Read `docs/SPARSE_RUNTIME_SERIALIZATION.md` before extending the omission set.
 
 Sparse runtime serialization is a native ICC Plus serialization concern. Source semantic normalization—Requirement hoisting, Row merging, taxonomy pruning, style-intent consolidation, Pick-N inference, and deterministic runtime-ID remapping—belongs in the source compiler/lowering layer. Read `docs/COMPILER_BOUNDARY.md`.
 

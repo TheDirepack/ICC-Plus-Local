@@ -64,6 +64,6 @@ Use explicit refs instead when the target set is small, irregular, or hand-picke
 
 ## Safety
 
-A normal `structure`, `rules`, or `style` write runs on a copy and replaces the project only after its operation checks and final complete-project validation succeed. An expectation failure leaves the original file unchanged.
+A normal `structure`, `rules`, or `style` write runs on a copy and replaces the project only after its operation checks and final complete-project validation succeed in memory. The replacement is sparse by default. An expectation failure leaves the original file unchanged.
 
 Re-preview after an earlier mutation that can change selector membership, order, names, Groups, or parentage.

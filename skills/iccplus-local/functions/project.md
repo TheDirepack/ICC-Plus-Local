@@ -2,12 +2,12 @@
 
 Read this file for project validation, hydration, formatting, export, fragmentation, serialization, IDs, and build strings.
 
-Use `project validate` for final Creator-complete validation of an imported or externally supplied project. Use `project hydrate` to restore missing official baseline sections and safe Creator-eager fields without inventing missing identities or downgrading newer projects.
+Use `project validate` for the normal sparse saved-project check. Add `--complete` for explicit Creator-complete validation. Use `project hydrate` to materialize missing official baseline sections and safe Creator-eager fields in memory without inventing missing identities or downgrading newer projects. Its saved JSON is still sparse unless `--not-sparse` is supplied.
 
 For source-driven large projects, distinguish three artifacts when useful:
 
 - authoritative semantic source,
-- readable Creator-complete semantic/test `project.json`,
+- readable sparse semantic/test `project.json`,
 - compact runtime release `project.json`.
 
 Do not edit the compact release artifact as a second source.
@@ -16,7 +16,7 @@ Do not edit the compact release artifact as a second source.
 
 Player-facing runtime serialization omits every native value currently proven behavior-equivalent when absent in the pinned ICC Plus 2.10.7 Viewer. This is the default runtime policy, not an optional generic cleanup pass.
 
-Creator Save-to-Disk and Creator-compatible exports remain Creator-complete. Runtime omission happens after the native authoring artifact has been validated. The serializer uses an explicit, version-pinned whitelist and conditional rules rather than treating schema-optional fields or Creator construction defaults as automatically removable.
+All saved full-project JSON and Viewer payloads use sparse serialization after the native project has been hydrated and complete-validated in memory. Formatting, `project hydrate`, separate-image exports, and Viewer packages do not bypass this rule; only `--not-sparse` does. The serializer uses an explicit, version-pinned whitelist and conditional rules rather than treating schema-optional fields or Creator construction defaults as automatically removable.
 
 Read `../../../docs/SPARSE_RUNTIME_SERIALIZATION.md` for the proven omission set. For unresolved cases, generate one-omission-at-a-time browser artifacts with `python -m iccplus_tools.omission_probe -o verification/sparse-omission`. Promote a new omission only after the candidate behaves like its baseline in the pinned Viewer; load success alone is insufficient.
 
@@ -35,6 +35,6 @@ If a source compiler or release pipeline compacts runtime IDs, that layer must:
 
 After that transformation, use ICC Plus Local to validate the compact native artifact, exercise relevant runtime/save-load paths, and inspect references. Reverse-mapped semantic equivalence is a compiler/release-pipeline proof, not a hidden `project` rewrite.
 
-Do not remove native fields from Creator-complete authoring artifacts merely for size. Runtime release payloads may omit only values covered by the pinned Viewer behavior-equivalence rules.
+Do not add new omissions merely for size. Normal saved and runtime payloads may omit only values covered by the pinned Viewer behavior-equivalence rules; materialized fields are retained only when the producing command explicitly uses `--not-sparse`.
 
 Read `../../../docs/COMPILER_BOUNDARY.md`, `../../../docs/SPARSE_RUNTIME_SERIALIZATION.md`, and `../../../docs/cyoa/guide/21-large-project-normalization.md` for the serialization/compiler boundary and release-compaction rules.

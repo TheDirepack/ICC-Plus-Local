@@ -222,7 +222,7 @@ def _entity_defaults(project: dict[str, Any], kind: str, value: dict[str, Any], 
         }
     if kind == 'point':
         return {
-            'name': 'Point', 'startingSum': 0, 'initValue': 0, 'activatedId': '',
+            'name': 'Point', 'startingSum': 0, 'initValue': value.get('startingSum', 0), 'activatedId': '',
             'beforeText': 'Point:', 'afterText': '', 'category': -1,
         }
     if kind == 'variable':
@@ -286,7 +286,10 @@ def hydrate_project(project: dict[str, Any], *, upgrade_version: bool = False) -
         for key, default in defaults.items():
             p = _path(parent, key)
             if key not in target:
-                target[key] = copy.deepcopy(default)
+                # Missing activated in a sparse project means the runtime default
+                # empty build, not Creator Save-to-Disk's static [''] artifact.
+                fill_value = [] if (parent == '' and key == 'activated') else default
+                target[key] = copy.deepcopy(fill_value)
                 changes.append({'path': p, 'action': 'filled', 'source': 'official_creator_default'})
                 continue
             current = target[key]

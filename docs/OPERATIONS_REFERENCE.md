@@ -2,7 +2,7 @@
 
 This document describes the underlying operation vocabulary used by phase scripts and retained compatibility paths. It is not a separate public workflow. New automation should execute operations through `structure`, `rules`, or `style`, using the schema returned by `reference schema` for that phase.
 
-Phase writes run against a copy and replace the project only after operation checks and complete-project validation succeed.
+Phase writes run against a copy and replace the project only after operation checks and complete-project validation succeed in memory. The replacement file then uses the normal sparse saved-project representation.
 
 ## Short syntax
 

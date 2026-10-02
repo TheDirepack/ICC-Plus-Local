@@ -44,9 +44,9 @@ Upstream ICC Plus 2.10.8's changelog says that “Change choices per row could n
 
 Do not use the 2.10.8 changelog entry as justification for replacing tested selectable-Addon exclusion logic with Row selection limits. Any such replacement needs direct target-Viewer evidence for the actual mechanic.
 
-### Creator-complete authoring versus sparse runtime serialization
+### Creator-complete validation versus sparse saved serialization
 
-Creator-eager/default fields are native authoring structure. Creator-complete projects, Creator Save-to-Disk output, and Creator-compatible exports should preserve the fields required for reliable Creator round-tripping.
+Creator-eager/default fields are native authoring structure used for hydration and complete validation. ICC Plus Local materializes that complete structure in memory before valid writes, then saves the behavior-preserving sparse form on every full-project JSON path. Retaining the materialized fields in an output requires `--not-sparse` on that specific command.
 
 The player-facing runtime payload is a different serialization target. ICC Plus Local may omit a native field there only when its absence is proven behavior-equivalent in the pinned Viewer. This is native serialization, not source-level normalization. Schema optionality, matching a Creator construction default, or saving bytes is not enough evidence on its own.
 

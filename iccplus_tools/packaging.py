@@ -258,10 +258,20 @@ def _zip_write_bytes(zf: zipfile.ZipFile, name: str, data: bytes) -> None:
     zf.writestr(info, data)
 
 
-def export_project_zip(project: dict[str, Any], output: str | Path) -> dict[str, Any]:
-    """Create the Creator's 'Export Project with Separate Images' package."""
+def export_project_zip(project: dict[str, Any], output: str | Path, *, not_sparse: bool = False) -> dict[str, Any]:
+    """Create an Export Project with Separate Images package.
+
+    The embedded full-project JSON is sparse by default. ``not_sparse=True``
+    is the explicit opt-out used by the CLI's --not-sparse flag.
+    """
     temp, assets = creator_export_payload(project, separate_images=True)
-    project_bytes = json_stringify(temp).encode('utf-8')
+    serialization = None
+    if not_sparse:
+        serialized = temp
+        serialization = {'mode': 'not-sparse', 'removed_count': 0, 'bytes_removed': 0}
+    else:
+        serialized, serialization = sparsify_project(temp, require_complete=True)
+    project_bytes = json_stringify(serialized).encode('utf-8')
     output = Path(output)
     output.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(output, 'w', compression=zipfile.ZIP_STORED) as zf:
@@ -274,7 +284,10 @@ def export_project_zip(project: dict[str, Any], output: str | Path) -> dict[str,
         'image_count': len(assets),
         'images': list(assets),
         'icc_plus_version': ICCPLUS_VERSION,
-        'content_parity': 'AppSaveLoad.svelte exportZip/imageSeparation',
+        'project_sparse': not not_sparse,
+        'project_omissions': serialization.get('removed_count', 0) if isinstance(serialization, dict) else 0,
+        'project_bytes_removed': serialization.get('bytes_removed', 0) if isinstance(serialization, dict) else 0,
+        'content_parity': 'AppSaveLoad.svelte exportZip/imageSeparation plus default pinned sparse project serialization',
         'zip_byte_parity': False,
     }
 
@@ -410,7 +423,7 @@ def _rewrite_loading_css(css: str, viewer: dict[str, Any]) -> str:
     return re.sub(r':root\s*\{[\s\S]*?\}', root, css, count=1)
 
 
-def build_viewer_package(project: dict[str, Any], template_zip: str | Path, output: str | Path, *, mode: str | None = None, separate_images: bool | None = None) -> dict[str, Any]:
+def build_viewer_package(project: dict[str, Any], template_zip: str | Path, output: str | Path, *, mode: str | None = None, separate_images: bool | None = None, not_sparse: bool = False) -> dict[str, Any]:
     """Reproduce Creator exportWithViewer with sparse runtime serialization.
 
     The official template is an explicit input so its version can be pinned.
@@ -437,7 +450,11 @@ def build_viewer_package(project: dict[str, Any], template_zip: str | Path, outp
         base['version'] = ICCPLUS_VERSION
         temp, assets = viewer_image_separation(base)
     viewer = temp.get('viewerConfig') if isinstance(temp.get('viewerConfig'), dict) else {}
-    runtime_project, runtime_serialization = sparsify_project(temp, require_complete=True)
+    if not_sparse:
+        runtime_project = temp
+        runtime_serialization = {'mode': 'not-sparse', 'removed_count': 0, 'bytes_removed': 0}
+    else:
+        runtime_project, runtime_serialization = sparsify_project(temp, require_complete=True)
     save_data = json_stringify(runtime_project)
     save_bytes = save_data.encode('utf-8')
 
@@ -490,7 +507,7 @@ def build_viewer_package(project: dict[str, Any], template_zip: str | Path, outp
         'image_count': len(assets),
         'icc_plus_version': ICCPLUS_VERSION,
         'template': str(template_zip),
-        'runtime_sparse': True,
+        'runtime_sparse': not not_sparse,
         'runtime_omissions': runtime_serialization['removed_count'],
         'runtime_bytes_removed': runtime_serialization['bytes_removed'],
         'content_parity': '2.10.7 exportWithViewer project/image/local-embed logic plus pinned behavior-preserving runtime omissions',

@@ -37,7 +37,7 @@ Read `iccplus-local/SKILL.md`, then only the function guide needed for the curre
 
 The canonical command tree is `reference`, `template`, `media`, `project`, `inspect`, `generate`, `build`, `structure`, `rules`, `style`, and `play`.
 
-Normal writes fill missing official Creator defaults and run complete-project validation. Use `project validate` for final completeness checks and `project hydrate` to repair supported sparse or legacy ICC Plus 2 projects.
+Normal writes fill missing official Creator defaults, complete-validate in memory, then save sparse. Use `project validate` for the normal saved artifact, `project validate --complete` for explicit Creator completeness, and `project hydrate` to materialize supported sparse or legacy ICC Plus 2 projects.
 
 For styling, prefer project styling, then official Row/Choice Design Groups, then one-off private styling. Use custom CSS only when native ICC Plus styling cannot express the result.
 

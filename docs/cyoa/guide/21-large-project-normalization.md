@@ -234,7 +234,7 @@ Before accepting a compiler normalization pass:
 - [ ] Compact IDs are deterministic, stable, and reversible if used.
 - [ ] Every reference-bearing field participates in compaction/remapping.
 - [ ] Compact and semantic projects compare equivalently after reverse mapping.
-- [ ] Creator-complete validation passes.
+- [ ] Creator-complete validation passes before the normal sparse saved artifact is serialized.
 - [ ] Representative local runtime and save/load paths pass.
 - [ ] Test timeouts are distinguished from semantic failures.
 - [ ] Official Viewer verification remains a separate release gate where required.

@@ -35,6 +35,7 @@ from .guides import guide, guide_topics
 from .image_edit import crop_webp, webp_data_url
 from .image_assets import prepare_image_reference
 from .build_string import entry_to_dict, parse_build_string
+from .sparse_project import sparsify_project
 from .creator_helpers import (
     CREATOR_SYMBOLS, ROW_SORT_MODES, clean_private_styling, creator_id_csv, export_design, font_inventory, ids_from_titles, import_design,
     project_stats, sort_row_choices, update_font,
@@ -83,6 +84,49 @@ def save(path: str, value: Any, *, compact: bool = False, trailing_newline: bool
     finally:
         if tmp.exists():
             tmp.unlink()
+
+
+def _serialization_summary(report: dict[str, Any]) -> dict[str, Any]:
+    """Compact receipt for the normal sparse project serialization path."""
+    return {
+        'mode': 'sparse',
+        'source_complete': report.get('source_complete'),
+        'source_bytes': report.get('source_bytes'),
+        'sparse_bytes': report.get('sparse_bytes'),
+        'bytes_removed': report.get('bytes_removed'),
+        'removed_count': report.get('removed_count'),
+        'removed_by_rule': report.get('removed_by_rule', {}),
+    }
+
+
+def save_project(
+    path: str,
+    project: dict[str, Any],
+    *,
+    compact: bool = False,
+    trailing_newline: bool = True,
+    not_sparse: bool = False,
+) -> dict[str, Any]:
+    """Write a full-project JSON artifact. Sparse is always the default.
+
+    ``--not-sparse`` is the sole user-facing opt-out for a materialized project
+    JSON. Callers must validate/hydrate the project before reaching this helper.
+    """
+    if not_sparse:
+        text_bytes = len(json_stringify(project).encode('utf-8'))
+        save(path, project, compact=compact, trailing_newline=trailing_newline)
+        return {
+            'mode': 'not-sparse',
+            'source_complete': True,
+            'source_bytes': text_bytes,
+            'sparse_bytes': text_bytes,
+            'bytes_removed': 0,
+            'removed_count': 0,
+            'removed_by_rule': {},
+        }
+    sparse, report = sparsify_project(project, require_complete=True)
+    save(path, sparse, compact=compact, trailing_newline=trailing_newline)
+    return _serialization_summary(report)
 
 
 def save_runtime_state(path: str, value: Any) -> None:
@@ -224,13 +268,25 @@ def cli_strings(values: list[str] | None) -> list[str]:
     return list(dict.fromkeys(out))
 
 
-def write_checked(project: dict[str, Any], target: str, *, allow_invalid: bool = False) -> tuple[dict[str, Any], str | None]:
+def write_checked(
+    project: dict[str, Any],
+    target: str,
+    *,
+    allow_invalid: bool = False,
+    not_sparse: bool = False,
+) -> tuple[dict[str, Any], str | None]:
     hydration_changes = hydrate_project(project, upgrade_version=True)
     report = validate_complete(project)
     report['hydration_changes'] = hydration_changes
-    if report['valid'] or allow_invalid:
-        save(target, project)
+    if report['valid']:
+        report['serialization'] = save_project(target, project, not_sparse=not_sparse)
         return report, target
+    if allow_invalid and not_sparse:
+        save(target, project)
+        report['serialization'] = {'mode': 'invalid-not-sparse', 'source_complete': False}
+        return report, target
+    if allow_invalid:
+        report['serialization_error'] = '--allow-invalid requires --not-sparse because sparse omission rules require a complete source project'
     return report, None
 
 def _strings_for_cli(value: Any) -> list[str]:
@@ -323,7 +379,7 @@ def cmd_project_update(a: argparse.Namespace) -> int:
     editor.update_project(values=values, unset=unset, normalize=False)
     editor.normalize_and_check()
     target = a.output or a.project
-    report, written = write_checked(project, target, allow_invalid=a.allow_invalid)
+    report, written = write_checked(project, target, allow_invalid=a.allow_invalid, not_sparse=bool(getattr(a, 'not_sparse', False)))
     emit({'ok': report['valid'], 'written': written, 'updated_fields': sorted(values), 'unset': unset, 'validation': report})
     return 0 if report['valid'] else 2
 
@@ -339,7 +395,7 @@ def cmd_update(a: argparse.Namespace) -> int:
     value = editor.update(a.reference, kind=a.kind, values=values, unset=unset, normalize=False)
     editor.normalize_and_check()
     target = a.output or a.project
-    report, written = write_checked(project, target, allow_invalid=a.allow_invalid)
+    report, written = write_checked(project, target, allow_invalid=a.allow_invalid, not_sparse=bool(getattr(a, 'not_sparse', False)))
     emit({'ok': report['valid'], 'written': written, 'entity': value, 'validation': report})
     return 0 if report['valid'] else 2
 
@@ -350,23 +406,22 @@ def cmd_delete(a: argparse.Namespace) -> int:
     removed = editor.delete(a.reference, kind=a.kind, normalize=False)
     editor.normalize_and_check()
     target = a.output or a.project
-    report, written = write_checked(project, target, allow_invalid=a.allow_invalid)
+    report, written = write_checked(project, target, allow_invalid=a.allow_invalid, not_sparse=bool(getattr(a, 'not_sparse', False)))
     emit({'ok': report['valid'], 'written': written, 'removed': removed, 'validation': report})
     return 0 if report['valid'] else 2
 
 
 def cmd_generate(a: argparse.Namespace) -> int:
-    """Create the exact blank ICC Plus Creator project used as the build starting point."""
+    """Create the blank ICC Plus project using normal sparse serialization."""
     project = default_export_project()
     validation = validate_complete(project)
     if not validation['valid']:
         raise ValueError('internal official blank project failed complete validation')
     output = a.output or str(unique_output_path(Path('project.json')))
     written = None
+    serialization = None
     if not a.dry_run:
-        # Keep the Creator's exact blank-export byte shape. Later authoring goes
-        # through apply/direct mutation tools, not a second generation format.
-        save(output, project, compact=True, trailing_newline=False)
+        serialization = save_project(output, project, compact=True, trailing_newline=False, not_sparse=bool(getattr(a, 'not_sparse', False)))
         written = output
     emit({
         'ok': True,
@@ -376,6 +431,7 @@ def cmd_generate(a: argparse.Namespace) -> int:
         'version': project['version'],
         'summary': ProjectIndex(project).summary(),
         'validation': validation,
+        'serialization': serialization,
         'next': f'iccplus-local structure {output} SCRIPT' if written else 'iccplus-local structure PROJECT SCRIPT',
     })
     return 0
@@ -391,7 +447,7 @@ def cmd_build(a: argparse.Namespace) -> int:
         emit(result)
         return 4 if result.get('stage') == 'step' else 2
     if not a.dry_run:
-        save(a.output, project)
+        result['serialization'] = save_project(a.output, project, not_sparse=bool(getattr(a, 'not_sparse', False)))
         result['written'] = a.output
     emit(result)
     return 0
@@ -447,9 +503,15 @@ def _cmd_phase_apply(a: argparse.Namespace, phase: str) -> int:
     result['hydration_changes'] = hydration_changes
     valid = report is None or report.get('valid') is True
     written = None
-    if not a.dry_run and (valid or a.allow_invalid):
-        save(a.output or a.project, updated)
+    if not a.dry_run and valid:
+        result['serialization'] = save_project(a.output or a.project, updated, not_sparse=bool(getattr(a, 'not_sparse', False)))
         written = a.output or a.project
+    elif not a.dry_run and a.allow_invalid and bool(getattr(a, 'not_sparse', False)):
+        save(a.output or a.project, updated)
+        result['serialization'] = {'mode': 'invalid-not-sparse', 'source_complete': False}
+        written = a.output or a.project
+    elif not a.dry_run and a.allow_invalid:
+        result['serialization_error'] = '--allow-invalid requires --not-sparse because sparse omission rules require a complete source project'
     result['written'] = written
     result['dry_run'] = bool(a.dry_run)
     result['summary'] = ProjectIndex(updated).summary()
@@ -479,9 +541,15 @@ def cmd_apply(a: argparse.Namespace) -> int:
     result['hydration_changes'] = hydration_changes
     valid = report is None or report.get('valid') is True
     written = None
-    if not a.dry_run and (valid or a.allow_invalid):
-        save(a.output or a.project, updated)
+    if not a.dry_run and valid:
+        result['serialization'] = save_project(a.output or a.project, updated, not_sparse=bool(getattr(a, 'not_sparse', False)))
         written = a.output or a.project
+    elif not a.dry_run and a.allow_invalid and bool(getattr(a, 'not_sparse', False)):
+        save(a.output or a.project, updated)
+        result['serialization'] = {'mode': 'invalid-not-sparse', 'source_complete': False}
+        written = a.output or a.project
+    elif not a.dry_run and a.allow_invalid:
+        result['serialization_error'] = '--allow-invalid requires --not-sparse because sparse omission rules require a complete source project'
     result['written'] = written
     result['dry_run'] = bool(a.dry_run)
     result['summary'] = ProjectIndex(updated).summary()
@@ -758,9 +826,15 @@ def cmd_apply_visuals(a: argparse.Namespace) -> int:
     report = validate_complete(updated) if not a.no_validate else None
     valid = report is None or report.get('valid') is True
     written = None
-    if not a.dry_run and (valid or a.allow_invalid):
+    if not a.dry_run and valid:
+        written = a.output or a.project
+        result['serialization'] = save_project(written, updated, not_sparse=bool(getattr(a, 'not_sparse', False)))
+    elif not a.dry_run and a.allow_invalid and bool(getattr(a, 'not_sparse', False)):
         written = a.output or a.project
         save(written, updated)
+        result['serialization'] = {'mode': 'invalid-not-sparse', 'source_complete': False}
+    elif not a.dry_run and a.allow_invalid:
+        result['serialization_error'] = '--allow-invalid requires --not-sparse because sparse omission rules require a complete source project'
     result['ok'] = valid
     if getattr(a, 'canonical_style', False):
         result['phase'] = 'style'
@@ -1132,7 +1206,7 @@ def cmd_clean_private_styling(a: argparse.Namespace) -> int:
     project = load(a.project)
     changed = clean_private_styling(project)
     target = a.output or a.project
-    report, written = write_checked(project, target, allow_invalid=a.allow_invalid)
+    report, written = write_checked(project, target, allow_invalid=a.allow_invalid, not_sparse=bool(getattr(a, 'not_sparse', False)))
     emit({'ok': report['valid'], 'written': written, 'changed': changed, 'validation': report})
     return 0 if report['valid'] else 2
 
@@ -1157,7 +1231,7 @@ def cmd_style_template(a: argparse.Namespace) -> int:
     project = load(a.project)
     index, name = apply_style_template(project, a.preset)
     target = a.output or a.project
-    report, written = write_checked(project, target, allow_invalid=a.allow_invalid)
+    report, written = write_checked(project, target, allow_invalid=a.allow_invalid, not_sparse=bool(getattr(a, 'not_sparse', False)))
     emit({
         'ok': report['valid'],
         'written': written,
@@ -1228,7 +1302,7 @@ def cmd_ids_from_titles(a: argparse.Namespace) -> int:
     project = load(a.project)
     info = ids_from_titles(project)
     target = a.output or a.project
-    report, written = write_checked(project, target, allow_invalid=a.allow_invalid)
+    report, written = write_checked(project, target, allow_invalid=a.allow_invalid, not_sparse=bool(getattr(a, 'not_sparse', False)))
     emit({'ok': report['valid'], 'written': written, 'renames': info, 'validation': report})
     return 0 if report['valid'] else 2
 
@@ -1240,7 +1314,7 @@ def cmd_fonts(a: argparse.Namespace) -> int:
         return 0
     info = update_font(project, a.source, a.value, remove=a.font_action == 'remove')
     target = a.output or a.project
-    report, written = write_checked(project, target, allow_invalid=a.allow_invalid)
+    report, written = write_checked(project, target, allow_invalid=a.allow_invalid, not_sparse=bool(getattr(a, 'not_sparse', False)))
     emit({'ok': report['valid'], 'written': written, 'font': info, 'validation': report})
     return 0 if report['valid'] else 2
 
@@ -1306,7 +1380,7 @@ def cmd_design(a: argparse.Namespace) -> int:
     value = parse_json_value(a.design)
     info = import_design(project, a.target, value)
     target = a.output or a.project
-    report, written = write_checked(project, target, allow_invalid=a.allow_invalid)
+    report, written = write_checked(project, target, allow_invalid=a.allow_invalid, not_sparse=bool(getattr(a, 'not_sparse', False)))
     emit({'ok': report['valid'], 'written': written, 'design': info, 'validation': report})
     return 0 if report['valid'] else 2
 
@@ -1330,7 +1404,7 @@ def cmd_validate(a: argparse.Namespace) -> int:
 
 def cmd_project_validate(a: argparse.Namespace) -> int:
     project = load(a.project, require_iccplus=False)
-    complete = not bool(getattr(a, 'compat', False))
+    complete = bool(getattr(a, 'complete', False))
     report = validate(project, complete=complete)
     out = {
         'ok': report['valid'],
@@ -1349,9 +1423,10 @@ def cmd_project_hydrate(a: argparse.Namespace) -> int:
     changes = hydrate_project(project, upgrade_version=True)
     report = validate_complete(project)
     written = None
+    serialization = None
     if not a.dry_run and report['valid']:
         written = a.output or a.project
-        save(written, project)
+        serialization = save_project(written, project, not_sparse=bool(getattr(a, 'not_sparse', False)))
     out = {
         'ok': report['valid'],
         'target_version': ICCPLUS_VERSION,
@@ -1361,6 +1436,7 @@ def cmd_project_hydrate(a: argparse.Namespace) -> int:
         'changes': changes,
         'validation': report,
         'completeness': completeness_summary(project),
+        'serialization': serialization,
     }
     emit(out)
     return 0 if out['ok'] else 2
@@ -1391,11 +1467,9 @@ def cmd_get(a: argparse.Namespace) -> int:
 
 def cmd_new(a: argparse.Namespace) -> int:
     output = a.output or str(unique_output_path(Path('project.json')))
-    # ICC Plus Save to Disk writes compact JSON with no trailing newline and
-    # turns an empty build into activated=[""] via ''.split(',').
     project = default_export_project()
-    save(output, project, compact=True, trailing_newline=False)
-    emit({'written': output, 'version': project['version']})
+    serialization = save_project(output, project, compact=True, trailing_newline=False, not_sparse=bool(getattr(a, 'not_sparse', False)))
+    emit({'written': output, 'version': project['version'], 'serialization': serialization})
     return 0
 
 
@@ -1414,19 +1488,32 @@ def cmd_format(a: argparse.Namespace) -> int:
     hydration_changes = hydrate_project(project, upgrade_version=True)
     validation = validate_complete(project)
     if not validation['valid']:
-        raise ValueError('project cannot be formatted as a complete ICC Plus project; run project validate for diagnostics')
-    creator = a.style == 'creator'
-    formatted = creator_save_payload(project) if creator else project
-    expected = json_stringify(formatted) if creator else json.dumps(formatted, indent=2, ensure_ascii=False) + '\n'
+        raise ValueError('project cannot be formatted from an incomplete ICC Plus project; run project validate --complete for diagnostics')
+
+    # Formatting style never disables sparse output. Only --not-sparse may do so.
+    creator_style = a.style == 'creator'
+    not_sparse = bool(getattr(a, 'not_sparse', False))
+    # Creator Save-to-Disk normalization is itself an opt-out from the normal
+    # sparse project representation, so it is only applied with --not-sparse.
+    materialized = creator_save_payload(project) if (creator_style and not_sparse) else project
+    if not_sparse:
+        formatted = materialized
+        serialization = {'mode': 'not-sparse', 'source_complete': True}
+    else:
+        formatted, sparse_report = sparsify_project(materialized, require_complete=True)
+        serialization = _serialization_summary(sparse_report)
+
+    compact = creator_style
+    expected = json_stringify(formatted) if compact else json.dumps(formatted, indent=2, ensure_ascii=False) + '\n'
     source = Path(a.project).read_text(encoding='utf-8')
     if a.check:
         ok = source == expected
-        emit({'ok': ok, 'style': a.style, 'project': a.project, 'would_change': not ok, 'hydration_changes': hydration_changes, 'validation': validation})
+        emit({'ok': ok, 'style': a.style, 'project': a.project, 'would_change': not ok, 'hydration_changes': hydration_changes, 'validation': validation, 'serialization': serialization})
         return 0 if ok else 2
     target = Path(a.output or a.project)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(expected, encoding='utf-8')
-    emit({'ok': True, 'style': a.style, 'written': str(target), 'bytes': len(expected.encode('utf-8')), 'hydration_changes': hydration_changes, 'validation': validation})
+    emit({'ok': True, 'style': a.style, 'written': str(target), 'bytes': len(expected.encode('utf-8')), 'hydration_changes': hydration_changes, 'validation': validation, 'serialization': serialization})
     return 0
 
 
@@ -1436,7 +1523,7 @@ def cmd_export_project(a: argparse.Namespace) -> int:
     validation = validate_complete(project)
     if not validation['valid']:
         raise ValueError('project is not complete enough to export; run project validate for diagnostics')
-    report = export_project_zip(project, a.output)
+    report = export_project_zip(project, a.output, not_sparse=bool(getattr(a, 'not_sparse', False)))
     emit({'ok': True, 'hydration_change_count': len(hydration_changes), 'validation': validation, **report})
     return 0
 
@@ -1452,7 +1539,7 @@ def cmd_build_viewer(a: argparse.Namespace) -> int:
         separate = True
     elif a.embedded_images:
         separate = False
-    report = build_viewer_package(project, a.template, a.output, mode=a.mode, separate_images=separate)
+    report = build_viewer_package(project, a.template, a.output, mode=a.mode, separate_images=separate, not_sparse=bool(getattr(a, 'not_sparse', False)))
     emit({'ok': True, **report})
     return 0
 
@@ -1527,7 +1614,7 @@ def cmd_crop_field(a: argparse.Namespace) -> int:
     editor.update(ent.id, kind=ent.kind, values={a.field: value}, normalize=False)
     editor.normalize_and_check()
     target = a.output or a.project
-    report, written = write_checked(project, target, allow_invalid=a.allow_invalid)
+    report, written = write_checked(project, target, allow_invalid=a.allow_invalid, not_sparse=bool(getattr(a, 'not_sparse', False)))
     emit({'ok': report['valid'], 'written': written, 'entity': ent.id, 'field': a.field, 'crop': meta, 'image_compression': compression, 'validation': report})
     return 0 if report['valid'] else 2
 
@@ -1542,7 +1629,7 @@ def cmd_add(a: argparse.Namespace) -> int:
     created = [editor.add(a.kind, parent=a.parent, values=values, normalize=False) for _ in range(count)]
     editor.normalize_and_check()
     target = a.output or a.project
-    report, written = write_checked(project, target, allow_invalid=a.allow_invalid)
+    report, written = write_checked(project, target, allow_invalid=a.allow_invalid, not_sparse=bool(getattr(a, 'not_sparse', False)))
     payload: dict[str, Any] = {'ok': report['valid'], 'written': written, 'validation': report}
     if count == 1:
         payload['entity'] = created[0]
@@ -1559,7 +1646,7 @@ def cmd_set(a: argparse.Namespace) -> int:
     editor.set(a.pointer, parse_relaxed_value(a.value))
     editor.normalize_and_check()
     target = a.output or a.project
-    report, written = write_checked(project, target, allow_invalid=a.allow_invalid)
+    report, written = write_checked(project, target, allow_invalid=a.allow_invalid, not_sparse=bool(getattr(a, 'not_sparse', False)))
     emit({'ok': report['valid'], 'written': written, 'pointer': a.pointer, 'validation': report})
     return 0 if report['valid'] else 2
 
@@ -1570,7 +1657,7 @@ def cmd_remove(a: argparse.Namespace) -> int:
     removed = editor.remove(a.pointer)
     editor.normalize_and_check()
     target = a.output or a.project
-    report, written = write_checked(project, target, allow_invalid=a.allow_invalid)
+    report, written = write_checked(project, target, allow_invalid=a.allow_invalid, not_sparse=bool(getattr(a, 'not_sparse', False)))
     emit({'ok': report['valid'], 'written': written, 'removed': removed, 'validation': report})
     return 0 if report['valid'] else 2
 
@@ -1581,7 +1668,7 @@ def cmd_rename(a: argparse.Namespace) -> int:
     editor.rename(a.old, a.new, normalize=False)
     editor.normalize_and_check()
     target = a.output or a.project
-    report, written = write_checked(project, target, allow_invalid=a.allow_invalid)
+    report, written = write_checked(project, target, allow_invalid=a.allow_invalid, not_sparse=bool(getattr(a, 'not_sparse', False)))
     emit({'ok': report['valid'], 'written': written, 'old': a.old, 'new': a.new, 'validation': report})
     return 0 if report['valid'] else 2
 
@@ -1591,7 +1678,7 @@ def cmd_normalize(a: argparse.Namespace) -> int:
     editor = ProjectEditor(project)
     changes = editor.normalize_and_check()
     target = a.output or a.project
-    report, written = write_checked(project, target, allow_invalid=a.allow_invalid)
+    report, written = write_checked(project, target, allow_invalid=a.allow_invalid, not_sparse=bool(getattr(a, 'not_sparse', False)))
     emit({'ok': report['valid'], 'written': written, 'changes': changes, 'validation': report})
     return 0 if report['valid'] else 2
 
@@ -1600,7 +1687,7 @@ def _finish_structural_write(project: dict[str, Any], a: argparse.Namespace, res
     editor = ProjectEditor(project)
     editor.normalize_and_check()
     target = a.output or a.project
-    report, written = write_checked(project, target, allow_invalid=a.allow_invalid)
+    report, written = write_checked(project, target, allow_invalid=a.allow_invalid, not_sparse=bool(getattr(a, 'not_sparse', False)))
     emit({'ok': report['valid'], 'written': written, **result, 'validation': report})
     return 0 if report['valid'] else 2
 
@@ -2236,8 +2323,17 @@ def add_output_flags(p: argparse.ArgumentParser) -> None:
     group.add_argument('--pretty', action='store_true', default=argparse.SUPPRESS, help='Pretty-print JSON even when stdout is not a terminal.')
 
 
+def add_not_sparse_flag(p: argparse.ArgumentParser) -> None:
+    p.add_argument(
+        '--not-sparse', '--not_sparse',
+        dest='not_sparse', action='store_true',
+        help='Opt out of default sparse full-project JSON serialization and write the materialized project instead.',
+    )
+
+
 def add_safe_write_flags(p: argparse.ArgumentParser) -> None:
-    p.add_argument('--allow-invalid', action='store_true', help='Write even when validation reports errors. Default is to leave the target unchanged.')
+    p.add_argument('--allow-invalid', action='store_true', help='Write even when validation reports errors. Requires --not-sparse because sparse omission rules require a complete source.')
+    add_not_sparse_flag(p)
 
 
 
@@ -2276,12 +2372,12 @@ def add_compatibility_commands(sub: argparse._SubParsersAction) -> None:
     q = sub.add_parser('match', help=hidden); q.add_argument('project'); q.add_argument('where'); q.add_argument('--expect'); q.add_argument('--allow-empty', action='store_true'); q.set_defaults(func=cmd_match)
     q = sub.add_parser('get', help=hidden); q.add_argument('project'); q.add_argument('pointer'); q.set_defaults(func=cmd_get)
     q = sub.add_parser('show', help=hidden); q.add_argument('project'); q.add_argument('reference'); q.add_argument('--kind'); q.set_defaults(func=cmd_show)
-    q = sub.add_parser('new', help=hidden); q.add_argument('output', nargs='?'); q.set_defaults(func=cmd_new)
+    q = sub.add_parser('new', help=hidden); q.add_argument('output', nargs='?'); add_not_sparse_flag(q); q.set_defaults(func=cmd_new)
 
     q = sub.add_parser('visual-audit', help=hidden)
     q.add_argument('project'); q.add_argument('--kind', action='append', choices=sorted(VISUAL_KINDS)); q.add_argument('--row'); q.add_argument('--group'); q.add_argument('--missing-images', action='store_true'); q.add_argument('--missing-assets', action='store_true'); q.add_argument('--unstyled', action='store_true'); q.add_argument('--asset-root'); q.add_argument('--limit', type=int); q.add_argument('--manifest-stub', action='store_true'); q.add_argument('--style-values', action='store_true'); q.set_defaults(func=cmd_visual_audit)
     q = sub.add_parser('apply-visuals', help=hidden)
-    q.add_argument('project'); q.add_argument('manifest', nargs='?', default='-'); q.add_argument('-o','--output'); q.add_argument('--report-out'); q.add_argument('--no-validate', action='store_true'); q.add_argument('--allow-invalid', action='store_true'); q.add_argument('--dry-run', action='store_true'); q.set_defaults(func=cmd_apply_visuals)
+    q.add_argument('project'); q.add_argument('manifest', nargs='?', default='-'); q.add_argument('-o','--output'); q.add_argument('--report-out'); q.add_argument('--no-validate', action='store_true'); q.add_argument('--allow-invalid', action='store_true'); q.add_argument('--dry-run', action='store_true'); add_not_sparse_flag(q); q.set_defaults(func=cmd_apply_visuals)
 
     q = sub.add_parser('add', help=hidden); q.add_argument('project'); q.add_argument('kind', choices=['row','backpack_row','choice','addon','selectable_addon','score','requirement','point','variable','word','group','global_requirement','row_design_group','choice_design_group','sound_effect','category']); q.add_argument('--parent'); q.add_argument('--count', type=int, default=1); q.add_argument('--values'); q.add_argument('-f','--field', action='append'); q.add_argument('-o','--output'); add_safe_write_flags(q); q.set_defaults(func=cmd_add)
     q = sub.add_parser('set', help=hidden); q.add_argument('project'); q.add_argument('pointer'); q.add_argument('value'); q.add_argument('-o','--output'); add_safe_write_flags(q); q.set_defaults(func=cmd_set)
@@ -2383,7 +2479,7 @@ def add_template_namespace(sub: argparse._SubParsersAction) -> None:
     st = r.add_subparsers(dest='style_action', required=True)
     x = st.add_parser('list', help='List the eight ICC Plus 2.10.7 style templates'); add_output_flags(x); x.set_defaults(func=cmd_style_template)
     x = st.add_parser('show', help='Show one exact pinned style template'); x.add_argument('preset'); add_output_flags(x); x.set_defaults(func=cmd_style_template)
-    x = st.add_parser('apply', help='Apply one pinned style template'); x.add_argument('project'); x.add_argument('preset'); x.add_argument('-o','--output'); x.set_defaults(allow_invalid=False); add_output_flags(x); x.set_defaults(func=cmd_style_template)
+    x = st.add_parser('apply', help='Apply one pinned style template'); x.add_argument('project'); x.add_argument('preset'); x.add_argument('-o','--output'); x.set_defaults(allow_invalid=False); add_not_sparse_flag(x); add_output_flags(x); x.set_defaults(func=cmd_style_template)
 
     r = tt.add_parser('design', help='Import or export Creator design JSON')
     dt = r.add_subparsers(dest='design_action', required=True)
@@ -2396,15 +2492,15 @@ def add_project_namespace(sub: argparse._SubParsersAction) -> None:
     q = sub.add_parser('project', help='Project formatting, import/export, IDs, fragments, and Build Form serialization')
     pt = q.add_subparsers(dest='project_action', required=True)
 
-    r = pt.add_parser('format', help='Write a complete Creator-compatible or pretty project JSON'); r.add_argument('project'); r.add_argument('--style', choices=['creator','pretty'], default='creator'); r.add_argument('-o','--output'); r.add_argument('--check', action='store_true'); add_output_flags(r); r.set_defaults(func=cmd_format)
-    r = pt.add_parser('validate', help='Validate a final project against the complete official Creator shape'); r.add_argument('project'); r.add_argument('--compat', action='store_true', help='Use permissive compatibility validation instead of final-project completeness validation'); add_output_flags(r); r.set_defaults(func=cmd_project_validate)
-    r = pt.add_parser('hydrate', help='Fill missing project sections from official Creator defaults and upgrade to the pinned target version'); r.add_argument('project'); r.add_argument('-o','--output'); r.add_argument('--dry-run', action='store_true'); add_output_flags(r); r.set_defaults(func=cmd_project_hydrate)
-    r = pt.add_parser('export', help='Export Project with Separate Images after complete-project validation'); r.add_argument('project'); r.add_argument('-o','--output', required=True); add_output_flags(r); r.set_defaults(func=cmd_export_project)
+    r = pt.add_parser('format', help='Format project JSON; content stays sparse unless --not-sparse is supplied'); r.add_argument('project'); r.add_argument('--style', choices=['creator','pretty'], default='pretty'); r.add_argument('-o','--output'); r.add_argument('--check', action='store_true'); add_not_sparse_flag(r); add_output_flags(r); r.set_defaults(func=cmd_format)
+    r = pt.add_parser('validate', help='Validate normal sparse/compatible project JSON; use --complete for the full Creator shape'); r.add_argument('project'); r.add_argument('--complete', action='store_true', help='Require the complete official Creator shape instead of normal sparse compatibility'); add_output_flags(r); r.set_defaults(func=cmd_project_validate)
+    r = pt.add_parser('hydrate', help='Hydrate for validation, then save sparse by default; use --not-sparse to keep all materialized defaults'); r.add_argument('project'); r.add_argument('-o','--output'); r.add_argument('--dry-run', action='store_true'); add_not_sparse_flag(r); add_output_flags(r); r.set_defaults(func=cmd_project_hydrate)
+    r = pt.add_parser('export', help='Export Project with Separate Images; embedded project.json is sparse unless --not-sparse is supplied'); r.add_argument('project'); r.add_argument('-o','--output', required=True); add_not_sparse_flag(r); add_output_flags(r); r.set_defaults(func=cmd_export_project)
 
     r = pt.add_parser('fragment', help='Import or export one Creator entity as ordinary ICC Plus JSON')
     ft = r.add_subparsers(dest='fragment_action', required=True)
     x = ft.add_parser('export', help='Export one entity fragment'); x.add_argument('project'); x.add_argument('reference'); x.add_argument('--kind'); x.add_argument('-o','--output'); x.add_argument('--compact-fragment', action='store_true'); add_output_flags(x); x.set_defaults(func=cmd_export_fragment)
-    x = ft.add_parser('import', help='Import one entity fragment with safe ID remapping'); x.add_argument('project'); x.add_argument('kind', choices=['row','backpack_row','choice','addon','selectable_addon','score','requirement','point','variable','word','group','global_requirement','row_design_group','choice_design_group','sound_effect','category']); x.add_argument('source'); x.add_argument('--parent'); x.add_argument('--index', type=int); x.add_argument('-o','--output'); x.set_defaults(allow_invalid=False); add_output_flags(x); x.set_defaults(func=cmd_import_fragment)
+    x = ft.add_parser('import', help='Import one entity fragment with safe ID remapping'); x.add_argument('project'); x.add_argument('kind', choices=['row','backpack_row','choice','addon','selectable_addon','score','requirement','point','variable','word','group','global_requirement','row_design_group','choice_design_group','sound_effect','category']); x.add_argument('source'); x.add_argument('--parent'); x.add_argument('--index', type=int); x.add_argument('-o','--output'); x.set_defaults(allow_invalid=False); add_not_sparse_flag(x); add_output_flags(x); x.set_defaults(func=cmd_import_fragment)
 
     r = pt.add_parser('ids', help='Export IDs or safely derive IDs from titles')
     it = r.add_subparsers(dest='ids_action', required=True)
@@ -2534,9 +2630,9 @@ def parser() -> argparse.ArgumentParser:
 
 
     # `template` is registered above as the consolidated template namespace.
-    q = sub.add_parser('format', help='Write project JSON in Creator-compatible or pretty form'); q.add_argument('project'); q.add_argument('--style', choices=['creator','pretty'], default='creator', help='creator reproduces file-import load normalization plus Save to Disk compact JSON with no trailing newline; pretty changes whitespace only.'); q.add_argument('-o','--output'); q.add_argument('--check', action='store_true', help='Do not write; exit 2 when formatting differs.'); q.set_defaults(func=cmd_format)
-    q = sub.add_parser('export-project', help='Mirror Creator Export Project with Separate Images'); q.add_argument('project'); q.add_argument('-o','--output', required=True, help='Output ZIP path'); q.set_defaults(func=cmd_export_project)
-    q = sub.add_parser('build-viewer', help='Build a playable package from an official ICC Plus viewer template ZIP'); q.add_argument('project'); q.add_argument('--template', required=True, help='Official web_viewer.zip or local_viewer.zip matching the target ICC Plus version'); q.add_argument('-o','--output', required=True, help='Output ZIP path'); q.add_argument('--mode', choices=['web','local'], help='Default comes from viewerConfig.useLocalViewer'); g=q.add_mutually_exclusive_group(); g.add_argument('--separate-images', action='store_true'); g.add_argument('--embedded-images', action='store_true'); q.set_defaults(func=cmd_build_viewer)
+    q = sub.add_parser('format', help='Format project JSON; content stays sparse unless --not-sparse is supplied'); q.add_argument('project'); q.add_argument('--style', choices=['creator','pretty'], default='pretty', help='Formatting only: creator uses compact Creator-style bytes; pretty uses indentation. Neither disables sparsity.'); q.add_argument('-o','--output'); q.add_argument('--check', action='store_true', help='Do not write; exit 2 when formatting differs.'); add_not_sparse_flag(q); q.set_defaults(func=cmd_format)
+    q = sub.add_parser('export-project', help='Export Project with Separate Images; embedded project.json is sparse by default'); q.add_argument('project'); q.add_argument('-o','--output', required=True, help='Output ZIP path'); add_not_sparse_flag(q); q.set_defaults(func=cmd_export_project)
+    q = sub.add_parser('build-viewer', help='Build a playable package; project JSON/local embed is sparse by default'); q.add_argument('project'); q.add_argument('--template', required=True, help='Official web_viewer.zip or local_viewer.zip matching the target ICC Plus version'); q.add_argument('-o','--output', required=True, help='Output ZIP path'); q.add_argument('--mode', choices=['web','local'], help='Default comes from viewerConfig.useLocalViewer'); g=q.add_mutually_exclusive_group(); g.add_argument('--separate-images', action='store_true'); g.add_argument('--embedded-images', action='store_true'); add_not_sparse_flag(q); q.set_defaults(func=cmd_build_viewer)
     q = sub.add_parser('image-field', help='Import, assign, or clear an entity image field without manual data-URL encoding')
     it = q.add_subparsers(dest='image_action', required=True)
     r = it.add_parser('import', help='Import a local image as a Creator-style data URL, or assign a URL/data URL directly'); r.add_argument('project'); r.add_argument('reference'); r.add_argument('source'); r.add_argument('--kind'); r.add_argument('--field', default='image'); r.add_argument('--as-path', action='store_true', help='Store the supplied local path instead of embedding it'); r.add_argument('-o','--output'); add_safe_write_flags(r); add_output_flags(r); r.set_defaults(func=cmd_image_field)
@@ -2550,15 +2646,17 @@ def parser() -> argparse.ArgumentParser:
     q = sub.add_parser('export-fragment', help='Export one Creator entity as ordinary ICC Plus JSON'); q.add_argument('project'); q.add_argument('reference'); q.add_argument('--kind'); q.add_argument('-o','--output'); q.add_argument('--compact-fragment', action='store_true', help='Write compact fragment JSON when -o is used'); q.set_defaults(func=cmd_export_fragment)
     q = sub.add_parser('import-fragment', help='Import Creator entity JSON, preserving unique IDs and remapping collisions'); q.add_argument('project'); q.add_argument('kind', choices=['row','backpack_row','choice','addon','selectable_addon','score','requirement','point','variable','word','group','global_requirement','row_design_group','choice_design_group','sound_effect','category']); q.add_argument('source', help='Fragment JSON, @file, file path, or - for stdin'); q.add_argument('--parent', help='Destination parent for nested entities'); q.add_argument('--index', type=int, help='Zero-based insertion index; default appends'); q.add_argument('-o','--output'); add_safe_write_flags(q); q.set_defaults(func=cmd_import_fragment)
 
-    q = sub.add_parser('generate', help='Create the exact blank ICC Plus Creator project used as the authoring/build starting point')
+    q = sub.add_parser('generate', help='Create a blank ICC Plus project in the normal sparse saved-project form')
     q.add_argument('-o','--output', help='Output project path. Omit for a non-destructive project.json name.')
     q.add_argument('--dry-run', action='store_true', help='Return the blank-project receipt without writing a file.')
+    add_not_sparse_flag(q)
     q.set_defaults(func=cmd_generate)
 
-    q = sub.add_parser('build', help='Rebuild project.json from the blank Creator project plus ordered phased authoring steps')
+    q = sub.add_parser('build', help='Rebuild sparse project.json from the blank Creator project plus ordered phased authoring steps')
     q.add_argument('manifest', help='Build manifest JSON file, @file, inline JSON, or - for stdin.')
     q.add_argument('-o','--output', required=True, help='Output project.json path. The file is written only after every step and final validation succeed.')
     q.add_argument('--dry-run', action='store_true', help='Execute and validate the full build without writing the output file.')
+    add_not_sparse_flag(q)
     q.set_defaults(func=cmd_build)
 
     for phase_name, phase_help, phase_func in (
@@ -2572,6 +2670,7 @@ def parser() -> argparse.ArgumentParser:
         q.add_argument('--no-validate', action='store_true', help=argparse.SUPPRESS)
         q.add_argument('--allow-invalid', action='store_true', help=argparse.SUPPRESS)
         q.add_argument('--dry-run', action='store_true')
+        add_not_sparse_flag(q)
         q.set_defaults(func=phase_func)
 
     q = sub.add_parser('style', help='Apply presentation/style edits using the visual-manifest format')
@@ -2582,6 +2681,7 @@ def parser() -> argparse.ArgumentParser:
     q.add_argument('--no-validate', action='store_true', help=argparse.SUPPRESS)
     q.add_argument('--allow-invalid', action='store_true', help=argparse.SUPPRESS)
     q.add_argument('--dry-run', action='store_true')
+    add_not_sparse_flag(q)
     q.set_defaults(func=cmd_apply_visuals, canonical_style=True)
 
     q = sub.add_parser('apply', help='Low-level escape hatch: apply a generic JSON or JSONL batch edit script atomically')
@@ -2592,6 +2692,7 @@ def parser() -> argparse.ArgumentParser:
     q.add_argument('--require-valid', action='store_true', help=argparse.SUPPRESS)
     q.add_argument('--allow-invalid', action='store_true', help='Write the batch result even when validation has errors. Default is no write.')
     q.add_argument('--dry-run', action='store_true'); q.add_argument('--result-mode', choices=['full','compact'], help='Response detail. Canonical iccplus-agent-ops scripts default to compact; compatibility scripts default to full.')
+    add_not_sparse_flag(q)
     q.set_defaults(func=cmd_apply)
 
     q = sub.add_parser('pair', help='Analyze selection-order interaction for two choices')

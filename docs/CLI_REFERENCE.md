@@ -4,7 +4,7 @@ The canonical ICC Plus Local 0.10.0rc14 surface has 11 top-level commands.
 
 ## `generate`
 
-Create the exact blank ICC Plus 2.10.7 Creator project and verify the result with complete-project validation.
+Create the blank ICC Plus 2.10.7 project, complete-validate it in memory, and save it in the normal sparse form.
 
 ```bash
 iccplus-local generate -o project.json
@@ -56,7 +56,7 @@ Audit requests use `steps` or `actions`. Each step may select, deselect, press a
 
 ## `build`
 
-Rebuild from the exact blank project using an ordered phase manifest. Missing official sections are hydrated from Creator defaults and the final output must pass complete-project validation before write.
+Rebuild from the exact blank project using an ordered phase manifest. Missing official sections are hydrated from Creator defaults, the result must pass complete-project validation in memory, and the written `project.json` uses the normal sparse form.
 
 ```bash
 iccplus-local build iccplus.build.json -o project.json
@@ -85,8 +85,8 @@ Image compression is automatic.
 ## `project`
 
 ```text
-project format
-project validate [--compat]
+project format [--style sparse|creator|pretty]
+project validate [--complete]
 project hydrate
 project export
 project fragment export|import
@@ -95,9 +95,9 @@ project build-summary
 project build-string
 ```
 
-`project validate` is the canonical final-artifact completeness check. `project hydrate` fills missing official Creator sections and safe eager entity defaults without overwriting existing values or inventing IDs. The remaining project commands are serialization/interchange helpers, not alternate authoring paths.
+`project validate` is the canonical check for the normal sparse saved artifact. `project validate --complete` requires the full Creator shape in memory or in an explicitly non-sparse artifact. `project hydrate` fills missing official Creator sections and safe eager entity defaults without overwriting existing values or inventing IDs, then still saves sparse unless `--not-sparse` is supplied. `project format --style creator` selects compact Creator-style formatting and `--style pretty` selects indentation; neither disables sparsity. The remaining project commands are serialization/interchange helpers, not alternate authoring paths.
 
-Player-facing Viewer packages use the pinned behavior-preserving sparse runtime serializer by default. Creator-format and Creator-compatible export paths remain complete. The standalone `iccplus-sparse` and `iccplus-omission-probe` entry points are release/verification helpers rather than additions to the 11-command `iccplus-local` surface.
+Every full-project JSON output uses the pinned behavior-preserving sparse serializer by default. `--not-sparse` / `--not_sparse` is the only output-level opt-out, including format, hydrate, export, and Viewer packaging paths. The standalone `iccplus-sparse` and `iccplus-omission-probe` entry points are release/verification helpers rather than additions to the 11-command `iccplus-local` surface.
 
 ## `reference`
 
