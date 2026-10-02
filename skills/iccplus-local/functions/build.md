@@ -1,20 +1,17 @@
 # build
 
-Read this file for reproducible multi-phase builds.
+Read this file for reproducible multi-phase native ICC Plus builds.
 
 `build` consumes an ordered manifest and produces a Creator-complete project. Use it when a project has an authoritative source tree or compiler pipeline. Generated project JSON remains output, not a second authoring source.
 
-For large projects, keep two concerns separate:
+ICC Plus Local executes the explicit native phases it is given. It does not decide how a higher-level semantic source should be normalized.
 
-- the readable semantic build used for authoring, review, and most tests;
-- optional release normalization/compaction performed deterministically after the semantic build.
+For source-driven projects, perform semantic normalization in the compiler before or while emitting the native build phases. Examples of compiler-owned decisions include Requirement hoisting, style deduplication, source-taxonomy Group pruning, Row merging, Pick N inference, and runtime-ID compaction.
 
-A normalization phase may centralize style, promote shared Requirements to Rows, prune runtime-only Groups with no consumers, merge safe Rows, or compact runtime IDs. Do not make those transformations by hand against the generated release file.
-
-If runtime IDs are compacted, generate them deterministically, rewrite every reference-bearing field, emit a reversible mapping, validate the compact result, and prove that reverse mapping reproduces the semantic project. A different compact-ID mapping is a public-ID migration after release.
+If the compiler emits a compact release artifact, ICC Plus Local can validate that native result and run local regressions against it. The compiler remains responsible for deterministic ID generation, complete reference remapping, reversible mappings, and migration policy for published IDs.
 
 Do not strip Creator-complete eager/default fields merely to reduce bytes.
 
-Read `../../../docs/cyoa/guide/21-large-project-normalization.md` before adding a large-project normalization phase.
+Read `../../../docs/COMPILER_BOUNDARY.md` and `../../../docs/cyoa/guide/21-large-project-normalization.md` when the surrounding compiler performs normalization or release compaction.
 
 See `../../../docs/BUILD_SYSTEM.md` and the current build manifest schema for exact command and phase shapes.

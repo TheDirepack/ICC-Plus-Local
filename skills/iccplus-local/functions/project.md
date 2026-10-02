@@ -12,23 +12,21 @@ For source-driven large projects, distinguish three artifacts when useful:
 
 Do not edit the compact release artifact as a second source.
 
-## Runtime ID compaction
+## Runtime ID compaction boundary
 
-Compact runtime IDs can materially reduce repeated-reference payload in large projects, but only as a deterministic release transformation.
+ICC Plus Local owns native serialization and reference validation. It does not choose a compact ID scheme or infer which public identities are safe to replace.
 
-A safe compact-ID pipeline must:
+If a source compiler or release pipeline compacts runtime IDs, that layer must:
 
 - keep source/test IDs semantic and readable;
 - generate stable deterministic runtime IDs rather than fresh random IDs;
 - use explicit collision detection and stable collision handling;
 - rewrite every identity and every reference-bearing field;
 - emit a reversible semantic-to-runtime ID map for release/debug records;
-- validate the compact artifact;
-- reverse-map a comparison copy and compare it field-for-field with the semantic build;
-- treat any later mapping/algorithm change as a public-ID migration when old saves or imports matter.
+- treat later mapping or algorithm changes as public-ID migrations when old saves or imports matter.
 
-A short type prefix such as `r`, `c`, `a`, or `g` is useful for diagnosis but does not replace the reversible map.
+After that transformation, use ICC Plus Local to validate the compact native artifact, exercise relevant runtime/save-load paths, and inspect references. Reverse-mapped semantic equivalence is a compiler/release-pipeline proof, not a hidden `project` rewrite.
 
 Do not strip official Creator-complete eager/default fields only to reduce file size. Remaining schema overhead is preferable to a smaller project that the target Creator cannot round-trip safely.
 
-Read `../../../docs/cyoa/guide/21-large-project-normalization.md` for the full release-compaction rules.
+Read `../../../docs/COMPILER_BOUNDARY.md` and `../../../docs/cyoa/guide/21-large-project-normalization.md` for the source-compiler boundary and release-compaction rules.
