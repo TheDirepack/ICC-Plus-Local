@@ -10,6 +10,6 @@ The complete generic CYOA guide is under `cyoa/guide/`. The legacy migration ref
 
 For player-view details, use `PLAY_STRUCTURE.md`. For playtesting workflows, use `GAMEPLAY_RUNNER.md`. For the command tree, use `CLI_REFERENCE.md`. For native fields, use `FIELD_CATALOG.md` and `ICCPLUS_FIELD_REFERENCE.md`.
 
-For the authoring/compiler boundary, use `COMPILER_BOUNDARY.md`. For the default player-facing runtime serializer, its pinned omission rules, and the generated Viewer verification kit, use `SPARSE_RUNTIME_SERIALIZATION.md`. `iccplus-sparse` writes the default compact runtime artifact directly; `iccplus-omission-probe` generates isolated baseline/candidate Viewer test artifacts for unresolved omission rules.
+For the authoring/compiler boundary, use `COMPILER_BOUNDARY.md`. For the default player-facing runtime serializer, its pinned omission rules, and the generated Viewer verification kit, use `SPARSE_RUNTIME_SERIALIZATION.md`. `iccplus-sparse` writes the default compact runtime artifact directly; `iccplus-omission-probe` generates isolated baseline/candidate Viewer test artifacts for unresolved omission rules. Promote an unresolved omission only after behavior matches in the pinned Viewer, not merely because both files load.
 
 Historical audit documents keep the release/version labels of the evidence they record. They are not the current command or release instructions.
