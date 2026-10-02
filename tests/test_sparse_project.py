@@ -63,6 +63,13 @@ def test_nested_loader_proven_omissions_are_narrow() -> None:
         }],
         'pointTypes': [{'id': 'p1', 'startingSum': 3, 'initValue': 3, 'name': 'P'}],
         'words': [{'id': 'w1', 'replaceText': '', 'category': -1}],
+        'groups': [{
+            'id': 'g1',
+            'name': 'G',
+            'elements': [],
+            'rowElements': [],
+            'designGroups': ['keep-design-link'],
+        }],
         'rowDesignGroups': [{
             'id': 'rdg',
             'name': 'R',
@@ -104,6 +111,9 @@ def test_nested_loader_proven_omissions_are_narrow() -> None:
     assert addon['title'] == 'keep-title'
     assert 'initValue' not in sparse['pointTypes'][0]
     assert 'replaceText' not in sparse['words'][0]
+    assert 'elements' not in sparse['groups'][0]
+    assert 'rowElements' not in sparse['groups'][0]
+    assert sparse['groups'][0]['designGroups'] == ['keep-design-link']
     for key in ('activatedId', 'elements', 'backpackElements', 'groupElements'):
         assert key not in sparse['rowDesignGroups'][0]
         assert key not in sparse['objectDesignGroups'][0]
@@ -208,6 +218,61 @@ def test_private_filter_uses_private_loader_defaults_not_global_defaults() -> No
     assert choice['styling'] == {'unselFilterSatur': 1}
     assert report['removed_by_rule']['private_filter_explicit_loader_default'] == 6
     assert report['private_style_inference_applied'] is False
+
+
+def test_design_group_private_filter_defaults_remain_explicit() -> None:
+    source = {
+        'version': ICCPLUS_VERSION,
+        'rowDesignGroups': [{
+            'id': 'rdg',
+            'privateFilterIsOn': True,
+            'styling': {
+                'unselFilterSaturIsOn': True,
+                'unselFilterSatur': 0,
+            },
+        }],
+        'objectDesignGroups': [{
+            'id': 'odg',
+            'privateFilterIsOn': True,
+            'styling': {
+                'unselFilterBlurIsOn': False,
+                'unselFilterBlur': 0,
+            },
+        }],
+    }
+
+    sparse, report = sparsify_project(source, require_complete=False)
+
+    assert sparse['rowDesignGroups'][0]['styling'] == {
+        'unselFilterSaturIsOn': True,
+        'unselFilterSatur': 0,
+    }
+    assert sparse['objectDesignGroups'][0]['styling'] == {
+        'unselFilterBlurIsOn': False,
+        'unselFilterBlur': 0,
+    }
+    assert 'private_filter_explicit_loader_default' not in report['removed_by_rule']
+
+
+def test_group_empty_member_arrays_use_viewer_loader_defaults() -> None:
+    source = {
+        'version': ICCPLUS_VERSION,
+        'groups': [{
+            'id': 'g',
+            'name': 'G',
+            'elements': [],
+            'rowElements': [],
+            'designGroups': ['keep'],
+        }],
+    }
+
+    sparse, report = sparsify_project(source, require_complete=False)
+    group = sparse['groups'][0]
+
+    assert 'elements' not in group
+    assert 'rowElements' not in group
+    assert group['designGroups'] == ['keep']
+    assert report['removed_by_rule']['group_loader_default'] == 2
 
 
 def test_runtime_discarded_fields_and_null_object_members_do_not_survive() -> None:

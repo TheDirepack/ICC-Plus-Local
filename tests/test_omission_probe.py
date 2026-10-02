@@ -21,13 +21,24 @@ def _diff_count(a, b) -> int:
 
 def test_core_probe_cases_isolate_one_change_and_use_valid_controls() -> None:
     cases = omission_probe_cases(exhaustive=False)
-    assert len(cases) >= 30
+    assert len(cases) >= 35
     ids = [case['id'] for case in cases]
     assert len(ids) == len(set(ids))
     assert 'private-filter-unsel-satur-one' in ids
     assert any(case_id.startswith('viewer-config-') for case_id in ids)
     assert 'row-privateMultiChoiceIsOn' in ids
     assert 'choice-privateMultiChoiceIsOn' in ids
+
+    guarded_membership_ids = {
+        'row-groups-empty',
+        'row-rowDesignGroups-empty',
+        'choice-groups-empty',
+        'choice-objectDesignGroups-empty',
+        'group-designGroups-empty',
+    }
+    assert guarded_membership_ids <= set(ids)
+    guarded_cases = [case for case in cases if case['category'] == 'guarded-empty-membership']
+    assert {case['id'] for case in guarded_cases} == guarded_membership_ids
 
     for case in cases:
         if case['category'] == 'remove-nulls-array-filtering':
@@ -55,11 +66,12 @@ def test_exhaustive_probe_inventory_covers_unproven_style_fallbacks() -> None:
     assert 'retained-global-styling-member' in categories
     assert 'private-style-member-fallback' in categories
     assert 'runtime-state-empty-build' in categories
+    assert 'guarded-empty-membership' in categories
     assert 'global-styling-unselFilterSatur' in ids
     assert 'private-choice-privateTextIsOn-objectTitle' in ids
     assert 'top-level-activated-empty-build' in ids
 
-    for category in ('retained-global-styling-member', 'private-style-member-fallback', 'runtime-state-empty-build'):
+    for category in ('retained-global-styling-member', 'private-style-member-fallback', 'runtime-state-empty-build', 'guarded-empty-membership'):
         case = next(item for item in cases if item['category'] == category)
         assert validate_complete(case['baseline'])['valid'] is True, case['id']
         assert _diff_count(case['baseline'], case['candidate']) == 1, case['id']

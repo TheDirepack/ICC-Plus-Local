@@ -214,6 +214,39 @@ def _add_core_cases(cases: list[dict[str, Any]]) -> None:
             note=f'Confirm that the Viewer import path filters a {label} from native mdObjects exactly as if it had been omitted before serialization.',
         ))
 
+    for case_id, scope, field in (
+        ('row-groups-empty', 'row', 'groups'),
+        ('row-rowDesignGroups-empty', 'row', 'rowDesignGroups'),
+        ('choice-groups-empty', 'choice', 'groups'),
+        ('choice-objectDesignGroups-empty', 'choice', 'objectDesignGroups'),
+    ):
+        baseline = _base_project()
+        entity = baseline['rows'][0] if scope == 'row' else baseline['rows'][0]['objects'][0]
+        entity[field] = []
+        candidate = copy.deepcopy(baseline)
+        target = candidate['rows'][0] if scope == 'row' else candidate['rows'][0]['objects'][0]
+        target.pop(field, None)
+        cases.append(_case(
+            case_id, baseline, candidate,
+            path=f'/rows/0' + ('' if scope == 'row' else '/objects/0') + f'/{field}',
+            category='guarded-empty-membership',
+            note='Pinned Viewer source guards every known use of this membership array, but it is not explicitly reconstructed during load. Verify empty-array versus missing behavior before promotion.',
+        ))
+
+    baseline = _base_project()
+    group = make_entity(baseline, 'group', {'id': 'probe-group', 'name': 'Omission Probe Group'})
+    group['designGroups'] = []
+    baseline['groups'].append(group)
+    if validate_complete(baseline).get('valid') is not True:
+        raise ValueError('internal Group.designGroups omission-probe baseline is not Creator-complete')
+    candidate = copy.deepcopy(baseline)
+    candidate['groups'][-1].pop('designGroups', None)
+    cases.append(_case(
+        'group-designGroups-empty', baseline, candidate,
+        path=f'/groups/{len(baseline["groups"]) - 1}/designGroups', category='guarded-empty-membership',
+        note='Pinned Viewer source guards Group.designGroups everywhere it is consumed, but does not explicitly reconstruct it. Verify empty-array versus missing behavior before promotion.',
+    ))
+
 
 def _add_exhaustive_style_cases(cases: list[dict[str, Any]]) -> None:
     stock_styling = DEFAULT_APP['styling']
@@ -277,7 +310,7 @@ def _readme(case_count: int) -> str:
 
 This directory contains {case_count} isolated browser-verification cases generated against ICC Plus {ICCPLUS_VERSION} commit `{ICCPLUS_COMMIT}`.
 
-The default generator includes individual retained-`viewerConfig` members, retained global-style members, private-style enable flags, private-style fallback members, import array cleanup, the empty `activated` state, and a known private-filter negative control. Fields already proven unsafe by direct Viewer consumption/schema behavior are not duplicated merely to make the kit larger.
+The default generator includes individual retained-`viewerConfig` members, retained global-style members, private-style enable flags, private-style fallback members, guarded empty membership arrays, import array cleanup, the empty `activated` state, and a known private-filter negative control. Fields already proven unsafe by direct Viewer consumption/schema behavior are not duplicated merely to make the kit larger.
 
 For ordinary omission cases, load `baseline.json` and `candidate.json` separately in the pinned Viewer and compare load success, visible layout/text/style, selection behavior, counters/scores, save/reload behavior where relevant, and browser console errors. For `remove-nulls-array-filtering` cases, the baseline deliberately contains the pre-import null/empty array member and the candidate is the cleaned control; compare the post-load result and console behavior.
 
