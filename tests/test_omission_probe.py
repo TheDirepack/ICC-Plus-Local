@@ -19,7 +19,7 @@ def _diff_count(a, b) -> int:
     return 0 if a == b else 1
 
 
-def test_probe_cases_are_complete_and_isolate_one_change() -> None:
+def test_probe_cases_isolate_one_change_and_use_valid_controls() -> None:
     cases = omission_probe_cases()
     assert len(cases) >= 30
     ids = [case['id'] for case in cases]
@@ -30,9 +30,15 @@ def test_probe_cases_are_complete_and_isolate_one_change() -> None:
     assert 'choice-privateMultiChoiceIsOn' in ids
 
     for case in cases:
-        assert validate_complete(case['baseline'])['valid'] is True, case['id']
-        # Candidates intentionally omit optional/native fields under test, so
-        # Creator completeness is not required after the omission.
+        if case['category'] == 'remove-nulls-array-filtering':
+            # These baselines deliberately contain the pre-import null/empty
+            # array member that the Viewer cleanup pass is being asked to
+            # normalize. The cleaned candidate is the valid control.
+            assert validate_complete(case['baseline'])['valid'] is False, case['id']
+            assert validate_complete(case['candidate'])['valid'] is True, case['id']
+        else:
+            assert validate_complete(case['baseline'])['valid'] is True, case['id']
+        # Every experiment changes exactly one omission dimension.
         assert _diff_count(case['baseline'], case['candidate']) == 1, case['id']
 
     array_cases = {case['id']: case for case in cases if case['id'].startswith('array-')}
