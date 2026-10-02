@@ -68,6 +68,16 @@ DESIGN_GROUP_DEFAULTS: dict[str, Any] = {
     'groupElements': [],
 }
 
+CREATOR_CATEGORY_COLLECTIONS = (
+    'pointTypes',
+    'variables',
+    'words',
+    'groups',
+    'globalRequirements',
+    'rowDesignGroups',
+    'objectDesignGroups',
+)
+
 _SPECIAL_TOP_LEVEL = frozenset({'version', 'viewerConfig', 'styling', 'backpack'})
 _MISSING = object()
 
@@ -96,6 +106,26 @@ def _strip_null_object_members(value: Any, path: str, removals: list[dict[str, s
     elif isinstance(value, list):
         for index, item in enumerate(value):
             _strip_null_object_members(item, f'{path}/{index}', removals)
+
+
+def _strip_creator_category_metadata(app: dict[str, Any], removals: list[dict[str, str]]) -> None:
+    # Categories organize Creator dialogs only. The pinned Viewer store never
+    # reads app.categories or an entity's category index.
+    if 'categories' in app:
+        _remove(app, 'categories', '/categories', 'viewer_ignores_creator_categories', removals)
+    for collection_name in CREATOR_CATEGORY_COLLECTIONS:
+        collection = app.get(collection_name)
+        if not isinstance(collection, list):
+            continue
+        for index, entity in enumerate(collection):
+            if isinstance(entity, dict) and 'category' in entity:
+                _remove(
+                    entity,
+                    'category',
+                    f'/{collection_name}/{index}/category',
+                    'viewer_ignores_creator_category_metadata',
+                    removals,
+                )
 
 
 def _strip_private_filter_defaults(entity: Any, path: str, removals: list[dict[str, str]]) -> None:
@@ -362,6 +392,7 @@ def sparsify_project(
                     removals,
                 )
 
+    _strip_creator_category_metadata(sparse, removals)
     _strip_groups(sparse.get('groups'), '/groups', removals)
     _strip_design_groups(sparse.get('rowDesignGroups'), '/rowDesignGroups', removals)
     _strip_design_groups(sparse.get('objectDesignGroups'), '/objectDesignGroups', removals)
