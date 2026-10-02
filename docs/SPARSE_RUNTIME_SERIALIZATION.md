@@ -20,11 +20,12 @@ The serializer currently removes these classes of values by default:
 - Addon derived `parentId` and empty `requireds`;
 - Point `initValue` when it equals `startingSum`;
 - Word `replaceText: ""`;
+- Group `elements` and `rowElements` when they are empty, because the Viewer reconstructs both arrays during load;
 - Design Group `activatedId`, `elements`, `backpackElements`, and `groupElements` when they equal the loader defaults;
 - Choice `initMultipleTimesMinus` only when it equals the value the Viewer will derive;
 - Choice `addonJustify` only when it equals the effective inherited project/default value;
 - object properties whose value is `null`, matching the proven object-property portion of the Viewer import cleanup;
-- private-filter missing-value defaults only while `privateFilterIsOn` remains explicitly true. These use the private initializer's own values, not global styling defaults.
+- Row/Choice private-filter missing-value defaults only while `privateFilterIsOn` remains explicitly true. These use the Row/Choice private initializer's own values, not global styling defaults. Design Groups are excluded from this rule because their load path does not reconstruct those private-filter values the same way.
 
 The private-filter distinction matters: the pinned global styling default for `unselFilterSatur` is `1`, while the private missing-field initializer uses `0`. An explicit private `unselFilterSatur: 1` therefore remains serialized.
 
@@ -37,7 +38,7 @@ The unresolved set includes:
 - individual members of a retained custom `viewerConfig`;
 - individual stock-valued members of an otherwise custom global `styling` object, except the five source-proven members already listed above;
 - private-style enable flags whose absence may cause the Viewer to infer a different style source;
-- stock-valued private-style members whose absence may fall back to project/Design-Group styling, reconstruct a local default, or remain undefined;
+- stock-valued private-style members whose absence may fall back to project/Design-Group styling, reconstruct a local default, or remain undefined; Design Group private-filter members remain explicit unless separately proven safe;
 - list-level filtering of `null` or empty-object entries;
 - Creator Save-to-Disk's empty `activated: [""]` representation versus omitting `activated` and taking the Viewer's built-in empty state;
 - any other Row, Choice, Addon, Requirement, Score, or styling field without an explicit loader reconstruction rule or equivalent pinned-Viewer proof.
