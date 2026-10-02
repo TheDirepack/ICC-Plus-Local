@@ -22,6 +22,30 @@ def _nondefault(value):
     return 'creator-only-noise'
 
 
+def _req(req_id: str = 'target') -> dict:
+    return {
+        'required': True,
+        'requireds': [],
+        'orRequired': [],
+        'orRequireds': [],
+        'id': 'creator-only-requirement-id',
+        'type': 'id',
+        'reqId': req_id,
+        'reqId1': '',
+        'reqId2': '',
+        'reqId3': '',
+        'reqPoints': 0,
+        'showRequired': False,
+        'operator': '1',
+        'afterText': 'choice',
+        'beforeText': 'Required:',
+        'orNum': 1,
+        'selNum': 1,
+        'selFromOperators': '1',
+        'more': [],
+    }
+
+
 def test_creator_edit_state_is_removed_even_when_nondefault() -> None:
     source = {
         'version': ICCPLUS_VERSION,
@@ -99,6 +123,143 @@ def test_all_creator_only_top_level_fields_are_removed_even_when_customized() ->
     assert sparse['cropperPosition'] == 2
     assert sparse['tooltipDelay'] == 321
     assert report['removed_by_rule']['viewer_ignores_creator_edit_state'] >= len(CREATOR_ONLY_TOP_LEVEL)
+
+
+def test_creator_entity_labels_and_sound_effect_authoring_metadata_are_removed() -> None:
+    source = {
+        'version': ICCPLUS_VERSION,
+        'groups': [{
+            'id': 'group',
+            'name': 'Creator Group Label',
+            'elements': ['choice'],
+            'rowElements': ['row'],
+            'designGroups': ['dg'],
+        }],
+        'globalRequirements': [{
+            'id': 'global',
+            'name': 'Creator Global Requirement Label',
+            'requireds': [_req()],
+        }],
+        'rowDesignGroups': [{
+            'id': 'rdg',
+            'name': 'Creator Row Design Label',
+            'activatedId': 'global',
+            'elements': ['row'],
+            'backpackElements': [],
+            'groupElements': [],
+            'styling': {'rowMargin': 12},
+        }],
+        'objectDesignGroups': [{
+            'id': 'odg',
+            'name': 'Creator Choice Design Label',
+            'activatedId': 'global',
+            'elements': ['choice'],
+            'backpackElements': [],
+            'groupElements': [],
+            'styling': {'objectMargin': 12},
+        }],
+        'soundEffects': [{
+            'id': 'sfx',
+            'name': 'Creator SFX Label',
+            'audio': 'sound.ogg',
+            'volume': 0.75,
+            'pitch': 1,
+            'isDefault': True,
+            'onSelected': True,
+            'onDeselected': True,
+            'requireds': [_req()],
+            'groups': ['group'],
+        }],
+    }
+
+    sparse, report = sparsify_project(source, require_complete=False)
+
+    assert 'name' not in sparse['groups'][0]
+    assert sparse['groups'][0]['id'] == 'group'
+    assert sparse['groups'][0]['elements'] == ['choice']
+    assert sparse['groups'][0]['rowElements'] == ['row']
+    assert sparse['groups'][0]['designGroups'] == ['dg']
+
+    assert 'name' not in sparse['globalRequirements'][0]
+    assert sparse['globalRequirements'][0]['id'] == 'global'
+    assert sparse['globalRequirements'][0]['requireds'][0]['reqId'] == 'target'
+
+    for key in ('rowDesignGroups', 'objectDesignGroups'):
+        design = sparse[key][0]
+        assert 'name' not in design
+        assert design['activatedId'] == 'global'
+        assert design['elements']
+        assert design['styling']
+
+    sfx = sparse['soundEffects'][0]
+    for key in ('name', 'isDefault', 'onSelected', 'onDeselected', 'groups'):
+        assert key not in sfx
+    assert sfx['id'] == 'sfx'
+    assert sfx['audio'] == 'sound.ogg'
+    assert sfx['volume'] == 0.75
+    assert sfx['pitch'] == 1
+    assert sfx['requireds'][0]['reqId'] == 'target'
+    assert report['removed_by_rule']['viewer_ignores_creator_entity_metadata'] == 9
+
+
+def test_requirement_structural_noise_is_removed_recursively_from_all_runtime_containers() -> None:
+    nested = _req('nested')
+    outer = _req('outer')
+    outer['requireds'] = [copy.deepcopy(nested)]
+    outer['orRequireds'] = [copy.deepcopy(nested)]
+
+    source = {
+        'version': ICCPLUS_VERSION,
+        'rows': [{
+            'id': 'row',
+            'requireds': [copy.deepcopy(outer)],
+            'objects': [{
+                'id': 'choice',
+                'requireds': [copy.deepcopy(outer)],
+                'scores': [{'idx': 'score', 'requireds': [copy.deepcopy(outer)]}],
+                'addons': [{
+                    'id': '',
+                    'requireds': [copy.deepcopy(outer)],
+                    'scores': [{'idx': 'addon-score', 'requireds': [copy.deepcopy(outer)]}],
+                }],
+            }],
+        }],
+        'globalRequirements': [{'id': 'global', 'requireds': [copy.deepcopy(outer)]}],
+        'soundEffects': [{
+            'id': 'sfx',
+            'audio': 'sound.ogg',
+            'volume': 1,
+            'pitch': 0,
+            'requireds': [copy.deepcopy(outer)],
+        }],
+    }
+
+    sparse, report = sparsify_project(source, require_complete=False)
+
+    requirement_lists = [
+        sparse['rows'][0]['requireds'],
+        sparse['rows'][0]['objects'][0]['requireds'],
+        sparse['rows'][0]['objects'][0]['scores'][0]['requireds'],
+        sparse['rows'][0]['objects'][0]['addons'][0]['requireds'],
+        sparse['rows'][0]['objects'][0]['addons'][0]['scores'][0]['requireds'],
+        sparse['globalRequirements'][0]['requireds'],
+        sparse['soundEffects'][0]['requireds'],
+    ]
+
+    def assert_clean(req: dict) -> None:
+        assert 'id' not in req
+        assert 'more' not in req
+        assert req['reqId']
+        for child in req.get('requireds', []):
+            assert_clean(child)
+        for child in req.get('orRequireds', []):
+            assert_clean(child)
+
+    for requireds in requirement_lists:
+        assert_clean(requireds[0])
+
+    assert report['removed_by_rule']['viewer_ignores_requirement_structural_id'] > 0
+    assert report['removed_by_rule']['requirement_empty_more_is_noop'] > 0
 
 
 def test_legacy_sfx_id_is_removed_only_when_enabled_directions_already_have_modern_ids() -> None:
