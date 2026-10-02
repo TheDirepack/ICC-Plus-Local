@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 
-from iccplus_tools.sparse_project import main, sparsify_project
+from iccplus_tools.sparse_project import main, runtime_project_text, sparsify_project
 from iccplus_tools.upstream_2106 import ICCPLUS_VERSION, default_export_project
 
 
@@ -19,7 +19,19 @@ def test_complete_blank_project_uses_viewer_defaults_without_dropping_version() 
     assert sparse['activated'] == ['']
     assert report['source_complete'] is True
     assert report['sparse_bytes'] < report['source_bytes']
-    assert report['browser_verification_required'] is True
+    assert report['browser_verification_required_for_unproven_rules'] is True
+
+
+def test_default_runtime_text_applies_proven_omissions() -> None:
+    source = default_export_project()
+    text, report = runtime_project_text(source)
+    runtime = json.loads(text)
+
+    assert runtime['version'] == ICCPLUS_VERSION
+    assert 'rows' not in runtime
+    assert 'viewerConfig' not in runtime
+    assert 'styling' not in runtime
+    assert report['removed_count'] > 0
 
 
 def test_nested_loader_proven_omissions_are_narrow() -> None:
@@ -159,6 +171,42 @@ def test_custom_styling_only_strips_explicitly_proven_members() -> None:
 
     sparse, report = sparsify_project(source, require_complete=False)
     assert sparse['styling'] == {'objectMargin': 25, 'unselFilterSatur': 1}
+    assert report['private_style_inference_applied'] is False
+
+
+def test_private_filter_uses_private_loader_defaults_not_global_defaults() -> None:
+    source = {
+        'version': ICCPLUS_VERSION,
+        'rows': [{
+            'id': 'r',
+            'privateFilterIsOn': True,
+            'styling': {
+                'unselFilterBlurIsOn': False,
+                'unselFilterBlur': 0,
+                'unselFilterSaturIsOn': False,
+                'unselFilterSatur': 0,
+            },
+            'objects': [{
+                'id': 'c',
+                'privateFilterIsOn': True,
+                'styling': {
+                    'unselFilterOpacIsOn': False,
+                    'unselFilterOpac': 100,
+                    'unselFilterSatur': 1,
+                },
+            }],
+        }],
+    }
+
+    sparse, report = sparsify_project(source, require_complete=False)
+    row = sparse['rows'][0]
+    choice = row['objects'][0]
+
+    assert row['privateFilterIsOn'] is True
+    assert row['styling'] == {}
+    assert choice['privateFilterIsOn'] is True
+    assert choice['styling'] == {'unselFilterSatur': 1}
+    assert report['removed_by_rule']['private_filter_explicit_loader_default'] == 6
     assert report['private_style_inference_applied'] is False
 
 
