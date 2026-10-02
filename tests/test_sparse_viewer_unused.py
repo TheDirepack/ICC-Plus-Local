@@ -125,7 +125,7 @@ def test_all_creator_only_top_level_fields_are_removed_even_when_customized() ->
     assert report['removed_by_rule']['viewer_ignores_creator_edit_state'] >= len(CREATOR_ONLY_TOP_LEVEL)
 
 
-def test_creator_entity_labels_and_sound_effect_authoring_metadata_are_removed() -> None:
+def test_creator_entity_labels_are_removed_but_sound_effect_name_is_retained() -> None:
     source = {
         'version': ICCPLUS_VERSION,
         'groups': [{
@@ -192,14 +192,15 @@ def test_creator_entity_labels_and_sound_effect_authoring_metadata_are_removed()
         assert design['styling']
 
     sfx = sparse['soundEffects'][0]
-    for key in ('name', 'isDefault', 'onSelected', 'onDeselected', 'groups'):
+    assert sfx['name'] == 'Creator SFX Label'
+    for key in ('isDefault', 'onSelected', 'onDeselected', 'groups'):
         assert key not in sfx
     assert sfx['id'] == 'sfx'
     assert sfx['audio'] == 'sound.ogg'
     assert sfx['volume'] == 0.75
     assert sfx['pitch'] == 1
     assert sfx['requireds'][0]['reqId'] == 'target'
-    assert report['removed_by_rule']['viewer_ignores_creator_entity_metadata'] == 9
+    assert report['removed_by_rule']['viewer_ignores_creator_entity_metadata'] == 8
 
 
 def test_requirement_structural_noise_is_removed_recursively_from_all_runtime_containers() -> None:
