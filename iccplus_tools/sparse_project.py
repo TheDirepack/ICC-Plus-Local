@@ -400,10 +400,10 @@ def _strip_score(
 ) -> None:
     if not isinstance(score, dict):
         return
-    # The Viewer assigns a fresh unique internal idx whenever it is absent and
-    # no player behavior reads the serialized score idx afterward.
-    if 'idx' in score:
-        _remove(score, 'idx', f'{path}/idx', 'score_index_rebuilt_on_load', removals)
+    # Keep Score idx in normal sparse project JSON. The pinned Viewer can
+    # regenerate an internal score index when it is absent, but ICC Plus Local
+    # uses idx as the stable authoring identity across separate commands and
+    # hydration deliberately never invents missing entity identities.
     _strip_viewer_unused_fields(score, SCORE_VIEWER_UNUSED_FIELDS, path, removals)
     if loader_migrates_or:
         _strip_loader_migrated_or_requireds(score.get('requireds'), f'{path}/requireds', removals)
