@@ -6,6 +6,8 @@ Runtime `project.json` serialization should omit every field that is proven beha
 
 Creator-complete authoring artifacts remain complete. Creator Save-to-Disk and Creator-compatible project exports preserve the native structure needed for Creator round-tripping. Runtime sparsification is applied when producing the player-facing Viewer payload or an explicit sparse runtime artifact.
 
+The no-read rules below were checked against the pinned 2.10.7 Viewer source. The immediately following 2.10.8 upstream commit was also reviewed to make sure a field was not being classified as unused merely because its read path disappeared after 2.10.7; that commit changes the relevant Viewer store only for a Point legacy-version check and Addon width-stack handling.
+
 ## Automatic omissions
 
 The serializer removes four broad classes of data: exact built-in defaults that the Viewer reconstructs, values the Viewer never consumes, values the loader deterministically rebuilds, and narrow legacy values whose modern replacement already preserves the same behavior.
