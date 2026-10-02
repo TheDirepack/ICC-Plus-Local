@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 
-from iccplus_tools.omission_probe import omission_probe_cases, write_omission_probe_suite
+from iccplus_tools.omission_probe import main, omission_probe_cases, write_omission_probe_suite
 from iccplus_tools.validation import validate_complete
 
 
@@ -31,9 +31,6 @@ def test_core_probe_cases_isolate_one_change_and_use_valid_controls() -> None:
 
     for case in cases:
         if case['category'] == 'remove-nulls-array-filtering':
-            # These baselines deliberately contain the pre-import null/empty
-            # array member that the Viewer cleanup pass is being asked to
-            # normalize. The cleaned candidate is the valid control.
             assert validate_complete(case['baseline'])['valid'] is False, case['id']
             assert validate_complete(case['candidate'])['valid'] is True, case['id']
         else:
@@ -62,17 +59,13 @@ def test_exhaustive_probe_inventory_covers_unproven_style_fallbacks() -> None:
     assert 'private-choice-privateTextIsOn-objectTitle' in ids
     assert 'top-level-activated-empty-build' in ids
 
-    # Validate one representative construction from each new exhaustive family
-    # instead of turning CI into hundreds of repeated full-project validations.
     for category in ('retained-global-styling-member', 'private-style-member-fallback', 'runtime-state-empty-build'):
         case = next(item for item in cases if item['category'] == category)
         assert validate_complete(case['baseline'])['valid'] is True, case['id']
         assert _diff_count(case['baseline'], case['candidate']) == 1, case['id']
 
 
-def test_probe_suite_writes_manifest_and_pairs(tmp_path) -> None:
-    # File-writing behavior needs only a representative sample; the generator's
-    # default command still emits the complete exhaustive matrix.
+def test_probe_suite_writes_manifest_pairs_and_results_ledger(tmp_path) -> None:
     sample = omission_probe_cases(exhaustive=False)[:5]
     manifest = write_omission_probe_suite(tmp_path, cases=sample)
     assert manifest['format_version'] == 2
@@ -81,7 +74,10 @@ def test_probe_suite_writes_manifest_and_pairs(tmp_path) -> None:
     assert manifest['target']['icc_plus_version'] == '2.10.7'
     assert sum(manifest['category_counts'].values()) == manifest['case_count']
     disk_manifest = json.loads((tmp_path / 'manifest.json').read_text(encoding='utf-8'))
+    results = json.loads((tmp_path / 'results.json').read_text(encoding='utf-8'))
     assert disk_manifest['case_count'] == manifest['case_count']
+    assert len(results['results']) == manifest['case_count']
+    assert {item['status'] for item in results['results']} == {'untested'}
     assert (tmp_path / 'README.md').is_file()
 
     for case in manifest['cases']:
@@ -90,3 +86,17 @@ def test_probe_suite_writes_manifest_and_pairs(tmp_path) -> None:
         assert baseline.is_file(), case['id']
         assert candidate.is_file(), case['id']
         assert json.loads(baseline.read_text(encoding='utf-8')) != json.loads(candidate.read_text(encoding='utf-8'))
+
+
+def test_probe_cli_can_filter_to_one_core_category(tmp_path) -> None:
+    out = tmp_path / 'filtered'
+    assert main([
+        '--core-only',
+        '--category', 'known-private-default-mismatch',
+        '-o', str(out),
+    ]) == 0
+    manifest = json.loads((out / 'manifest.json').read_text(encoding='utf-8'))
+    assert manifest['case_count'] == 1
+    assert manifest['cases'][0]['id'] == 'private-filter-unsel-satur-one'
+    assert (out / 'private-filter-unsel-satur-one' / 'baseline.json').is_file()
+    assert (out / 'private-filter-unsel-satur-one' / 'candidate.json').is_file()
