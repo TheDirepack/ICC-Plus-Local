@@ -55,6 +55,12 @@ DESIGN_GROUP_CREATOR_ONLY_FIELDS = frozenset({'name'})
 GLOBAL_REQUIREMENT_CREATOR_ONLY_FIELDS = frozenset({'name'})
 SOUND_EFFECT_CREATOR_ONLY_FIELDS = frozenset({'name', 'isDefault', 'onSelected', 'onDeselected', 'groups'})
 
+# These fields survive Creator/schema export but have no pinned Viewer read path.
+ROW_VIEWER_UNUSED_FIELDS = frozenset({'imageIsUrl'})
+CHOICE_VIEWER_UNUSED_FIELDS = frozenset({'selectedThisManyTimesProp'})
+POINT_VIEWER_UNUSED_FIELDS = frozenset({'imageIsURL'})
+SCORE_VIEWER_UNUSED_FIELDS = frozenset({'type'})
+
 RETAINED_STYLING_DEFAULTS: dict[str, Any] = {
     'customMultiTextFont': False,
     'multiChoiceCounterPosition': 0,
@@ -151,6 +157,19 @@ def _strip_creator_only_fields(
     for key in fields:
         if key in entity:
             _remove(entity, key, f'{path}/{key}', rule, removals)
+
+
+def _strip_viewer_unused_fields(
+    entity: Any,
+    fields: frozenset[str],
+    path: str,
+    removals: list[dict[str, str]],
+) -> None:
+    if not isinstance(entity, dict):
+        return
+    for key in fields:
+        if key in entity:
+            _remove(entity, key, f'{path}/{key}', 'viewer_ignores_entity_field', removals)
 
 
 def _strip_creator_category_metadata(app: dict[str, Any], removals: list[dict[str, str]]) -> None:
@@ -357,6 +376,25 @@ def _strip_loader_migrated_or_requireds(requireds: Any, path: str, removals: lis
                     strip_one(nested_req, f'{req_path}/requireds/{nested_index}')
 
 
+def _strip_score(
+    score: Any,
+    path: str,
+    removals: list[dict[str, str]],
+    *,
+    loader_migrates_or: bool,
+) -> None:
+    if not isinstance(score, dict):
+        return
+    # The Viewer assigns a fresh unique internal idx whenever it is absent and
+    # no player behavior reads the serialized score idx afterward.
+    if 'idx' in score:
+        _remove(score, 'idx', f'{path}/idx', 'score_index_rebuilt_on_load', removals)
+    _strip_viewer_unused_fields(score, SCORE_VIEWER_UNUSED_FIELDS, path, removals)
+    if loader_migrates_or:
+        _strip_loader_migrated_or_requireds(score.get('requireds'), f'{path}/requireds', removals)
+    _strip_requirement_noise(score.get('requireds'), f'{path}/requireds', removals)
+
+
 def _strip_addon(addon: Any, path: str, removals: list[dict[str, str]]) -> None:
     if not isinstance(addon, dict):
         return
@@ -368,6 +406,8 @@ def _strip_addon(addon: Any, path: str, removals: list[dict[str, str]]) -> None:
         _remove(addon, 'template', f'{path}/template', 'addon_template_normalizes_to_one', removals)
     if 'parentId' in addon:
         _remove(addon, 'parentId', f'{path}/parentId', 'addon_parent_derived_from_container', removals)
+    if addon.get('skipIndex', _MISSING) is False:
+        _remove(addon, 'skipIndex', f'{path}/skipIndex', 'addon_false_skip_index_is_missing_equivalent', removals)
     _strip_loader_migrated_or_requireds(addon.get('requireds'), f'{path}/requireds', removals)
     _strip_requirement_noise(addon.get('requireds'), f'{path}/requireds', removals)
     if addon.get('requireds', _MISSING) == []:
@@ -375,8 +415,7 @@ def _strip_addon(addon: Any, path: str, removals: list[dict[str, str]]) -> None:
     scores = addon.get('scores')
     if isinstance(scores, list):
         for index, score in enumerate(scores):
-            if isinstance(score, dict):
-                _strip_requirement_noise(score.get('requireds'), f'{path}/scores/{index}/requireds', removals)
+            _strip_score(score, f'{path}/scores/{index}', removals, loader_migrates_or=False)
 
 
 def _strip_choice(
@@ -388,6 +427,7 @@ def _strip_choice(
     if not isinstance(choice, dict):
         return
     _strip_creator_only_fields(choice, CHOICE_CREATOR_ONLY_FIELDS, path, removals)
+    _strip_viewer_unused_fields(choice, CHOICE_VIEWER_UNUSED_FIELDS, path, removals)
     _strip_redundant_legacy_sfx_id(choice, path, removals)
     _strip_legacy_fade_transition(choice, path, removals, loader_migrates=True)
     if 'index' in choice:
@@ -412,9 +452,7 @@ def _strip_choice(
     scores = choice.get('scores')
     if isinstance(scores, list):
         for index, score in enumerate(scores):
-            if isinstance(score, dict):
-                _strip_loader_migrated_or_requireds(score.get('requireds'), f'{path}/scores/{index}/requireds', removals)
-                _strip_requirement_noise(score.get('requireds'), f'{path}/scores/{index}/requireds', removals)
+            _strip_score(score, f'{path}/scores/{index}', removals, loader_migrates_or=True)
 
     _strip_private_filter_defaults(choice, path, removals)
     addons = choice.get('addons')
@@ -434,10 +472,13 @@ def _strip_row(
     if not isinstance(row, dict):
         return
     _strip_creator_only_fields(row, ROW_CREATOR_ONLY_FIELDS, path, removals)
+    _strip_viewer_unused_fields(row, ROW_VIEWER_UNUSED_FIELDS, path, removals)
     if 'index' in row:
         _remove(row, 'index', f'{path}/index', 'row_index_rebuilt_from_position', removals)
     if backpack and row.get('isBackpack') is True:
         _remove(row, 'isBackpack', f'{path}/isBackpack', 'backpack_row_flag_forced_true', removals)
+    if row.get('width', _MISSING) is False:
+        _remove(row, 'width', f'{path}/width', 'row_false_width_is_missing_equivalent', removals)
     _strip_loader_migrated_or_requireds(row.get('requireds'), f'{path}/requireds', removals)
     _strip_requirement_noise(row.get('requireds'), f'{path}/requireds', removals)
     _strip_private_filter_defaults(row, path, removals)
@@ -525,7 +566,10 @@ def sparsify_project(
     point_types = sparse.get('pointTypes')
     if isinstance(point_types, list):
         for index, point in enumerate(point_types):
-            if isinstance(point, dict) and 'initValue' in point and point.get('initValue') == point.get('startingSum'):
+            if not isinstance(point, dict):
+                continue
+            _strip_viewer_unused_fields(point, POINT_VIEWER_UNUSED_FIELDS, f'/pointTypes/{index}', removals)
+            if 'initValue' in point and point.get('initValue') == point.get('startingSum'):
                 _remove(point, 'initValue', f'/pointTypes/{index}/initValue', 'point_init_value_equals_starting_sum', removals)
 
     words = sparse.get('words')
