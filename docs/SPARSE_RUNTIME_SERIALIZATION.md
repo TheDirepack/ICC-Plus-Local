@@ -32,30 +32,47 @@ The private-filter distinction matters: the pinned global styling default for `u
 
 The default serializer does not remove a field merely because the schema marks it optional or because it matches a Creator construction default.
 
-These cases remain in the verification queue:
+The unresolved set includes:
 
 - individual members of a retained custom `viewerConfig`;
+- individual stock-valued members of an otherwise custom global `styling` object, except the five source-proven members already listed above;
 - private-style enable flags whose absence may cause the Viewer to infer a different style source;
+- stock-valued private-style members whose absence may fall back to project/Design-Group styling, reconstruct a local default, or remain undefined;
 - list-level filtering of `null` or empty-object entries;
-- any Row, Choice, Addon, Requirement, Score, or styling field without an explicit loader reconstruction rule or equivalent pinned-Viewer proof.
+- Creator Save-to-Disk's empty `activated: [""]` representation versus omitting `activated` and taking the Viewer's built-in empty state;
+- any other Row, Choice, Addon, Requirement, Score, or styling field without an explicit loader reconstruction rule or equivalent pinned-Viewer proof.
 
-Private-style enable-flag testing includes `privateMultiChoiceIsOn` as well as the filter, text, image, object, Row, Addon, and background flags exposed by the pinned 2.10.7 native types.
+Fields already shown by source/schema behavior to be required or directly behavior-bearing are treated as unsafe rather than queued for redundant browser testing.
 
 ## Browser verification kit
 
-Generate isolated baseline/candidate artifacts with:
+Generate the exhaustive one-omission-at-a-time matrix with:
+
+```text
+iccplus-omission-probe -o verification/sparse-omission
+```
+
+The same generator is available as:
 
 ```text
 python -m iccplus_tools.omission_probe -o verification/sparse-omission
 ```
 
-The generated directory contains a manifest plus one baseline/candidate pair per unresolved omission. Ordinary omission candidates differ from their baseline by one removed field. The array-cleanup probes deliberately use a pre-import baseline containing the null/empty member under test and a cleaned candidate control.
+The generated manifest reports a case count and per-category counts. The default matrix covers:
 
-Load each pair separately in the pinned Viewer and compare load success, rendering, style source, interaction behavior, counters/scores, and browser-console errors.
+- every member of a retained custom `viewerConfig`;
+- every not-yet-proven stock-valued member of a retained custom global `styling` object;
+- every applicable Row/Choice private-style enable flag, including `privateMultiChoiceIsOn`;
+- every not-yet-proven member in the private filter, text, object-image, object, row-image, row, addon-image, addon, background, and multi-choice styling families;
+- native-array `null` and empty-object cleanup using `mdObjects`;
+- the empty `activated` build-state representation;
+- a known private `unselFilterSatur: 1` negative control.
 
-Load success alone is not enough to promote a rule. Add an omission to the default serializer only after the behavior controlled by that field is indistinguishable in the pinned Viewer.
+Ordinary omission candidates differ from their baseline by one removed field. The array-cleanup probes deliberately use a pre-import baseline containing the invalid member under test and a cleaned schema-valid control.
 
-The kit includes a private `unselFilterSatur: 1` negative control. Source inspection indicates that omission reconstructs `0`, so the explicit `1` should remain unless direct Viewer testing proves that difference irrelevant in the tested context.
+Load each pair separately in the pinned Viewer and compare load success, rendering, style source, interaction behavior, counters/scores, save/reload behavior where relevant, and browser-console errors. Load success alone is not enough to promote a rule.
+
+When a case is confirmed behavior-equivalent, add a regression test and promote only that exact omission rule into the default serializer. When it changes behavior, keep the field explicit and record the negative result so it is not repeatedly re-tested.
 
 ## Version policy
 
