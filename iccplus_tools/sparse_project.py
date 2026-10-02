@@ -56,6 +56,11 @@ PRIVATE_FILTER_DEFAULTS: dict[str, Any] = {
     'unselFilterSepia': 0,
 }
 
+GROUP_DEFAULTS: dict[str, Any] = {
+    'elements': [],
+    'rowElements': [],
+}
+
 DESIGN_GROUP_DEFAULTS: dict[str, Any] = {
     'activatedId': '',
     'elements': [],
@@ -114,7 +119,18 @@ def _strip_design_groups(groups: Any, path: str, removals: list[dict[str, str]])
         for key, default in DESIGN_GROUP_DEFAULTS.items():
             if group.get(key, _MISSING) == default:
                 _remove(group, key, f'{base}/{key}', 'design_group_loader_default', removals)
-        _strip_private_filter_defaults(group, base, removals)
+
+
+def _strip_groups(groups: Any, path: str, removals: list[dict[str, str]]) -> None:
+    if not isinstance(groups, list):
+        return
+    for index, group in enumerate(groups):
+        if not isinstance(group, dict):
+            continue
+        base = f'{path}/{index}'
+        for key, default in GROUP_DEFAULTS.items():
+            if group.get(key, _MISSING) == default:
+                _remove(group, key, f'{base}/{key}', 'group_loader_default', removals)
 
 
 def _strip_addon(addon: Any, path: str, removals: list[dict[str, str]]) -> None:
@@ -265,6 +281,7 @@ def sparsify_project(
             if isinstance(word, dict) and word.get('replaceText', _MISSING) == '':
                 _remove(word, 'replaceText', f'/words/{index}/replaceText', 'word_empty_replace_text_loader_default', removals)
 
+    _strip_groups(sparse.get('groups'), '/groups', removals)
     _strip_design_groups(sparse.get('rowDesignGroups'), '/rowDesignGroups', removals)
     _strip_design_groups(sparse.get('objectDesignGroups'), '/objectDesignGroups', removals)
     _strip_null_object_members(sparse, '', removals)
