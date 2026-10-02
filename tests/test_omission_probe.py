@@ -35,6 +35,14 @@ def test_probe_cases_are_complete_and_isolate_one_change() -> None:
         # Creator completeness is not required after the omission.
         assert _diff_count(case['baseline'], case['candidate']) == 1, case['id']
 
+    array_cases = {case['id']: case for case in cases if case['id'].startswith('array-')}
+    assert set(array_cases) == {'array-null-entry', 'array-empty-object-entry'}
+    for case in array_cases.values():
+        assert case['path'] == '/mdObjects/0'
+        assert 'probeArray' not in case['baseline']
+        assert len(case['baseline']['mdObjects']) == 2
+        assert len(case['candidate']['mdObjects']) == 1
+
 
 def test_probe_suite_writes_manifest_and_pairs(tmp_path) -> None:
     manifest = write_omission_probe_suite(tmp_path)
