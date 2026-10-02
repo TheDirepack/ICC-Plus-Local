@@ -1,4 +1,4 @@
-# ICC Plus Local 0.10.0rc14 handoff
+# ICC Plus Local 0.10.0rc15 handoff
 
 The engine target remains ICC Plus 2.10.7, pinned to upstream commit `1ea9db888cde2286d18d0d5de50933cb8773b739`.
 
@@ -10,7 +10,7 @@ generate -> structure -> rules -> style -> play
 
 Use `inspect` for read-only project discovery. Use `reference commands` for the complete command tree, `reference fields` for native fields, and `reference schema` for machine-readable contracts. Template operations live under `template`, media under `media`, and project validation, hydration, serialization, import, and export under `project`.
 
-Normal project writes hydrate official Creator defaults and require complete-project validation in memory, then save the proven-safe sparse representation. Use `project validate` for the normal sparse/compatibility check and `project validate --complete` when you explicitly need to check the full Creator shape. `project hydrate` reconstructs that shape in memory without inventing missing IDs but still saves sparse unless `--not-sparse` is supplied.
+Normal project writes hydrate official Creator defaults and require complete-project validation in memory, then save the proven-safe sparse representation. The saved sparse project remains an editable authoring artifact: stable Score `idx` identities and non-derivable authoring labels such as Sound Effect `name` remain serialized even where the Viewer could ignore or regenerate an internal equivalent. Use `project validate` for the normal sparse/compatibility check and `project validate --complete` when you explicitly need to check the full Creator shape. `project hydrate` reconstructs that shape in memory without inventing missing IDs but still saves sparse unless `--not-sparse` is supplied.
 
 For styling, use project styling first, then official Row/Choice Design Groups. Use private Row or Choice styling only for genuine one-off exceptions. Use custom CSS only when native ICC Plus styling cannot express the result.
 
