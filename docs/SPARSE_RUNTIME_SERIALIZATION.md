@@ -39,6 +39,7 @@ The unresolved set includes:
 - individual stock-valued members of an otherwise custom global `styling` object, except the five source-proven members already listed above;
 - private-style enable flags whose absence may cause the Viewer to infer a different style source;
 - stock-valued private-style members whose absence may fall back to project/Design-Group styling, reconstruct a local default, or remain undefined; Design Group private-filter members remain explicit unless separately proven safe;
+- guarded empty membership arrays whose known Viewer uses tolerate absence but which are not explicitly reconstructed during load: `Row.groups`, `Row.rowDesignGroups`, `Choice.groups`, `Choice.objectDesignGroups`, and `Group.designGroups`;
 - list-level filtering of `null` or empty-object entries;
 - Creator Save-to-Disk's empty `activated: [""]` representation versus omitting `activated` and taking the Viewer's built-in empty state;
 - any other Row, Choice, Addon, Requirement, Score, or styling field without an explicit loader reconstruction rule or equivalent pinned-Viewer proof.
@@ -64,6 +65,7 @@ For incremental testing, restrict output by exact case ID or manifest category:
 ```text
 iccplus-omission-probe --case viewer-config-title -o verification/one-case
 iccplus-omission-probe --category private-style-enable-inference -o verification/private-flags
+iccplus-omission-probe --category guarded-empty-membership -o verification/membership-arrays
 iccplus-omission-probe --core-only -o verification/core-omissions
 ```
 
@@ -75,6 +77,7 @@ The default exhaustive matrix covers:
 - every not-yet-proven stock-valued member of a retained custom global `styling` object;
 - every applicable Row/Choice private-style enable flag, including `privateMultiChoiceIsOn`;
 - every not-yet-proven member in the private filter, text, object-image, object, row-image, row, addon-image, addon, background, and multi-choice styling families;
+- guarded empty membership arrays for `Row.groups`, `Row.rowDesignGroups`, `Choice.groups`, `Choice.objectDesignGroups`, and `Group.designGroups`;
 - native-array `null` and empty-object cleanup using `mdObjects`;
 - the empty `activated` build-state representation;
 - a known private `unselFilterSatur: 1` negative control.
