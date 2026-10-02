@@ -14,7 +14,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-from .project_integrity import validate_complete
+from .validation import validate_complete
 from .upstream_2106 import DEFAULT_APP, ICCPLUS_COMMIT, ICCPLUS_VERSION, json_stringify
 
 
