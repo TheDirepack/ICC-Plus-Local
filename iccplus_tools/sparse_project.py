@@ -180,6 +180,50 @@ def _strip_redundant_legacy_sfx_id(entity: Any, path: str, removals: list[dict[s
     _remove(entity, 'sfxId', f'{path}/sfxId', 'legacy_sfx_id_redundant_after_explicit_direction_ids', removals)
 
 
+def _strip_legacy_fade_transition(
+    entity: Any,
+    path: str,
+    removals: list[dict[str, str]],
+    *,
+    loader_migrates: bool,
+) -> None:
+    """Remove old transition fields only when their loader effect is redundant."""
+    if not isinstance(entity, dict):
+        return
+    has_flag = 'fadeTransitionIsOn' in entity
+    has_time = 'fadeTransitionTime' in entity
+    if not has_flag and not has_time:
+        return
+
+    if not loader_migrates:
+        # The pinned Addon load path never consults these legacy fields; modern
+        # selectable-Addon runtime behavior uses isFadeTransition and the
+        # separate fadeIn/fadeOut times.
+        if has_flag:
+            _remove(entity, 'fadeTransitionIsOn', f'{path}/fadeTransitionIsOn', 'legacy_fade_transition_unused_on_addon', removals)
+        if has_time:
+            _remove(entity, 'fadeTransitionTime', f'{path}/fadeTransitionTime', 'legacy_fade_transition_unused_on_addon', removals)
+        return
+
+    legacy_enabled = entity.get('fadeTransitionIsOn') is True
+    if not legacy_enabled or not has_time:
+        # On Choices the loader only migrates when both conditions are true.
+        # Outside that condition neither legacy member has a runtime read path.
+        if has_flag:
+            _remove(entity, 'fadeTransitionIsOn', f'{path}/fadeTransitionIsOn', 'legacy_fade_transition_no_loader_effect', removals)
+        if has_time:
+            _remove(entity, 'fadeTransitionTime', f'{path}/fadeTransitionTime', 'legacy_fade_transition_no_loader_effect', removals)
+        return
+
+    legacy_time = entity.get('fadeTransitionTime')
+    if (
+        entity.get('fadeInTransitionTime', _MISSING) == legacy_time
+        and entity.get('fadeOutTransitionTime', _MISSING) == legacy_time
+    ):
+        _remove(entity, 'fadeTransitionIsOn', f'{path}/fadeTransitionIsOn', 'legacy_fade_transition_matches_modern_times', removals)
+        _remove(entity, 'fadeTransitionTime', f'{path}/fadeTransitionTime', 'legacy_fade_transition_matches_modern_times', removals)
+
+
 def _strip_private_filter_defaults(entity: Any, path: str, removals: list[dict[str, str]]) -> None:
     if not isinstance(entity, dict) or entity.get('privateFilterIsOn') is not True:
         return
@@ -282,6 +326,7 @@ def _strip_addon(addon: Any, path: str, removals: list[dict[str, str]]) -> None:
         return
     _strip_creator_only_fields(addon, ADDON_CREATOR_ONLY_FIELDS, path, removals)
     _strip_redundant_legacy_sfx_id(addon, path, removals)
+    _strip_legacy_fade_transition(addon, path, removals, loader_migrates=False)
     # Pinned Viewer normalizes both missing and explicit 0 to template 1.
     if addon.get('template', _MISSING) in {0, 1}:
         _remove(addon, 'template', f'{path}/template', 'addon_template_normalizes_to_one', removals)
@@ -302,6 +347,7 @@ def _strip_choice(
         return
     _strip_creator_only_fields(choice, CHOICE_CREATOR_ONLY_FIELDS, path, removals)
     _strip_redundant_legacy_sfx_id(choice, path, removals)
+    _strip_legacy_fade_transition(choice, path, removals, loader_migrates=True)
     if 'index' in choice:
         _remove(choice, 'index', f'{path}/index', 'choice_index_rebuilt_from_position', removals)
 
