@@ -1,9 +1,9 @@
 {
-  "package": "ICC Plus Local rc14 compiler-boundary and sparse-runtime candidate",
-  "tool_version": "0.10.0rc14",
+  "package": "ICC Plus Local rc15 sparse-authoring release candidate",
+  "tool_version": "0.10.0rc15",
   "target_icc_plus_version": "2.10.7",
   "target_source_commit": "1ea9db888cde2286d18d0d5de50933cb8773b739",
-  "candidate_role": "LLM-first ICC Plus 2.10.7 authoring and validation with explicit compiler/native ownership boundaries and behavior-preserving sparse Viewer runtime serialization",
+  "candidate_role": "LLM-first ICC Plus 2.10.7 authoring, validation, and sparse saved-project serialization with an explicit authoring round-trip invariant",
   "local_regression": {
     "normal_tests": "CI workflow is authoritative for the current branch",
     "checked_in_examples": "CI workflow is authoritative for the current branch",
@@ -16,7 +16,8 @@
     "repair": "project hydrate",
     "canonical_writes": "hydrate and complete-validate in memory, then save the pinned sparse representation by default",
     "compatibility_validation": "normal saved-project validation is project validate; use --complete for explicit Creator completeness",
-    "identity_policy": "hydration never invents missing entity identities",
+    "identity_policy": "hydration never invents missing entity identities; sparse project saves retain stable authoring identities such as Score idx",
+    "authoring_round_trip": "canonical sparse saves must preserve non-derivable authoring state needed by later ICC Plus Local commands, including Sound Effect name",
     "version_policy": "older supported projects may upgrade to 2.10.7; future versions are never downgraded"
   },
   "compiler_boundary": {
@@ -25,11 +26,11 @@
     "rules_document": "docs/COMPILER_BOUNDARY.md"
   },
   "runtime_serialization": {
-    "policy": "normal saved project JSON and player-facing Viewer payloads omit every pinned 2.10.7 field currently proven behavior-equivalent when absent",
+    "policy": "normal saved project JSON and player-facing Viewer payloads omit pinned 2.10.7 fields only when omission is behavior-equivalent; editable project JSON must also preserve the authoring round trip",
     "non_sparse_opt_out": "all full-project JSON outputs are sparse by default; --not-sparse / --not_sparse is the only opt-out on commands that write project JSON",
     "standalone_command": "iccplus-sparse",
     "verification_command": "iccplus-omission-probe",
-    "verification_policy": "unproven omissions require isolated pinned-Viewer baseline/candidate testing before promotion",
+    "verification_policy": "unproven omissions require isolated pinned-Viewer baseline/candidate testing before promotion, plus authoring-round-trip safety for normal project saves",
     "rules_document": "docs/SPARSE_RUNTIME_SERIALIZATION.md"
   },
   "style_policy": {

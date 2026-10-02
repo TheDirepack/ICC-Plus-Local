@@ -22,7 +22,7 @@ def _dead_score_fields() -> dict:
     }
 
 
-def test_viewer_unused_fields_and_score_internal_ids_are_omitted() -> None:
+def test_viewer_unused_fields_are_omitted_but_score_authoring_ids_are_retained() -> None:
     source = {
         'version': ICCPLUS_VERSION,
         'pointTypes': [{
@@ -92,8 +92,9 @@ def test_viewer_unused_fields_and_score_internal_ids_are_omitted() -> None:
     assert 'selectedThisManyTimesProp' not in choice
     assert choice['title'] == 'Choice'
 
+    assert choice_score['idx'] == 'creator-score-id'
+    assert addon_score['idx'] == 'creator-addon-score-id'
     for score in (choice_score, addon_score):
-        assert 'idx' not in score
         for key in SCORE_VIEWER_UNUSED_FIELDS:
             assert key not in score
         assert score['id'] == 'points'
@@ -108,7 +109,7 @@ def test_viewer_unused_fields_and_score_internal_ids_are_omitted() -> None:
 
     expected_unused = 3 + (2 * len(SCORE_VIEWER_UNUSED_FIELDS))
     assert report['removed_by_rule']['viewer_ignores_entity_field'] == expected_unused
-    assert report['removed_by_rule']['score_index_rebuilt_on_load'] == 2
+    assert 'score_index_rebuilt_on_load' not in report['removed_by_rule']
     assert report['removed_by_rule']['row_false_width_is_missing_equivalent'] == 1
     assert report['removed_by_rule']['addon_false_skip_index_is_missing_equivalent'] == 1
 

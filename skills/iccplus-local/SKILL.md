@@ -7,7 +7,7 @@ description: Use when working with native ICC Plus 2 projects.
 
 Use this as the one general ICC Plus Local skill. Do not treat the files under `functions/` as separate installed skills. They are focused operating guides that this skill routes to when a task needs that function.
 
-Current tool version: `0.10.0rc13`.
+Current tool version: `0.10.0rc15`.
 Target ICC Plus version: `2.10.7`.
 
 ## How to use this skill
@@ -42,6 +42,8 @@ For broad edits, prefer batched `items`, explicit `refs`, or selectors. Add `exp
 
 Normal writes fill missing official Creator defaults, run complete-project validation in memory, and then save the pinned sparse project representation. Do not add a separate validation pass after every write. Use `project validate` for the normal saved artifact and `project validate --complete` for the materialized Creator shape. `project hydrate` still writes sparse by default; add `--not-sparse` only when you need that materialized shape on disk.
 
+Sparse saved projects must remain authoring-round-trip safe. Never omit a stable identity or non-derivable authoring value merely because the Viewer can ignore or regenerate an internal equivalent. In particular, Score `idx` and Sound Effect `name` remain in canonical sparse saves because later ICC Plus Local commands and hydration cannot safely invent them.
+
 Local and embedded images are compressed automatically when assigned. Do not add a manual compression step to ordinary authoring.
 
 ## Compiler boundary
@@ -68,7 +70,7 @@ A Row becoming hidden does not prove that selected children were deselected. Vis
 
 `allowedChoices: 0` means unlimited. ICC Plus Local preserves and simulates that meaning. A source compiler that knows a Row is Pick 1 or Pick N should emit the real positive maximum instead of expecting the local runtime to infer intent.
 
-Creator-complete fields remain part of native compatibility and are materialized for validation and explicit Creator operations. Normal saved project JSON may omit only fields covered by the pinned Viewer behavior-equivalence serializer. The compiler should still remove duplicated author intent before generation rather than using serialization omissions as a substitute for semantic normalization.
+Creator-complete fields remain part of native compatibility and are materialized for validation and explicit Creator operations. Normal saved project JSON may omit only fields covered by the pinned Viewer behavior-equivalence serializer and the authoring-round-trip contract. The compiler should still remove duplicated author intent before generation rather than using serialization omissions as a substitute for semantic normalization.
 
 ### ICC Plus 2.10.8 Addon changelog correction
 
@@ -105,8 +107,9 @@ Useful starting documents include:
 - `PHASED_AUTHORING.md` and `AUTHORING_SCRIPTS.md` for edits.
 - `FIELD_CATALOG.md` and `ICCPLUS_FIELD_REFERENCE.md` for native fields.
 - `COMPILER_BOUNDARY.md` for the boundary between native ICC Plus behavior and source-level lowering/normalization.
+- `SPARSE_RUNTIME_SERIALIZATION.md` for sparse-save omissions and the authoring-round-trip invariant.
 - `cyoa/guide/21-large-project-normalization.md` for compiler/build normalization guidance.
 
 ## Verification status
 
-rc13 keeps the automated GitHub Actions regression gate and checks for the compressed CYOA skill/documentation package. Local simulation is not browser proof. Official Creator/Viewer verification remains a separate release gate for rendering, browser-only behavior, and target-version details that are not covered by source-derived local parity.
+rc15 keeps the automated GitHub Actions regression gate and checks for the compressed CYOA skill/documentation package. Local simulation is not browser proof. Official Creator/Viewer verification remains a separate release gate for rendering, browser-only behavior, and target-version details that are not covered by source-derived local parity.

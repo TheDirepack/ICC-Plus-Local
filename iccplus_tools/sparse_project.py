@@ -54,7 +54,9 @@ ADDON_CREATOR_ONLY_FIELDS = frozenset({'isEditModeOn'})
 GROUP_CREATOR_ONLY_FIELDS = frozenset({'name'})
 DESIGN_GROUP_CREATOR_ONLY_FIELDS = frozenset({'name'})
 GLOBAL_REQUIREMENT_CREATOR_ONLY_FIELDS = frozenset({'name'})
-SOUND_EFFECT_CREATOR_ONLY_FIELDS = frozenset({'name', 'isDefault', 'onSelected', 'onDeselected', 'groups'})
+# Sound Effect names are authoring labels used by ICC Plus Local commands and
+# cannot be reconstructed by hydration, so canonical sparse saves retain them.
+SOUND_EFFECT_CREATOR_ONLY_FIELDS = frozenset({'isDefault', 'onSelected', 'onDeselected', 'groups'})
 
 # These fields survive Creator/schema export but have no pinned Viewer read path.
 ROW_VIEWER_UNUSED_FIELDS = frozenset({'imageIsUrl'})
@@ -400,10 +402,10 @@ def _strip_score(
 ) -> None:
     if not isinstance(score, dict):
         return
-    # The Viewer assigns a fresh unique internal idx whenever it is absent and
-    # no player behavior reads the serialized score idx afterward.
-    if 'idx' in score:
-        _remove(score, 'idx', f'{path}/idx', 'score_index_rebuilt_on_load', removals)
+    # Keep Score idx in normal sparse project JSON. The pinned Viewer can
+    # regenerate an internal score index when it is absent, but ICC Plus Local
+    # uses idx as the stable authoring identity across separate commands and
+    # hydration deliberately never invents missing entity identities.
     _strip_viewer_unused_fields(score, SCORE_VIEWER_UNUSED_FIELDS, path, removals)
     if loader_migrates_or:
         _strip_loader_migrated_or_requireds(score.get('requireds'), f'{path}/requireds', removals)

@@ -1,6 +1,6 @@
 # ICC Plus Local documentation
 
-The active package is ICC Plus Local 0.10.0rc14 targeting ICC Plus 2.10.7.
+The active package is ICC Plus Local 0.10.0rc15 targeting ICC Plus 2.10.7.
 
 For native ICC Plus 2 project operations, start with `../skills/iccplus-local/SKILL.md`. It routes to focused function guides under `../skills/iccplus-local/functions/`.
 
@@ -10,6 +10,6 @@ The complete generic CYOA guide is under `cyoa/guide/`. The legacy migration ref
 
 For player-view details, use `PLAY_STRUCTURE.md`. For playtesting workflows, use `GAMEPLAY_RUNNER.md`. For the command tree, use `CLI_REFERENCE.md`. For native fields, use `FIELD_CATALOG.md` and `ICCPLUS_FIELD_REFERENCE.md`.
 
-For the authoring/compiler boundary, use `COMPILER_BOUNDARY.md`. For the default player-facing runtime serializer, its pinned omission rules, and the generated Viewer verification kit, use `SPARSE_RUNTIME_SERIALIZATION.md`. `iccplus-sparse` writes the default compact runtime artifact directly; `iccplus-omission-probe` generates isolated baseline/candidate Viewer test artifacts for unresolved omission rules. Promote an unresolved omission only after behavior matches in the pinned Viewer, not merely because both files load.
+For the authoring/compiler boundary, use `COMPILER_BOUNDARY.md`. For the default player-facing runtime serializer, its pinned omission rules, the authoring-round-trip invariant for normal sparse project saves, and the generated Viewer verification kit, use `SPARSE_RUNTIME_SERIALIZATION.md`. `iccplus-sparse` writes the default compact runtime artifact directly; `iccplus-omission-probe` generates isolated baseline/candidate Viewer test artifacts for unresolved omission rules. Promote an unresolved omission only after behavior matches in the pinned Viewer and editable project state remains reconstructable, not merely because both files load.
 
 Historical audit documents keep the release/version labels of the evidence they record. They are not the current command or release instructions.

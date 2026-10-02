@@ -14,6 +14,8 @@ Do not begin a large generation pass from chat memory alone.
 
 When a project has structured source or a compiler, that source is authoritative. Generated `project.json` is a build product. Do not hand-edit it and then try to remember the change later. Fix the source or compiler and rebuild.
 
+For directly authored native projects, the normal ICC Plus Local `project.json` is sparse but remains an editable authoring artifact. Normal writes hydrate and complete-validate in memory before saving the sparse form. Do not remove stable identities or non-derivable authoring labels merely because the Viewer could ignore or regenerate an internal substitute.
+
 Keep reusable generation, validation, conversion, and test helpers under `/CYOA/tools/`. Revision folders should contain project source, inputs, outputs, checkpoints, and reports, not private copies of reusable tooling.
 
 At the compile and release boundary, keep an explicit separation between authoring metadata and player content. Do not export debug controls, source-only template fields, placeholder labels, or schema defaults as visible prose merely because they exist in the source model.
@@ -62,7 +64,7 @@ A safe general order is:
 
 Use the current ICC Plus 2 schema for exact field shapes. The exact order can change when the project has no dependency between two categories.
 
-Match Creator identity semantics while building the skeleton. Ordinary Requirements and non-selectable Addons keep structural blank IDs. Scores use `idx`; selectable Addons and normal top-level entities use real identities.
+Match Creator identity semantics while building the skeleton. Ordinary Requirements and non-selectable Addons keep structural blank IDs. Scores use stable `idx` identities; selectable Addons and normal top-level entities use real identities. Canonical sparse saves retain those Score identities so later commands can address the same Scores.
 
 Use short placeholders where content is not ready. A complete skeleton is more useful than one polished section followed by missing structure.
 
@@ -102,6 +104,8 @@ After each coherent batch:
 - Save a versioned checkpoint.
 - Update the working-state notes.
 
+A normal checkpoint may stay in the sparse saved-project form. Use `project validate` on that file; use `--not-sparse` and `project validate --complete` only when a materialized Creator-complete file is specifically needed.
+
 Do not wait until the whole project is complete for the first runtime test.
 
 ## Pass 5. Finalize text
@@ -138,6 +142,8 @@ Check:
 - every required player goal has at least one route,
 - no stale placeholder remains,
 - public IDs are unique and stable,
+- Score `idx` identities are still present and stable where Scores are authored,
+- non-derivable authoring labels needed by workflows have not been stripped,
 - currencies and units use one naming scheme,
 - repeated concepts use the same rule wording,
 - hidden content has the intended discoverability,

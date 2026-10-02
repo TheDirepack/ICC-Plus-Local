@@ -4,7 +4,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / "skills"
-CURRENT_TOOL_VERSION = "0.10.0rc14"
+CURRENT_TOOL_VERSION = "0.10.0rc15"
 CURRENT_ICCPLUS_VERSION = "2.10.7"
 
 RETAINED = {
@@ -60,7 +60,7 @@ def test_current_version_markers_are_synchronized():
 
     manifest = (ROOT / "PACKAGE_MANIFEST.json").read_text()
     assert f'"tool_version": "{CURRENT_TOOL_VERSION}"' in manifest
-    assert 'rc14' in manifest
+    assert 'rc15' in manifest
 
 
 def test_current_docs_keep_2107_target_and_sparse_runtime_contract():

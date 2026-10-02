@@ -2,9 +2,11 @@
 
 ICC Plus Local targets ICC Plus 2.10.7 at upstream commit `1ea9db888cde2286d18d0d5de50933cb8773b739`.
 
-Normal saved `project.json` serialization should omit every field that is proven behavior-equivalent when absent in that pinned Viewer. This is the default project-save policy as well as the Viewer-package policy. It is not a generic "remove defaults" pass and it does not change source-level project intent.
+Normal saved `project.json` serialization omits fields only when their absence is proven safe for both the pinned Viewer behavior and ICC Plus Local's authoring round trip. This is the default project-save policy as well as the Viewer-package policy. It is not a generic "remove defaults" pass and it does not change source-level project intent.
 
 ICC Plus Local hydrates and validates a Creator-complete in-memory project before a normal valid write, then sparsifies the full-project JSON. This rule applies to every project-JSON-producing path: normal edits, generation/builds, `project hydrate`, formatting, separate-image exports, and Viewer packages. A command writes a materialized/non-sparse project only when that command explicitly receives `--not-sparse` (or `--not_sparse`).
+
+A canonical sparse saved project must remain usable as an authoring artifact. Hydrating it back to the complete Creator shape must not require inventing stable entity identities or non-derivable authoring values. The current shared serializer therefore keeps some data that the Viewer alone could ignore or reconstruct. Score `idx` and Sound Effect `name` are the important examples: the Viewer does not need the serialized Score identity for player behavior and does not use the Sound Effect label for playback, but ICC Plus Local needs those values to preserve cross-command authoring semantics.
 
 This means a normal saved project is expected to pass compatibility validation, not complete validation. Use `project validate` for the normal artifact and `project validate --complete` only when checking an explicitly materialized Creator-complete form.
 
@@ -12,15 +14,14 @@ The no-read rules below were checked against the pinned 2.10.7 Viewer source. Th
 
 ## Automatic omissions
 
-The serializer removes four broad classes of data: exact built-in defaults that the Viewer reconstructs, values the Viewer never consumes, values the loader deterministically rebuilds, and narrow legacy values whose modern replacement already preserves the same behavior.
+The serializer removes four broad classes of data: exact built-in defaults that the Viewer reconstructs, values the Viewer never consumes, values the loader deterministically rebuilds, and narrow legacy values whose modern replacement already preserves the same behavior. For normal saved project JSON, an omission must also preserve the authoring round trip.
 
 ### Exact or reconstructed defaults
 
 - top-level values that exactly equal pinned `defaultApp`, except `version` and the separately handled special fields below;
 - stock `viewerConfig`, `styling`, and `backpack` only when the entire object or array exactly equals the pinned built-in value;
 - the five explicitly reconstructed multi-choice styling members in a retained custom global `styling` object;
-- Row and Choice `index`, which the Viewer rebuilds from array position;
-- Score `idx`, because the loader assigns a fresh unique internal score ID when it is absent and player behavior never reads the serialized value;
+- Row and Choice `index`, which the Viewer rebuilds from array position and which are not stable authoring identities;
 - `isBackpack: true` on backpack Rows;
 - Addon `template` when it is `0` or `1`, because missing/`0`/`1` all normalize to effective template `1` in the pinned Viewer;
 - Addon derived `parentId` and empty `requireds`;
@@ -35,11 +36,13 @@ The serializer removes four broad classes of data: exact built-in defaults that 
 - object properties whose value is `null`, matching the proven object-property portion of the Viewer import cleanup;
 - Row/Choice private-filter missing-value defaults only while `privateFilterIsOn` remains explicitly true. These use the Row/Choice private initializer's own values, not global styling defaults. Design Groups are excluded from this rule because their load path does not reconstruct those private-filter values the same way.
 
+Score `idx` is intentionally not in this omission set. The pinned Viewer can assign a fresh internal score ID when it is absent, but ICC Plus Local treats `idx` as the stable Score identity used by authoring commands, validation, and later edits. Hydration does not invent missing entity identities, so canonical sparse project JSON retains it.
+
 The private-filter distinction matters: the pinned global styling default for `unselFilterSatur` is `1`, while the private missing-field initializer uses `0`. An explicit private `unselFilterSatur: 1` therefore remains serialized.
 
 ### Viewer-discarded, Creator-only, or unread data
 
-The following are removed regardless of whether they equal stock defaults:
+The following are removed regardless of whether they equal stock defaults, unless the authoring-round-trip rule requires retaining a value:
 
 - top-level runtime/legacy fields in the Viewer's `keysToRemove` list;
 - the Creator category table and per-entity `category` indices on Point Types, Variables, Words, Groups, Global Requirements, and Row/Choice Design Groups; these organize Creator dialogs and have no player-Viewer read path;
@@ -48,14 +51,14 @@ The following are removed regardless of whether they equal stock defaults:
 - Creator-only autosave/confirmation state: `printThis`, `autoSaveIsOn`, `buildAutoSaveIsOn`, `buildAutoSaveInterval`, `checkDeleteRow`, `checkDeleteObject`, and `checkSelectAll`;
 - Creator-only authoring UI preferences `compressImageAuto`, `useTextEditor`, `useChoiceEditBtn`, and `enableShortcut`;
 - Creator construction defaults that have already been copied into created entities: Row/Choice/Addon default titles/text, Point/Requirement label defaults, Row/Choice/Addon template/width defaults, Row justify/allowed-choice defaults, and the default Addon/Score/Requirement creation toggles;
-- Creator-facing entity labels that have no player read path: Group `name`, Row/Choice Design Group `name`, and Global Requirement `name`;
-- Sound Effect authoring metadata `name`, `isDefault`, `onSelected`, `onDeselected`, and `groups`; runtime sound playback uses the Sound Effect ID, audio, volume, pitch, and requirements instead;
+- Creator-facing entity labels that have no player read path and are not needed as local authoring handles: Group `name`, Row/Choice Design Group `name`, and Global Requirement `name`;
+- Sound Effect authoring metadata `isDefault`, `onSelected`, `onDeselected`, and `groups`; runtime sound playback uses the Sound Effect ID, audio, volume, pitch, and requirements instead. Sound Effect `name` is retained because it is a non-derivable authoring label used by ICC Plus Local workflows;
 - Requirement structural `id`, which has no Viewer read path;
 - `Requirement.more: []`, because the point-comparison evaluator only iterates it when present and an empty list contributes no operation;
 - Choice `selectedThisManyTimesProp`, Row `imageIsUrl`, and Point Type `imageIsURL`, which survive type/schema history but have no player Viewer read path;
 - Score `type` and the unread Score scratch/history members `discountScoreCal`, `isChangeDiscount`, `discountNum`, `tmpDisScore`, `tmpDiscount`, `discountedFrom`, `dupTextA`, `dupTextB`, `discountTextA`, `discountTextB`, `notStackableDiscount`, and `mulValue`.
 
-This group is intentionally source-driven. Adjacent similarly named fields remain when the Viewer actually consumes them. For example, Score `discountScore`, `appliedDiscount`, and `removeSpace` affect rendering; `defaultChoiceMaxNum` is a runtime fallback for multiple-selection limits; `defaultAddonJustify` is a loader fallback for Choices; `orderOrReqText` / `defaultOrReq` and the selected-from equivalents affect displayed Requirement text; `rowIdLength` / `objectIdLength` are used if identities must be generated; and settings such as `cropperPosition`, `tooltipDelay`, `isPointerCursor`, `importedChoicesIsOpen`, `hideScoresUpdated`, and `useToolbarBtn` still have Viewer read paths.
+This group is intentionally source-driven. Adjacent similarly named fields remain when the Viewer actually consumes them or when ICC Plus Local needs them to preserve authoring state. For example, Score `discountScore`, `appliedDiscount`, and `removeSpace` affect rendering; Score `idx` is stable authoring identity; Sound Effect `name` is a non-derivable authoring label; `defaultChoiceMaxNum` is a runtime fallback for multiple-selection limits; `defaultAddonJustify` is a loader fallback for Choices; `orderOrReqText` / `defaultOrReq` and the selected-from equivalents affect displayed Requirement text; `rowIdLength` / `objectIdLength` are used if identities must be generated; and settings such as `cropperPosition`, `tooltipDelay`, `isPointerCursor`, `importedChoicesIsOpen`, `hideScoresUpdated`, and `useToolbarBtn` still have Viewer read paths.
 
 ### Conditional legacy normalization
 
@@ -68,7 +71,7 @@ The OR-Requirement rule is deliberately structural rather than a blanket empty-a
 
 ## Deliberately not automatic yet
 
-The default serializer does not remove a field merely because the schema marks it optional or because it matches a Creator construction default.
+The default serializer does not remove a field merely because the schema marks it optional, because it matches a Creator construction default, or because the Viewer can create a runtime substitute that would destroy authoring identity.
 
 The unresolved set includes:
 
@@ -80,6 +83,7 @@ The unresolved set includes:
 - list-level filtering of `null` or empty-object entries;
 - Creator Save-to-Disk's empty `activated: [""]` representation versus omitting `activated` and taking the Viewer's built-in empty state;
 - behavior-bearing runtime/default fields merely because a false/zero/empty value looks default-like; these require an exact missing-value equivalence proof before promotion;
+- stable authoring identities and non-derivable authoring handles even when the pinned Viewer does not use their serialized values;
 - any other Row, Choice, Addon, Requirement, Score, or styling field without an explicit loader reconstruction rule, a proven no-read Viewer boundary, or equivalent pinned-Viewer proof.
 
 Fields already shown by source/schema behavior to be required or directly behavior-bearing are treated as unsafe rather than queued for redundant browser testing.
@@ -124,7 +128,7 @@ Ordinary omission candidates differ from their baseline by one removed field. Th
 
 Load each pair separately in the pinned Viewer and compare load success, rendering, style source, interaction behavior, counters/scores, save/reload behavior where relevant, and browser-console errors. Load success alone is not enough to promote a rule.
 
-When a case is confirmed behavior-equivalent, add a regression test and promote only that exact omission rule into the default serializer. When it changes behavior, keep the field explicit and record the negative result so it is not repeatedly re-tested.
+When a case is confirmed behavior-equivalent, add a regression test and promote only that exact omission rule if it also preserves the authoring-round-trip contract for normal saved project JSON. When it changes behavior or loses stable authoring state, keep the field explicit and record the negative result so it is not repeatedly re-tested.
 
 ## Version policy
 
@@ -132,4 +136,4 @@ Omission rules are native Viewer behavior and are pinned to the ICC Plus version
 
 ## Compiler boundary
 
-Sparse project serialization is not source normalization. The compiler remains responsible for semantic transformations such as Requirement hoisting, Row merging, taxonomy pruning, style-intent consolidation, Pick-N derivation, and runtime-ID compaction. ICC Plus Local only removes native serialized values whose omission has already been shown not to change the pinned Viewer's behavior.
+Sparse project serialization is not source normalization. The compiler remains responsible for semantic transformations such as Requirement hoisting, Row merging, taxonomy pruning, style-intent consolidation, Pick-N derivation, and runtime-ID compaction. ICC Plus Local only removes native serialized values whose omission has already been shown not to change the pinned Viewer's behavior and, for normal saved project JSON, not to destroy the state needed for later authoring.
