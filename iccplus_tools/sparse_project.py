@@ -133,6 +133,68 @@ def _strip_groups(groups: Any, path: str, removals: list[dict[str, str]]) -> Non
                 _remove(group, key, f'{base}/{key}', 'group_loader_default', removals)
 
 
+def _derived_legacy_or_requireds(req: Any) -> Any:
+    """Return the exact orRequireds list initializeApp derives from legacy orRequired."""
+    if not isinstance(req, dict) or req.get('type') != 'or':
+        return _MISSING
+    legacy = req.get('orRequired', _MISSING)
+    if not isinstance(legacy, list):
+        return _MISSING
+
+    derived: list[dict[str, Any]] = []
+    inherited = ('showRequired', 'operator', 'afterText', 'beforeText', 'orNum', 'selNum')
+    for item in legacy:
+        raw_req = item.get('req') if isinstance(item, dict) else None
+        child: dict[str, Any] = {
+            'required': True,
+            'requireds': [],
+            'orRequired': [],
+            'orRequireds': [],
+            'id': '',
+            'type': 'id',
+            'reqId': raw_req or '',
+            'reqId1': '',
+            'reqId2': '',
+            'reqId3': '',
+            'reqPoints': 0,
+            'selFromOperators': '1',
+            'more': [],
+        }
+        for key in inherited:
+            if key in req:
+                child[key] = copy.deepcopy(req[key])
+        derived.append(child)
+    return derived
+
+
+def _strip_loader_migrated_or_requireds(requireds: Any, path: str, removals: list[dict[str, str]]) -> None:
+    """Mirror the pinned loader's top-level + one-nested-level OR migration."""
+    if not isinstance(requireds, list):
+        return
+
+    def strip_one(req: Any, req_path: str) -> None:
+        if not isinstance(req, dict):
+            return
+        derived = _derived_legacy_or_requireds(req)
+        if derived is not _MISSING and req.get('orRequireds', _MISSING) == derived:
+            _remove(
+                req,
+                'orRequireds',
+                f'{req_path}/orRequireds',
+                'requirement_or_requireds_legacy_derived',
+                removals,
+            )
+
+    for index, req in enumerate(requireds):
+        req_path = f'{path}/{index}'
+        strip_one(req, req_path)
+        if isinstance(req, dict):
+            nested = req.get('requireds')
+            if isinstance(nested, list):
+                for nested_index, nested_req in enumerate(nested):
+                    strip_one(nested_req, f'{req_path}/requireds/{nested_index}')
+
+
 def _strip_addon(addon: Any, path: str, removals: list[dict[str, str]]) -> None:
     if not isinstance(addon, dict):
         return
@@ -141,6 +203,7 @@ def _strip_addon(addon: Any, path: str, removals: list[dict[str, str]]) -> None:
         _remove(addon, 'template', f'{path}/template', 'addon_template_normalizes_to_one', removals)
     if 'parentId' in addon:
         _remove(addon, 'parentId', f'{path}/parentId', 'addon_parent_derived_from_container', removals)
+    _strip_loader_migrated_or_requireds(addon.get('requireds'), f'{path}/requireds', removals)
     if addon.get('requireds', _MISSING) == []:
         _remove(addon, 'requireds', f'{path}/requireds', 'addon_requireds_empty_loader_default', removals)
 
@@ -170,6 +233,13 @@ def _strip_choice(
     if choice.get('addonJustify', _MISSING) == inherited_addon_justify:
         _remove(choice, 'addonJustify', f'{path}/addonJustify', 'choice_addon_justify_inherited', removals)
 
+    _strip_loader_migrated_or_requireds(choice.get('requireds'), f'{path}/requireds', removals)
+    scores = choice.get('scores')
+    if isinstance(scores, list):
+        for index, score in enumerate(scores):
+            if isinstance(score, dict):
+                _strip_loader_migrated_or_requireds(score.get('requireds'), f'{path}/scores/{index}/requireds', removals)
+
     _strip_private_filter_defaults(choice, path, removals)
     addons = choice.get('addons')
     if isinstance(addons, list):
@@ -191,6 +261,7 @@ def _strip_row(
         _remove(row, 'index', f'{path}/index', 'row_index_rebuilt_from_position', removals)
     if backpack and row.get('isBackpack') is True:
         _remove(row, 'isBackpack', f'{path}/isBackpack', 'backpack_row_flag_forced_true', removals)
+    _strip_loader_migrated_or_requireds(row.get('requireds'), f'{path}/requireds', removals)
     _strip_private_filter_defaults(row, path, removals)
 
     objects = row.get('objects')
@@ -280,6 +351,16 @@ def sparsify_project(
         for index, word in enumerate(words):
             if isinstance(word, dict) and word.get('replaceText', _MISSING) == '':
                 _remove(word, 'replaceText', f'/words/{index}/replaceText', 'word_empty_replace_text_loader_default', removals)
+
+    global_requirements = sparse.get('globalRequirements')
+    if isinstance(global_requirements, list):
+        for index, global_requirement in enumerate(global_requirements):
+            if isinstance(global_requirement, dict):
+                _strip_loader_migrated_or_requireds(
+                    global_requirement.get('requireds'),
+                    f'/globalRequirements/{index}/requireds',
+                    removals,
+                )
 
     _strip_groups(sparse.get('groups'), '/groups', removals)
     _strip_design_groups(sparse.get('rowDesignGroups'), '/rowDesignGroups', removals)
