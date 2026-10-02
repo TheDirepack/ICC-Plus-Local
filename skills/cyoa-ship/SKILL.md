@@ -24,7 +24,7 @@ Load:
 1. Rebuild from authoritative source when applicable, run `iccplus-local project validate`, and confirm required runtime tests, design review, and accessibility checks are complete.
 2. If the release pipeline performs structural normalization or runtime-ID compaction, rebuild the readable semantic artifact first and then derive the release artifact reproducibly. Read `../../docs/COMPILER_BOUNDARY.md` and `../../docs/cyoa/guide/21-large-project-normalization.md`.
 3. Choose the exact web, offline, or static release format.
-4. Build from the official ICC Plus Viewer release or template that matches the project target. The current ICC Plus Local 0.10.0rc14 tool target is ICC Plus 2.10.7. Every full-project JSON output uses the pinned behavior-preserving sparse serializer by default; use `--not-sparse` only when a specific output must retain materialized fields.
+4. Build from the official ICC Plus Viewer release or template that matches the project target. The current ICC Plus Local 0.10.0rc15 tool target is ICC Plus 2.10.7. Every full-project JSON output uses the pinned behavior-preserving sparse serializer by default; use `--not-sparse` only when a specific output must retain the complete materialized shape.
 5. Test the generated package itself.
 6. For web releases, stage through HTTP and then test the final hosted URL.
 7. For offline releases, test the package exactly as delivered.
@@ -39,7 +39,8 @@ Load:
 - Use official ICC Plus 2 templates.
 - Do not hand-edit generated `project.json` to fix release content. Change the source and rebuild. Limit release-path changes to deliberate packaging operations that are tested.
 - A generated sparse or compact runtime JSON is an output artifact, not the authoritative semantic source when a source compiler exists.
-- Runtime serialization should omit every native field proven behavior-equivalent when absent in the pinned Viewer. Do not extend the omission set from schema optionality or Creator construction defaults alone.
+- Runtime serialization should omit every native field proven behavior-equivalent when absent in the pinned Viewer. Normal editable project saves have an additional authoring-round-trip requirement: do not omit stable identities or non-derivable authoring labels that later ICC Plus Local commands need.
+- Keep Score `idx` and Sound Effect `name` in normal sparse project saves. The Viewer may not require those serialized values for player behavior, but ICC Plus Local cannot safely invent them during later authoring.
 - Use `../../docs/SPARSE_RUNTIME_SERIALIZATION.md` and the generated omission verification kit for unresolved omission cases.
 - Runtime IDs are public compatibility data once players can save or import them. Deterministic compaction must remain stable or be treated as a migration.
 - If compact IDs are used, preserve the reversible map in release records and prove reverse-mapped semantic equivalence before shipping.
@@ -61,6 +62,7 @@ Produce the tested release package plus a release record containing versions, ch
 - [ ] Correct official Viewer format was built.
 - [ ] Generated package was tested.
 - [ ] Player-facing runtime payload uses the pinned behavior-preserving sparse serializer.
+- [ ] Normal sparse authoring artifact preserves stable identities and non-derivable authoring state.
 - [ ] Semantic and compact artifacts are reproducibly related when compaction is used.
 - [ ] Runtime ID map is stable and recorded when used.
 - [ ] Final hosted URL was tested for web releases.
