@@ -1,74 +1,38 @@
 # style
 
-Read this file for presentation changes.
+Read this file before changing templates, widths, images, fonts, colors, backgrounds, borders, card geometry, responsive presentation, or Design Groups.
 
-Use `style` for images, templates, widths, project styling, official ICC Plus Design Groups, and exceptional private Row/Choice styling.
+Use `style` for presentation. Keep structure in `structure` and gameplay logic in `rules`.
 
-```bash
-iccplus-local style project.json @style.json
-```
+## Native style hierarchy
 
-## Styling priority for new work
+Use the broadest native scope that fits:
 
-Use the broadest native ICC Plus scope that fits the design:
+1. project-wide styling for the ordinary baseline,
+2. official Row/Choice Design Groups for reusable visual exceptions,
+3. private Row styling for a true one-Row exception,
+4. private Choice styling for a true one-Choice exception,
+5. custom CSS only when native ICC Plus styling cannot express the treatment.
 
-1. **Project styling** for the normal look of the whole CYOA.
-2. **Row/Choice Design Groups** for a reusable visual family shared by multiple Rows or Choices.
-3. **Private Row styling** only when one Row genuinely needs an exception.
-4. **Private Choice styling** only when one Choice genuinely needs an exception and neither project styling nor a Choice Design Group can express it.
-5. **Custom CSS** only for presentation the native ICC Plus styling fields cannot express.
+Do not copy the project style into every Row or Choice. Do not copy a complete project style object into every Design Group; store only the properties that group overrides.
 
-Do not repeat the same `styling` object on many Choices. That creates private per-Choice styling and makes later changes harder. Create one Choice Design Group and assign it instead. The style command rejects a private inline `styling` block when one manifest item targets multiple entities, specifically to keep reusable styling on Design Groups.
+When an ordinary ICC Plus Group already represents the semantic family that should share a treatment, link the Design Group through `Group.designGroups` instead of repeating the Design Group ID on every member. The target Viewer can inherit styling through ordinary Group membership, which keeps source intent and runtime JSON smaller.
 
-## Reusable Design Groups
+Direct per-entity Design Group assignment is still appropriate when membership is genuinely explicit and no semantic Group represents the family. It should not be the default for thousands of entities.
 
-Design Groups are the official ICC Plus reusable style system. Define them at the top level of the style manifest and assign them by ID:
+Use project styling for normal cards and Rows even when a compiler could cheaply stamp equivalent private styles. Repeated private styles make the project larger and harder to audit.
 
-```json
-{
-  "format": "iccplus-visual-manifest",
-  "format_version": 1,
-  "design_groups": {
-    "species-card": {
-      "kind": "choice",
-      "name": "Species card",
-      "styling": {
-        "object": {
-          "objectBorderIsOn": true,
-          "objectBorderWidth": 2
-        },
-        "text": {
-          "objectTitleAlign": "center"
-        }
-      }
-    }
-  },
-  "items": [
-    {
-      "where": {"kind": "choice", "row": "species"},
-      "expect": 8,
-      "design_group": "species-card"
-    }
-  ]
-}
-```
+## Large-project visual normalization
 
-Use `kind: "row"` for Row Design Groups. Existing Design Group IDs can also be assigned with `design_group` or `design_groups` without redefining them. If the project already has a normal ICC Plus Group that represents the visual family, put its ID in the Design Group definition's `groups` array. That links the reusable style to the Group itself, so current and future members inherit it without per-Choice style assignment.
+Before a large style migration:
 
-ICC Plus evaluates private Choice styling before Choice Design Groups, then private Row styling, then Row Design Groups, then project styling. Avoid private styling unless that precedence is actually needed for a one-off exception.
+- inventory project styling, Row/Choice Design Groups, ordinary Groups, direct design assignments, private styles, and custom CSS;
+- identify the baseline treatment that can move to project styling;
+- identify true exception families and give each one a reusable Design Group;
+- prefer Group-linked inheritance for semantic families;
+- keep private styling only where the visual treatment is intentionally unique;
+- rebuild and compare player-visible states, including selected and unmet states.
 
-## Presets
+Local validation does not prove browser rendering. Use the official Viewer for final layout, responsive behavior, overlays, image composition, and CSS.
 
-Manifest `presets` are authoring macros for repeated template, width, image, or other edit values. They are not the ICC Plus reusable runtime style system. If a preset contains `styling` and is applied to several Choices, it copies that styling into each Choice privately.
-
-For reusable styling, put the styling in `design_groups` and keep presets for non-style edit values such as template and width when useful.
-
-## Normal style work
-
-One style manifest can target one entity, explicit refs, or selector matches. Use `expect` when a selector should match a known number of entities.
-
-Local and embedded images are compressed automatically when assigned. Do not add a separate compression command to ordinary style work.
-
-Use `media` when the task is about importing, clearing, cropping, probing, or managing assets themselves. Use `template` for the Creator's built-in style presets or design-file import/export.
-
-See `../../../docs/VISUAL_WORKFLOW.md`, `ASSET_COMPRESSION.md`, and `BULK_SELECTORS.md`.
+Read `../../../docs/cyoa/guide/16-visual-design-and-responsive-layout.md` and `../../../docs/cyoa/guide/21-large-project-normalization.md` for the broader design and normalization rules.

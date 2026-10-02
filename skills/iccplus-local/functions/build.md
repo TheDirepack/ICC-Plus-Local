@@ -1,15 +1,20 @@
 # build
 
-Read this file when rebuilding a project from a repeatable ordered build manifest.
+Read this file for reproducible multi-phase builds.
 
-`build` starts from the exact blank project and applies the declared phases in order. Before write it hydrates missing official Creator sections/defaults and requires complete-project validation, so build output cannot silently be a sparse `rows`-only project.
+`build` consumes an ordered manifest and produces a Creator-complete project. Use it when a project has an authoritative source tree or compiler pipeline. Generated project JSON remains output, not a second authoring source.
 
-```bash
-iccplus-local build iccplus.build.json -o project.json
-```
+For large projects, keep two concerns separate:
 
-Use `build` when the project should be reproducible from source manifests or when several authoring phases must run in a controlled order. Do not use it as a substitute for a simple one-off edit to an existing project.
+- the readable semantic build used for authoring, review, and most tests;
+- optional release normalization/compaction performed deterministically after the semantic build.
 
-Keep build inputs under source control or in the authoritative project source. Treat the built `project.json` as an output when the project is manifest-driven.
+A normalization phase may centralize style, promote shared Requirements to Rows, prune runtime-only Groups with no consumers, merge safe Rows, or compact runtime IDs. Do not make those transformations by hand against the generated release file.
 
-See `../../../docs/BUILD_SYSTEM.md`, `PHASED_AUTHORING.md`, and `AUTHORING_SCRIPTS.md`.
+If runtime IDs are compacted, generate them deterministically, rewrite every reference-bearing field, emit a reversible mapping, validate the compact result, and prove that reverse mapping reproduces the semantic project. A different compact-ID mapping is a public-ID migration after release.
+
+Do not strip Creator-complete eager/default fields merely to reduce bytes.
+
+Read `../../../docs/cyoa/guide/21-large-project-normalization.md` before adding a large-project normalization phase.
+
+See `../../../docs/BUILD_SYSTEM.md` and the current build manifest schema for exact command and phase shapes.

@@ -14,6 +14,8 @@ Apply the external Unslop skill to non-code written output.
 
 Keep a short state record with the current checkpoint, premise, non-goals, player contract, invariants, source boundary, completed work, unresolved issues, tests, and next bounded queue.
 
+For compiler-driven projects, also record the artifact boundary: authoritative semantic source, readable semantic/test build, and any normalized or compact release artifact. Never let the compact release file become a second source of truth.
+
 ## Workflow
 
 1. Load or rebuild the current working state.
@@ -27,6 +29,21 @@ Keep a short state record with the current checkpoint, premise, non-goals, playe
 9. Update additions, edits, removals, tests, unresolved issues, and the next work queue.
 10. Save a coherent artifact checkpoint that agrees with the working state.
 
+## Large-project normalization passes
+
+When a project has become structurally repetitive or the generated JSON is unnecessarily large, use a separate bounded normalization pass. Read `../../docs/cyoa/guide/21-large-project-normalization.md` and consider, in this order:
+
+- move ordinary styling to project scope and reusable Design Groups;
+- use Group-linked Design Group inheritance instead of thousands of direct style assignments;
+- move shared visibility Requirements to the deepest owning Row;
+- remove redundant ancestor gates from descendants;
+- set real Row selection maxima for Pick 1 / Pick N Rows;
+- merge safe one-card Rows without mixing independent axes;
+- prune runtime Groups that have no runtime consumer while keeping useful source metadata;
+- optionally compact runtime IDs deterministically as a release transformation.
+
+Normalize one layer at a time and measure both behavioral regressions and artifact size. Do not combine a large content rewrite with a large mechanical normalization pass unless the changes cannot be separated.
+
 ## Rules
 
 - Prefer bounded passes over broad mixed work.
@@ -34,8 +51,10 @@ Keep a short state record with the current checkpoint, premise, non-goals, playe
 - Keep confirmed facts, evidence-supported inference, design choices, and unknowns distinguishable.
 - Audit generated sets for duplicate roles, cost drift, repeated prose, missing niches, and filler.
 - Test requirement networks for reachability, not only individual gates.
+- Test effective gating at Row + Choice scope rather than assuming every child must physically carry the same Requirement.
+- Treat visibility, legality, and provider-loss cleanup as separate mechanics.
 - Keep local and global checks separate.
-- Record removals.
+- Record removals and structural remaps such as merged Rows.
 - Discover current tool capabilities at run time.
 - Do not carry validation status across project or tool revisions.
 - Keep reusable generators, validators, and test helpers under `/CYOA/tools/`; keep revision folders focused on project source, inputs, outputs, and reports.
@@ -54,9 +73,10 @@ After each pass, leave the updated artifact checkpoint, updated working state, c
 - [ ] Local checks passed or failures are recorded.
 - [ ] Relevant global invariants were checked.
 - [ ] Additions, edits, removals, and unresolved items are recorded.
+- [ ] Normalized release artifacts remain reproducible from semantic source when used.
 - [ ] Working state and artifact checkpoint agree.
 - [ ] `references/develop-checklist.md` is complete.
 
 ## References
 
-Use `../../docs/cyoa/guide/03-development-protocol.md` for long-project rules. For native ICC Plus 2 implementation, editing, styling, validation, and local testing, use `iccplus-local` and the matching function guides.
+Use `../../docs/cyoa/guide/03-development-protocol.md` for long-project rules and `../../docs/cyoa/guide/21-large-project-normalization.md` for structural normalization and release compaction. For native ICC Plus 2 implementation, editing, styling, validation, and local testing, use `iccplus-local` and the matching function guides.

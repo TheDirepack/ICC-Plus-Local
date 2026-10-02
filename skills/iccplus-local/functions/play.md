@@ -1,53 +1,33 @@
 # play
 
-Read this file before player simulation, progressive playtesting, or player-visible audits.
+Read this file before player simulation, continuation-state testing, or player-visible audits.
 
-`play` is the canonical player-safe runtime/testing command.
+`play` exposes Rows, direct Choices, and Addons as separate player-safe entity lists with explicit parent/child links. Keep continuation state in a private state file.
 
-```bash
-iccplus-local play project.json
-iccplus-local play project.json --state run.json --select choice_a --compact
-iccplus-local play project.json @audit.json --state run.json
-```
+For normalized projects, test **effective behavior**, not an obsolete physical JSON shape.
 
-Use compact views by default. Request verbose output only when visible titles, descriptions, Scores, Requirements, or fuller records are needed.
+Examples:
 
-## Read the hierarchy directly
+- If a shared hide Requirement moved from every Choice to the Row, assert that the Row and its children are hidden before the provider and visible after it.
+- If a Row now uses `allowedChoices = 1`, test selecting one option and then another at the target boundary instead of asserting sibling deactivation IDs exist.
+- If Rows were merged, assert that the semantic choices remain reachable, ordered, and correctly limited instead of requiring the old Row ID.
+- If runtime IDs were compacted, use the release mapping or an ID-aware test harness rather than hard-coding semantic IDs into the compact artifact.
 
-Rows, direct Choices, and Addons are separate entity types.
+## Visibility and cleanup are separate tests
 
-Use these top-level lists as the primary structure:
+A hidden Row can contain an internally selected Choice. Hiding a branch does not prove provider-loss cleanup occurred.
 
-- `rows`
-- `choices`
-- `addons`
-- `row_ids`
-- `choice_ids`
-- `addon_ids`
+When provider loss matters, test both:
 
-Rows expose ordered `choice_ids`. Choices expose `row_id`, visible-order `index`, and `addon_ids`. Addons expose `choice_id`, `row_id`, and visible-order `index`.
+1. player visibility after the provider disappears;
+2. whether the prior selection remains active, is rejected, or is cleaned up according to the intended mechanic.
 
-The older `rows[].choices` field remains for compatibility. Do not make an agent reconstruct hierarchy from it when the flat lists and explicit links are available.
+Do not add duplicated Choice Requirements merely to make a test observe cleanup if the intended design is persistent hidden state.
 
-## Keep Choice and Addon selection separate
+## Large-suite practice
 
-Use:
+On very large projects, split simulator-heavy release checks into bounded suites when a monolithic run obscures failures behind a timeout. Keep complete coverage, but distinguish project failures from stale assertions, environment/import failures, and performance timeouts.
 
-- `available_direct_choice_ids`
-- `deselectable_direct_choice_ids`
-- `available_selectable_addon_ids`
-- `deselectable_selectable_addon_ids`
-- `available_selection_ids`
-- `deselectable_selection_ids`
+Reduce a long failing path to the shortest sequence that reproduces the behavior and keep that as the regression.
 
-The older `available_choice_ids` and `deselectable_choice_ids` compatibility fields include selectable Addons as well as direct Choices.
-
-## Continue sessions safely
-
-Use `--state FILE` for continuation. Treat that state file as private runtime data. Do not inspect it to obtain information hidden from the player view.
-
-Use `--reset` when a clean session is required.
-
-For hierarchy-sensitive audits, assert `row_choices` and `choice_rows` in `expect` rather than rereading raw project JSON.
-
-The full contract is in `../../../docs/PLAY_STRUCTURE.md`. Also read `GAMEPLAY_RUNNER.md` and `SESSION_PROTOCOL.md` for multi-step audits and saved-state behavior.
+Read `../../../docs/PLAY_STRUCTURE.md`, `../../../docs/GAMEPLAY_RUNNER.md`, and `../../../docs/cyoa/guide/21-large-project-normalization.md` for the full model and normalization-specific testing rules.

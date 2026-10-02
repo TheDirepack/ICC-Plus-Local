@@ -6,7 +6,13 @@ compatibility: Exceptional or legacy asset workflow. Normal ICC Plus 2 authoring
 
 # CYOA compress
 
-Treat standalone compression as an exception, not a normal authoring phase.
+Treat standalone asset compression as an exception, not a normal authoring phase.
+
+## Do not route structural JSON normalization here
+
+Large-project JSON reduction is not this skill's job. Generic styling, deepest-Row visibility gates, shared-Requirement promotion, Row selection limits, safe Row merging, runtime Group pruning, and deterministic runtime-ID compaction belong to the project's source/compiler and the `iccplus-local` implementation workflow.
+
+Use `../../docs/cyoa/guide/21-large-project-normalization.md` for those operations. Do not call a structural normalization pass “compression” if it changes or rewrites project mechanics/identities.
 
 ## Normal ICC Plus workflow
 
@@ -28,7 +34,7 @@ For a legacy or external tree:
 1. Probe the asset layout and references.
 2. Prefer a separate output directory.
 3. Dry-run broad rewrites when the tool supports it.
-4. Keep the original when conversion is not smaller or visibly worse.
+4. Keep the original when conversion is not smaller or is visibly worse.
 5. Verify rewritten references.
 6. Compare representative images at their rendered size.
 7. Test the resulting release package.
@@ -41,6 +47,7 @@ For a legacy or external tree:
 - Do not recompress files that are already suitable without a measurable benefit.
 - Do not assume a smaller file is visually acceptable.
 - Do not use a retired compatibility command simply because an old guide mentions it.
+- Do not randomize or rewrite project IDs as part of asset compression.
 
 ## Output
 
@@ -49,6 +56,7 @@ Report why a standalone pass was needed, the tool used, output location, size ch
 ## Final checks
 
 - [ ] The normal automatic media path was ruled out first.
+- [ ] Structural/runtime normalization was routed to `iccplus-local`, not this skill.
 - [ ] Originals remain recoverable.
 - [ ] References resolve.
 - [ ] Representative images remain acceptable.

@@ -1,28 +1,34 @@
 # project
 
-Read this file for serialization, interchange, fragments, IDs, and build strings.
+Read this file for project validation, hydration, formatting, export, fragmentation, serialization, IDs, and build strings.
 
-Canonical paths:
+Use `project validate` for final Creator-complete validation of an imported or externally supplied project. Use `project hydrate` to restore missing official baseline sections and safe Creator-eager fields without inventing missing identities or downgrading newer projects.
 
-```text
-project format
-project validate [--compat]
-project hydrate
-project export
-project fragment export|import
-project ids export|from-titles
-project build-summary
-project build-string
-```
+For source-driven large projects, distinguish three artifacts when useful:
 
-Use `project validate` for the final Creator-complete check. It requires the full pinned official project skeleton, valid native field types, and Creator-eager entity fields. Use `--compat` only when inspecting legacy/sparse input that must remain untouched.
+- authoritative semantic source,
+- readable semantic/test `project.json`,
+- optional compact runtime release `project.json`.
 
-Use `project hydrate` to repair missing official project sections and safe eager entity defaults. Hydration preserves existing values, does not invent missing IDs, upgrades older supported projects to the pinned target, and never downgrades a future project version.
+Do not edit the compact release artifact as a second source.
 
-The other commands are interchange helpers. They are not alternate authoring paths.
+## Runtime ID compaction
 
-Use `project format` when the task is formatting a complete project JSON. Use export and fragment operations when moving project data. Use ID helpers for ID interchange or derivation. Use build-summary and build-string for the corresponding ICC Plus serialization forms.
+Compact runtime IDs can materially reduce repeated-reference payload in large projects, but only as a deterministic release transformation.
 
-For content edits, use `structure`, `rules`, or `style` instead.
+A safe compact-ID pipeline must:
 
-See `../../../docs/CLI_REFERENCE.md`, `ID_GUARANTEES.md`, and `BUILD_SYSTEM.md`.
+- keep source/test IDs semantic and readable;
+- generate stable deterministic runtime IDs rather than fresh random IDs;
+- use explicit collision detection and stable collision handling;
+- rewrite every identity and every reference-bearing field;
+- emit a reversible semantic-to-runtime ID map for release/debug records;
+- validate the compact artifact;
+- reverse-map a comparison copy and compare it field-for-field with the semantic build;
+- treat any later mapping/algorithm change as a public-ID migration when old saves or imports matter.
+
+A short type prefix such as `r`, `c`, `a`, or `g` is useful for diagnosis but does not replace the reversible map.
+
+Do not strip official Creator-complete eager/default fields only to reduce file size. Remaining schema overhead is preferable to a smaller project that the target Creator cannot round-trip safely.
+
+Read `../../../docs/cyoa/guide/21-large-project-normalization.md` for the full release-compaction rules.

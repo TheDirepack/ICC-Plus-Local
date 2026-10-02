@@ -1,6 +1,6 @@
 # ICC Plus 2 CYOA guide
 
-This is the working reference for planning, building, testing, and shipping CYOAs with ICC Plus 2.
+This is the working reference for planning, building, testing, normalizing, and shipping CYOAs with ICC Plus 2.
 
 The files are ordered by the normal project lifecycle. Read only the phase you need; use the index instead of memorizing chapter numbers.
 
@@ -43,12 +43,13 @@ If the local model and target Viewer disagree, keep the project native to the Vi
 15. `15-buttons-saves-backpack-media.md` — Buttons, build saves, Choice Import, Backpack, media, audio, and project CSS.
 16. `16-visual-design-and-responsive-layout.md` — design system, card geometry, accessibility, responsive behavior, and visual QA.
 
-### Testing and release
+### Testing, normalization, and release
 
 17. `17-local-testing.md` — current local inspection, player-safe regression tests, and parity boundaries.
 18. `18-continuing-playtests.md` — private continuation state and multi-call playtesting.
 19. `19-publishing-and-release.md` — package construction and release QA.
 20. `20-troubleshooting.md` — symptom-first diagnosis and current recovery rules.
+21. `21-large-project-normalization.md` — generic styling, deepest-row gates, Row limits, one-card Row merging, runtime Group pruning, deterministic runtime-ID compaction, and known 2.10.7 caveats.
 
 `SOURCES.md` records the source material behind the guide. `REVISION-NOTES.md` is historical change provenance, not active workflow guidance.
 
@@ -57,10 +58,11 @@ If the local model and target Viewer disagree, keep the project native to the Vi
 - **Start or redesign a CYOA:** 05 → 11, using 03 and 04 for process.
 - **Implement approved content:** 12 → 16, then 17 for mechanical tests.
 - **Edit a current project:** read the affected implementation file, then 17 and 20 as needed.
+- **Normalize or shrink a large generated project:** 12 → 14, then 21 and 17. Keep the readable authoring source authoritative.
 - **Visual or image pass:** 10, 15, and 16.
 - **Mechanical regression work:** 13, 14, 17, and 18 as relevant.
-- **Review:** 05 → 11, then the implementation file for each issue found.
-- **Ship:** 17 → 20, with the official Viewer as the final authority.
+- **Review:** 05 → 11, then the implementation file for each issue found; include 21 for large source-driven projects.
+- **Ship:** 17 → 21 as relevant, with the official Viewer as the final authority.
 - **Legacy project:** use `../legacy-icc-reference/legacy-icc-migration-reference.md` first, then return here for the target state.
 
 ## Core design questions
@@ -75,9 +77,14 @@ A player should not have to reverse-engineer:
 ## Core implementation rules
 
 - Query the current schema before using an unfamiliar field.
-- Keep public IDs stable after release.
+- Keep public runtime IDs stable after release.
 - Keep structured source or the compiler authoritative when one exists.
 - Treat generated `project.json` as output, not a second editable master.
+- Put visibility gates on the deepest Row that fully owns them; do not copy ancestor gates through every descendant.
+- Put shared child gates on the Row when every Choice is governed by the same condition.
+- Use native Row selection limits for real Pick 1 / Pick N direct-Choice Rows when the target version supports the intended behavior.
+- Separate visibility from cleanup: hiding a Row does not by itself prove selected children were deselected.
+- Prefer project styling and Group-linked Design Groups over repeated private styling and repeated direct style assignments.
 - Test requirements on both sides of the gate and through state transitions.
 - Test the target Viewer, not only static data or the local runner.
 - Treat web and local Viewer packages as separate release formats.
