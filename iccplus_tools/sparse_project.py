@@ -50,6 +50,10 @@ CREATOR_ONLY_TOP_LEVEL = frozenset({
 ROW_CREATOR_ONLY_FIELDS = frozenset({'isEditModeOn', 'isSimpleEditMode', 'isRequirementOpen'})
 CHOICE_CREATOR_ONLY_FIELDS = frozenset({'isEditModeOn'})
 ADDON_CREATOR_ONLY_FIELDS = frozenset({'isEditModeOn'})
+GROUP_CREATOR_ONLY_FIELDS = frozenset({'name'})
+DESIGN_GROUP_CREATOR_ONLY_FIELDS = frozenset({'name'})
+GLOBAL_REQUIREMENT_CREATOR_ONLY_FIELDS = frozenset({'name'})
+SOUND_EFFECT_CREATOR_ONLY_FIELDS = frozenset({'name', 'isDefault', 'onSelected', 'onDeselected', 'groups'})
 
 RETAINED_STYLING_DEFAULTS: dict[str, Any] = {
     'customMultiTextFont': False,
@@ -139,12 +143,14 @@ def _strip_creator_only_fields(
     fields: frozenset[str],
     path: str,
     removals: list[dict[str, str]],
+    *,
+    rule: str = 'viewer_ignores_creator_edit_state',
 ) -> None:
     if not isinstance(entity, dict):
         return
     for key in fields:
         if key in entity:
-            _remove(entity, key, f'{path}/{key}', 'viewer_ignores_creator_edit_state', removals)
+            _remove(entity, key, f'{path}/{key}', rule, removals)
 
 
 def _strip_creator_category_metadata(app: dict[str, Any], removals: list[dict[str, str]]) -> None:
@@ -242,6 +248,13 @@ def _strip_design_groups(groups: Any, path: str, removals: list[dict[str, str]])
         if not isinstance(group, dict):
             continue
         base = f'{path}/{index}'
+        _strip_creator_only_fields(
+            group,
+            DESIGN_GROUP_CREATOR_ONLY_FIELDS,
+            base,
+            removals,
+            rule='viewer_ignores_creator_entity_metadata',
+        )
         for key, default in DESIGN_GROUP_DEFAULTS.items():
             if group.get(key, _MISSING) == default:
                 _remove(group, key, f'{base}/{key}', 'design_group_loader_default', removals)
@@ -254,9 +267,32 @@ def _strip_groups(groups: Any, path: str, removals: list[dict[str, str]]) -> Non
         if not isinstance(group, dict):
             continue
         base = f'{path}/{index}'
+        _strip_creator_only_fields(
+            group,
+            GROUP_CREATOR_ONLY_FIELDS,
+            base,
+            removals,
+            rule='viewer_ignores_creator_entity_metadata',
+        )
         for key, default in GROUP_DEFAULTS.items():
             if group.get(key, _MISSING) == default:
                 _remove(group, key, f'{base}/{key}', 'group_loader_default', removals)
+
+
+def _strip_requirement_noise(requireds: Any, path: str, removals: list[dict[str, str]]) -> None:
+    """Remove Requirement members with no pinned Viewer read path."""
+    if not isinstance(requireds, list):
+        return
+    for index, req in enumerate(requireds):
+        if not isinstance(req, dict):
+            continue
+        req_path = f'{path}/{index}'
+        if 'id' in req:
+            _remove(req, 'id', f'{req_path}/id', 'viewer_ignores_requirement_structural_id', removals)
+        if req.get('more', _MISSING) == []:
+            _remove(req, 'more', f'{req_path}/more', 'requirement_empty_more_is_noop', removals)
+        _strip_requirement_noise(req.get('requireds'), f'{req_path}/requireds', removals)
+        _strip_requirement_noise(req.get('orRequireds'), f'{req_path}/orRequireds', removals)
 
 
 def _derived_legacy_or_requireds(req: Any) -> Any:
@@ -333,8 +369,14 @@ def _strip_addon(addon: Any, path: str, removals: list[dict[str, str]]) -> None:
     if 'parentId' in addon:
         _remove(addon, 'parentId', f'{path}/parentId', 'addon_parent_derived_from_container', removals)
     _strip_loader_migrated_or_requireds(addon.get('requireds'), f'{path}/requireds', removals)
+    _strip_requirement_noise(addon.get('requireds'), f'{path}/requireds', removals)
     if addon.get('requireds', _MISSING) == []:
         _remove(addon, 'requireds', f'{path}/requireds', 'addon_requireds_empty_loader_default', removals)
+    scores = addon.get('scores')
+    if isinstance(scores, list):
+        for index, score in enumerate(scores):
+            if isinstance(score, dict):
+                _strip_requirement_noise(score.get('requireds'), f'{path}/scores/{index}/requireds', removals)
 
 
 def _strip_choice(
@@ -366,11 +408,13 @@ def _strip_choice(
         _remove(choice, 'addonJustify', f'{path}/addonJustify', 'choice_addon_justify_inherited', removals)
 
     _strip_loader_migrated_or_requireds(choice.get('requireds'), f'{path}/requireds', removals)
+    _strip_requirement_noise(choice.get('requireds'), f'{path}/requireds', removals)
     scores = choice.get('scores')
     if isinstance(scores, list):
         for index, score in enumerate(scores):
             if isinstance(score, dict):
                 _strip_loader_migrated_or_requireds(score.get('requireds'), f'{path}/scores/{index}/requireds', removals)
+                _strip_requirement_noise(score.get('requireds'), f'{path}/scores/{index}/requireds', removals)
 
     _strip_private_filter_defaults(choice, path, removals)
     addons = choice.get('addons')
@@ -395,6 +439,7 @@ def _strip_row(
     if backpack and row.get('isBackpack') is True:
         _remove(row, 'isBackpack', f'{path}/isBackpack', 'backpack_row_flag_forced_true', removals)
     _strip_loader_migrated_or_requireds(row.get('requireds'), f'{path}/requireds', removals)
+    _strip_requirement_noise(row.get('requireds'), f'{path}/requireds', removals)
     _strip_private_filter_defaults(row, path, removals)
 
     objects = row.get('objects')
@@ -493,11 +538,35 @@ def sparsify_project(
     if isinstance(global_requirements, list):
         for index, global_requirement in enumerate(global_requirements):
             if isinstance(global_requirement, dict):
+                base = f'/globalRequirements/{index}'
+                _strip_creator_only_fields(
+                    global_requirement,
+                    GLOBAL_REQUIREMENT_CREATOR_ONLY_FIELDS,
+                    base,
+                    removals,
+                    rule='viewer_ignores_creator_entity_metadata',
+                )
                 _strip_loader_migrated_or_requireds(
                     global_requirement.get('requireds'),
-                    f'/globalRequirements/{index}/requireds',
+                    f'{base}/requireds',
                     removals,
                 )
+                _strip_requirement_noise(global_requirement.get('requireds'), f'{base}/requireds', removals)
+
+    sound_effects = sparse.get('soundEffects')
+    if isinstance(sound_effects, list):
+        for index, sound_effect in enumerate(sound_effects):
+            if not isinstance(sound_effect, dict):
+                continue
+            base = f'/soundEffects/{index}'
+            _strip_creator_only_fields(
+                sound_effect,
+                SOUND_EFFECT_CREATOR_ONLY_FIELDS,
+                base,
+                removals,
+                rule='viewer_ignores_creator_entity_metadata',
+            )
+            _strip_requirement_noise(sound_effect.get('requireds'), f'{base}/requireds', removals)
 
     _strip_creator_category_metadata(sparse, removals)
     _strip_groups(sparse.get('groups'), '/groups', removals)
