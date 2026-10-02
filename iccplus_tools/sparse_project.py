@@ -59,7 +59,21 @@ SOUND_EFFECT_CREATOR_ONLY_FIELDS = frozenset({'name', 'isDefault', 'onSelected',
 ROW_VIEWER_UNUSED_FIELDS = frozenset({'imageIsUrl'})
 CHOICE_VIEWER_UNUSED_FIELDS = frozenset({'selectedThisManyTimesProp'})
 POINT_VIEWER_UNUSED_FIELDS = frozenset({'imageIsURL'})
-SCORE_VIEWER_UNUSED_FIELDS = frozenset({'type'})
+SCORE_VIEWER_UNUSED_FIELDS = frozenset({
+    'type',
+    'discountScoreCal',
+    'isChangeDiscount',
+    'discountNum',
+    'tmpDisScore',
+    'tmpDiscount',
+    'discountedFrom',
+    'dupTextA',
+    'dupTextB',
+    'discountTextA',
+    'discountTextB',
+    'notStackableDiscount',
+    'mulValue',
+})
 
 RETAINED_STYLING_DEFAULTS: dict[str, Any] = {
     'customMultiTextFont': False,
