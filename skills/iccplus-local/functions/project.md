@@ -14,7 +14,7 @@ Do not edit the compact release artifact as a second source.
 
 ## Runtime serialization
 
-Player-facing runtime serialization omits native values proven behavior-equivalent when absent in the pinned ICC Plus 2.10.7 Viewer. Normal saved project JSON uses the same sparse serializer, but it also has to remain safe for later authoring commands and hydration.
+Player-facing runtime serialization omits native values proven behavior-equivalent when absent in the pinned ICC Plus 2.10.7 Viewer. This is the default runtime policy. Normal saved project JSON uses the same sparse serializer, but it also has to remain safe for later authoring commands and hydration.
 
 All saved full-project JSON and Viewer payloads use sparse serialization after the native project has been hydrated and complete-validated in memory. Formatting, `project hydrate`, separate-image exports, and Viewer packages do not bypass this rule; only `--not-sparse` does. The serializer uses an explicit, version-pinned whitelist and conditional rules rather than treating schema-optional fields or Creator construction defaults as automatically removable.
 
