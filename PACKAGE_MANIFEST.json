@@ -1,9 +1,9 @@
 {
-  "package": "ICC Plus Local rc13 compressed CYOA skill and documentation candidate",
-  "tool_version": "0.10.0rc13",
+  "package": "ICC Plus Local rc14 compiler-boundary and sparse-runtime candidate",
+  "tool_version": "0.10.0rc14",
   "target_icc_plus_version": "2.10.7",
   "target_source_commit": "1ea9db888cde2286d18d0d5de50933cb8773b739",
-  "candidate_role": "LLM-first ICC Plus 2.10.7 authoring plus a compressed high-level CYOA planning/review/migration/release skill set",
+  "candidate_role": "LLM-first ICC Plus 2.10.7 authoring and validation with explicit compiler/native ownership boundaries and behavior-preserving sparse Viewer runtime serialization",
   "local_regression": {
     "normal_tests": "CI workflow is authoritative for the current branch",
     "checked_in_examples": "CI workflow is authoritative for the current branch",
@@ -18,6 +18,11 @@
     "compatibility_validation": "available for legacy read-only inspection with project validate --compat",
     "identity_policy": "hydration never invents missing entity identities",
     "version_policy": "older supported projects may upgrade to 2.10.7; future versions are never downgraded"
+  },
+  "compiler_boundary": {
+    "native_layer": "ICC Plus Local owns pinned native compatibility, validation, serialization, local simulation, explicit native edits, and reference integrity",
+    "source_compiler": "source lowering owns semantic normalization such as Requirement hoisting, style-intent consolidation, taxonomy pruning, Row merging, Pick-N inference, and deterministic runtime-ID compaction/remapping",
+    "rules_document": "docs/COMPILER_BOUNDARY.md"
   },
   "runtime_serialization": {
     "policy": "player-facing Viewer payloads omit every pinned 2.10.7 field currently proven behavior-equivalent when absent",

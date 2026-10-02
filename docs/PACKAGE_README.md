@@ -1,6 +1,6 @@
 # ICC Plus Local CLI
 
-Version 0.10.0rc13 targets ICC Plus 2.10.7 and pins official ICC Plus Svelte commit `1ea9db888cde2286d18d0d5de50933cb8773b739`.
+Version 0.10.0rc14 targets ICC Plus 2.10.7 and pins official ICC Plus Svelte commit `1ea9db888cde2286d18d0d5de50933cb8773b739`.
 
 The canonical top-level interface has 11 commands:
 
@@ -37,6 +37,12 @@ For styling, prefer project-wide native styling, then official Row/Choice Design
 
 `play` is the canonical runtime/testing interface. It exposes visible Rows, direct Choices, and Addons separately with explicit parent/child links. Use `--state FILE` for private continuation state. See `PLAY_STRUCTURE.md` and `GAMEPLAY_RUNNER.md`.
 
+## Runtime release serialization
+
+Creator-complete authoring JSON and Creator-compatible project exports remain complete. Player-facing Viewer packages use behavior-preserving sparse serialization by default. The omission rules are pinned to ICC Plus 2.10.7 rather than inferred from schema optionality or Creator factory defaults.
+
+Use `iccplus-sparse PROJECT -o runtime-project.json` when a standalone player runtime artifact is needed. Use `iccplus-omission-probe -o verification/sparse-omission` to generate isolated browser test cases for omission candidates that have not yet been proven safe. See `SPARSE_RUNTIME_SERIALIZATION.md` and `COMPILER_BOUNDARY.md`.
+
 ## CYOA skills
 
 `skills/iccplus-local/SKILL.md` is the single native ICC Plus 2 implementation skill. The repository also includes the high-level `cyoa-plan`, `cyoa-review`, `cyoa-migrate`, `cyoa-develop`, `cyoa-ship`, and exceptional `cyoa-compress` skills.
@@ -54,6 +60,6 @@ python -m pytest -q tests cli_tests
 ./examples/test_examples.sh
 ```
 
-GitHub Actions runs both before merge. Pushes to `main` also build the wheel, source ZIP, and SHA-256 file.
+GitHub Actions runs the core suite, CLI contract, and checked-in examples as separate jobs so failures remain attributable. Pushes to `main` also build the wheel, source ZIP, and SHA-256 file.
 
 Official Creator/Viewer browser verification remains a separate release gate for rendering and browser-only behavior.

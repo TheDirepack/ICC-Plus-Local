@@ -4,6 +4,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / "skills"
+CURRENT_TOOL_VERSION = "0.10.0rc14"
+CURRENT_ICCPLUS_VERSION = "2.10.7"
 
 RETAINED = {
     "iccplus-local",
@@ -39,16 +41,35 @@ def test_retained_skill_dependencies_are_packaged():
     assert (SKILLS / "iccplus-local/references/local-workflow-checklist.md").is_file()
 
 
-def test_current_docs_use_rc13_and_2107():
-    assert (ROOT / "VERSION").read_text().strip() == "0.10.0rc13"
-    assert "0.10.0rc13" in (ROOT / "START_HERE.md").read_text()
-    assert "0.10.0rc13" in (ROOT / "docs/PLAY_STRUCTURE.md").read_text()
+def test_current_version_markers_are_synchronized():
+    assert (ROOT / "VERSION").read_text().strip() == CURRENT_TOOL_VERSION
+    assert f'version = "{CURRENT_TOOL_VERSION}"' in (ROOT / "pyproject.toml").read_text()
+    assert f'__version__ = "{CURRENT_TOOL_VERSION}"' in (ROOT / "iccplus_tools/version.py").read_text()
+
+    current_docs = [
+        ROOT / "README.md",
+        ROOT / "START_HERE.md",
+        ROOT / "docs/PACKAGE_README.md",
+        ROOT / "docs/README.md",
+        ROOT / "docs/PLAY_STRUCTURE.md",
+        ROOT / "docs/CLI_REFERENCE.md",
+        SKILLS / "cyoa-ship/SKILL.md",
+    ]
+    for path in current_docs:
+        assert CURRENT_TOOL_VERSION in path.read_text(), path
+
+    manifest = (ROOT / "PACKAGE_MANIFEST.json").read_text()
+    assert f'"tool_version": "{CURRENT_TOOL_VERSION}"' in manifest
+    assert 'rc14' in manifest
+
+
+def test_current_docs_keep_2107_target_and_sparse_runtime_contract():
     field_reference = (ROOT / "docs/ICCPLUS_FIELD_REFERENCE.md").read_text()
-    assert "ICC Plus 2.10.7" in field_reference
+    assert f"ICC Plus {CURRENT_ICCPLUS_VERSION}" in field_reference
     assert "removeSpace" in field_reference
-    assert "ICC Plus 2.10.7" in (ROOT / "docs/FIELD_CATALOG.md").read_text()
+    assert f"ICC Plus {CURRENT_ICCPLUS_VERSION}" in (ROOT / "docs/FIELD_CATALOG.md").read_text()
     sparse = (ROOT / "docs/SPARSE_RUNTIME_SERIALIZATION.md").read_text()
-    assert "ICC Plus 2.10.7" in sparse
+    assert f"ICC Plus {CURRENT_ICCPLUS_VERSION}" in sparse
     assert "load success alone" in sparse.lower()
 
 

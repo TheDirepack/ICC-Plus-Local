@@ -1,6 +1,6 @@
 # CLI reference
 
-The canonical rc13 surface has 11 top-level commands.
+The canonical rc14 surface has 11 top-level commands.
 
 ## `generate`
 
@@ -96,6 +96,8 @@ project build-string
 ```
 
 `project validate` is the canonical final-artifact completeness check. `project hydrate` fills missing official Creator sections and safe eager entity defaults without overwriting existing values or inventing IDs. The remaining project commands are serialization/interchange helpers, not alternate authoring paths.
+
+Player-facing Viewer packages use the pinned behavior-preserving sparse runtime serializer by default. Creator-format and Creator-compatible export paths remain complete. The standalone `iccplus-sparse` and `iccplus-omission-probe` entry points are release/verification helpers rather than additions to the 11-command `iccplus-local` surface.
 
 ## `reference`
 
