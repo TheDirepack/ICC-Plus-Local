@@ -22,7 +22,7 @@ Load:
 ## Workflow
 
 1. Rebuild from authoritative source when applicable, run `iccplus-local project validate`, and confirm required runtime tests, design review, and accessibility checks are complete.
-2. If the release pipeline performs structural normalization or runtime-ID compaction, rebuild the readable semantic artifact first and then derive the release artifact reproducibly. Read `../../docs/cyoa/guide/21-large-project-normalization.md`.
+2. If the release pipeline performs structural normalization or runtime-ID compaction, rebuild the readable semantic artifact first and then derive the release artifact reproducibly. Read `../../docs/COMPILER_BOUNDARY.md` and `../../docs/cyoa/guide/21-large-project-normalization.md`.
 3. Choose the exact web, offline, or static release format.
 4. Build from the official ICC Plus Viewer release or template that matches the project target. The current rc13 tool target is ICC Plus 2.10.7.
 5. Test the generated package itself.
@@ -48,7 +48,7 @@ Load:
 - Check network errors at the final hosted origin.
 - Protect public IDs.
 - Treat static output as its own release target.
-- On the 2.10.7 target, do not replace tested selectable-Addon exclusion logic with Row caps without target-Viewer proof; upstream 2.10.8 specifically fixes Addon behavior for changed Row choice limits.
+- Do not cite ICC Plus 2.10.8's “Change choices per row could not change addons per row” note as a Row selection-limit fix. The upstream change is selectable-Addon width handling (`addonWidth`). Any change to Addon radio/exclusion mechanics needs direct target-Viewer evidence.
 
 ## Output
 
@@ -70,4 +70,4 @@ Produce the tested release package plus a release record containing versions, ch
 
 ## References
 
-Use `../../docs/cyoa/guide/19-publishing-and-release.md`, `20-troubleshooting.md`, `21-large-project-normalization.md`, `02-creator-and-viewer.md`, and `10-research-ideation-and-images.md` as needed.
+Use `../../docs/cyoa/guide/19-publishing-and-release.md`, `20-troubleshooting.md`, `21-large-project-normalization.md`, `02-creator-and-viewer.md`, `10-research-ideation-and-images.md`, and `../../docs/COMPILER_BOUNDARY.md` as needed.
