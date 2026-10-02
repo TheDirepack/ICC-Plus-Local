@@ -54,7 +54,9 @@ ADDON_CREATOR_ONLY_FIELDS = frozenset({'isEditModeOn'})
 GROUP_CREATOR_ONLY_FIELDS = frozenset({'name'})
 DESIGN_GROUP_CREATOR_ONLY_FIELDS = frozenset({'name'})
 GLOBAL_REQUIREMENT_CREATOR_ONLY_FIELDS = frozenset({'name'})
-SOUND_EFFECT_CREATOR_ONLY_FIELDS = frozenset({'name', 'isDefault', 'onSelected', 'onDeselected', 'groups'})
+# Sound Effect names are authoring labels used by ICC Plus Local commands and
+# cannot be reconstructed by hydration, so canonical sparse saves retain them.
+SOUND_EFFECT_CREATOR_ONLY_FIELDS = frozenset({'isDefault', 'onSelected', 'onDeselected', 'groups'})
 
 # These fields survive Creator/schema export but have no pinned Viewer read path.
 ROW_VIEWER_UNUSED_FIELDS = frozenset({'imageIsUrl'})
