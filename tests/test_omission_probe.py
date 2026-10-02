@@ -19,8 +19,8 @@ def _diff_count(a, b) -> int:
     return 0 if a == b else 1
 
 
-def test_probe_cases_isolate_one_change_and_use_valid_controls() -> None:
-    cases = omission_probe_cases()
+def test_core_probe_cases_isolate_one_change_and_use_valid_controls() -> None:
+    cases = omission_probe_cases(exhaustive=False)
     assert len(cases) >= 30
     ids = [case['id'] for case in cases]
     assert len(ids) == len(set(ids))
@@ -38,22 +38,48 @@ def test_probe_cases_isolate_one_change_and_use_valid_controls() -> None:
             assert validate_complete(case['candidate'])['valid'] is True, case['id']
         else:
             assert validate_complete(case['baseline'])['valid'] is True, case['id']
-        # Every experiment changes exactly one omission dimension.
         assert _diff_count(case['baseline'], case['candidate']) == 1, case['id']
 
     array_cases = {case['id']: case for case in cases if case['id'].startswith('array-')}
     assert set(array_cases) == {'array-null-entry', 'array-empty-object-entry'}
     for case in array_cases.values():
         assert case['path'] == '/mdObjects/0'
-        assert 'probeArray' not in case['baseline']
         assert len(case['baseline']['mdObjects']) == 2
-        assert len(case['candidate']['mdObjects']) == 1
+        assert case['candidate']['mdObjects'] == ['probe-md']
+
+
+def test_exhaustive_probe_inventory_covers_unproven_style_fallbacks() -> None:
+    cases = omission_probe_cases(exhaustive=True)
+    ids = [case['id'] for case in cases]
+    categories = {case['category'] for case in cases}
+
+    assert len(cases) > 500
+    assert len(ids) == len(set(ids))
+    assert 'retained-global-styling-member' in categories
+    assert 'private-style-member-fallback' in categories
+    assert 'runtime-state-empty-build' in categories
+    assert 'global-styling-unselFilterSatur' in ids
+    assert 'private-choice-privateTextIsOn-objectTitle' in ids
+    assert 'top-level-activated-empty-build' in ids
+
+    # Validate one representative construction from each new exhaustive family
+    # instead of turning CI into hundreds of repeated full-project validations.
+    for category in ('retained-global-styling-member', 'private-style-member-fallback', 'runtime-state-empty-build'):
+        case = next(item for item in cases if item['category'] == category)
+        assert validate_complete(case['baseline'])['valid'] is True, case['id']
+        assert _diff_count(case['baseline'], case['candidate']) == 1, case['id']
 
 
 def test_probe_suite_writes_manifest_and_pairs(tmp_path) -> None:
-    manifest = write_omission_probe_suite(tmp_path)
+    # File-writing behavior needs only a representative sample; the generator's
+    # default command still emits the complete exhaustive matrix.
+    sample = omission_probe_cases(exhaustive=False)[:5]
+    manifest = write_omission_probe_suite(tmp_path, cases=sample)
+    assert manifest['format_version'] == 2
+    assert manifest['case_count'] == len(sample)
     assert manifest['case_count'] == len(manifest['cases'])
     assert manifest['target']['icc_plus_version'] == '2.10.7'
+    assert sum(manifest['category_counts'].values()) == manifest['case_count']
     disk_manifest = json.loads((tmp_path / 'manifest.json').read_text(encoding='utf-8'))
     assert disk_manifest['case_count'] == manifest['case_count']
     assert (tmp_path / 'README.md').is_file()
