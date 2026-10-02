@@ -21,7 +21,7 @@ If the local model and target Viewer disagree, keep the project native to the Vi
 ### Foundation and workflow
 
 1. `01-operating-model-and-glossary.md` — project model, terminology, and evidence labels.
-2. `02-creator-and-viewer.md` — Creator versus Viewer, saves, imports, and release formats.
+2. `02-creator-and-viewer.md` — Creator versus Viewer, saves, imports, sparse project files, and release formats.
 3. `03-development-protocol.md` — long-running LLM work, source-of-truth rules, bounded passes, and consistency.
 4. `04-authoring-workflow.md` — the end-to-end build sequence.
 
@@ -79,7 +79,9 @@ A player should not have to reverse-engineer:
 - Query the current schema before using an unfamiliar field.
 - Keep public runtime IDs stable after release.
 - Keep structured source or the compiler authoritative when one exists.
-- Treat generated `project.json` as output, not a second editable master.
+- Treat generated `project.json` as output, not a second editable master, when the project has a higher-level source/compiler.
+- For direct native authoring, the normal ICC Plus Local `project.json` is sparse but remains an editable authoring artifact. Do not strip stable identities or non-derivable authoring labels merely because the Viewer could ignore or regenerate a runtime substitute.
+- Use `project validate` for normal sparse saved projects and `project validate --complete` only for an explicitly materialized Creator-complete shape.
 - Put visibility gates on the deepest Row that fully owns them; do not copy ancestor gates through every descendant.
 - Put shared child gates on the Row when every Choice is governed by the same condition.
 - Use native Row selection limits for real Pick 1 / Pick N direct-Choice Rows when the target version supports the intended behavior.
