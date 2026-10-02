@@ -55,6 +55,30 @@ RETAINED_STYLING_DEFAULTS: dict[str, Any] = {
     'multiChoiceTextSize': 100,
 }
 
+# The pinned 2.10.7 private-filter initializer explicitly reconstructs these
+# values when private filter styling is active. They intentionally do not mirror
+# global FILTER_STYLING blindly: private unselFilterSatur defaults to 0 here,
+# while the global built-in value is 1.
+PRIVATE_FILTER_DEFAULTS: dict[str, Any] = {
+    'unselFilterBlurIsOn': False,
+    'unselFilterBlur': 0,
+    'unselFilterBrightIsOn': False,
+    'unselFilterBright': 100,
+    'unselFilterCont': 100,
+    'unselFilterGrayIsOn': False,
+    'unselFilterGray': 0,
+    'unselFilterHueIsOn': False,
+    'unselFilterHue': 0,
+    'unselFilterInvertIsOn': False,
+    'unselFilterInvert': 0,
+    'unselFilterOpacIsOn': False,
+    'unselFilterOpac': 100,
+    'unselFilterSaturIsOn': False,
+    'unselFilterSatur': 0,
+    'unselFilterSepiaIsOn': False,
+    'unselFilterSepia': 0,
+}
+
 DESIGN_GROUP_DEFAULTS: dict[str, Any] = {
     'activatedId': '',
     'elements': [],
@@ -85,9 +109,8 @@ def _strip_null_object_members(value: Any, path: str, removals: list[dict[str, s
     """Mirror the proven object-property part of the Viewer's removeNulls pass.
 
     We intentionally do not rewrite list membership here. PR #7 found evidence
-    that null/empty-object list entries can also be filtered, but this serializer
-    keeps the narrower rule until list filtering is pinned with equally explicit
-    source/Viewer coverage.
+    that null/empty-object list entries can also be filtered, but that behavior
+    remains in the generated Viewer verification kit before default promotion.
     """
     if isinstance(value, dict):
         for key in list(value):
@@ -101,6 +124,23 @@ def _strip_null_object_members(value: Any, path: str, removals: list[dict[str, s
             _strip_null_object_members(item, f'{path}/{index}', removals)
 
 
+def _strip_private_filter_defaults(entity: Any, path: str, removals: list[dict[str, str]]) -> None:
+    if not isinstance(entity, dict) or entity.get('privateFilterIsOn') is not True:
+        return
+    styling = entity.get('styling')
+    if not isinstance(styling, dict):
+        return
+    for key, default in PRIVATE_FILTER_DEFAULTS.items():
+        if styling.get(key, _MISSING) == default:
+            _record_remove(
+                styling,
+                key,
+                path=f'{path}/styling/{key}',
+                rule='private_filter_explicit_loader_default',
+                removals=removals,
+            )
+
+
 def _strip_design_groups(groups: Any, path: str, removals: list[dict[str, str]]) -> None:
     if not isinstance(groups, list):
         return
@@ -111,6 +151,7 @@ def _strip_design_groups(groups: Any, path: str, removals: list[dict[str, str]])
         for key, default in DESIGN_GROUP_DEFAULTS.items():
             if group.get(key, _MISSING) == default:
                 _record_remove(group, key, path=f'{base}/{key}', rule='design_group_loader_default', removals=removals)
+        _strip_private_filter_defaults(group, base, removals)
 
 
 def _strip_addon(addon: Any, path: str, removals: list[dict[str, str]]) -> None:
@@ -161,6 +202,8 @@ def _strip_choice(
             removals=removals,
         )
 
+    _strip_private_filter_defaults(choice, path, removals)
+
     addons = choice.get('addons')
     if isinstance(addons, list):
         for index, addon in enumerate(addons):
@@ -182,6 +225,8 @@ def _strip_row(
     if backpack and row.get('isBackpack') is True:
         _record_remove(row, 'isBackpack', path=f'{path}/isBackpack', rule='backpack_row_flag_forced_true', removals=removals)
 
+    _strip_private_filter_defaults(row, path, removals)
+
     objects = row.get('objects')
     if isinstance(objects, list):
         for index, choice in enumerate(objects):
@@ -198,10 +243,11 @@ def sparsify_project(
     *,
     require_complete: bool = True,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Return a separate Viewer-safe sparse project and an omission receipt.
+    """Return the default behavior-preserving runtime payload and receipt.
 
-    The source object is never mutated. By default the input must already be a
-    Creator-complete ICC Plus 2.10.7 project; this prevents sparse serialization
+    Every currently proven safe omission is applied automatically. The source
+    object is never mutated. By default the input must already be a
+    Creator-complete ICC Plus 2.10.7 project; this prevents runtime serialization
     from silently using Creator hydration to invent semantics for an incomplete
     source artifact.
     """
@@ -346,9 +392,15 @@ def sparsify_project(
         'removals': removals,
         'private_style_inference_applied': False,
         'array_null_filtering_applied': False,
-        'browser_verification_required': True,
+        'browser_verification_required_for_unproven_rules': True,
     }
     return sparse, report
+
+
+def runtime_project_text(project: dict[str, Any], *, require_complete: bool = True) -> tuple[str, dict[str, Any]]:
+    """Serialize the default compact runtime project with all proven omissions."""
+    sparse, report = sparsify_project(project, require_complete=require_complete)
+    return json_stringify(sparse), report
 
 
 def _load_project(path: str) -> dict[str, Any]:
@@ -359,10 +411,10 @@ def _load_project(path: str) -> dict[str, Any]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Compiler/release-facing command for writing a separate sparse artifact."""
+    """Compiler/release-facing command for writing the default runtime artifact."""
     parser = argparse.ArgumentParser(
         prog='iccplus-sparse',
-        description='Write a Viewer-safe sparse ICC Plus 2.10.7 release project without modifying the authoring project.',
+        description='Write the default behavior-preserving ICC Plus 2.10.7 runtime project without modifying the authoring project.',
     )
     parser.add_argument('project')
     parser.add_argument('-o', '--output', required=True)
