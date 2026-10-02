@@ -1,6 +1,6 @@
 # CLI reference
 
-The canonical ICC Plus Local 0.10.0rc14 surface has 11 top-level commands.
+The canonical ICC Plus Local 0.10.0rc15 surface has 11 top-level commands.
 
 ## `generate`
 
@@ -80,15 +80,15 @@ media sound import
 media probe
 ```
 
-Image compression is automatic.
+Image compression is automatic. Native image-field names are checked against the pinned field catalog before assignment.
 
 ## `project`
 
 ```text
-project format [--style sparse|creator|pretty]
+project format [--style creator|pretty] [--not-sparse]
 project validate [--complete]
-project hydrate
-project export
+project hydrate [--not-sparse]
+project export [--not-sparse]
 project fragment export|import
 project ids export|from-titles
 project build-summary
@@ -97,7 +97,7 @@ project build-string
 
 `project validate` is the canonical check for the normal sparse saved artifact. `project validate --complete` requires the full Creator shape in memory or in an explicitly non-sparse artifact. `project hydrate` fills missing official Creator sections and safe eager entity defaults without overwriting existing values or inventing IDs, then still saves sparse unless `--not-sparse` is supplied. `project format --style creator` selects compact Creator-style formatting and `--style pretty` selects indentation; neither disables sparsity. The remaining project commands are serialization/interchange helpers, not alternate authoring paths.
 
-Every full-project JSON output uses the pinned behavior-preserving sparse serializer by default. `--not-sparse` / `--not_sparse` is the only output-level opt-out, including format, hydrate, export, and Viewer packaging paths. The standalone `iccplus-sparse` and `iccplus-omission-probe` entry points are release/verification helpers rather than additions to the 11-command `iccplus-local` surface.
+Every full-project JSON output uses the pinned behavior-preserving sparse serializer by default. For normal editable project saves, omission must also preserve the authoring round trip; stable Score `idx` identities and non-derivable authoring labels such as Sound Effect `name` therefore remain serialized. `--not-sparse` / `--not_sparse` is the only output-level opt-out, including format, hydrate, export, and Viewer packaging paths. The standalone `iccplus-sparse` and `iccplus-omission-probe` entry points are release/verification helpers rather than additions to the 11-command `iccplus-local` surface.
 
 ## `reference`
 
