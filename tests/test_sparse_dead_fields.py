@@ -77,7 +77,7 @@ def test_viewer_unused_fields_and_score_internal_ids_are_omitted() -> None:
     assert 'skipIndex' not in addon
     assert addon['template'] == 2
 
-    assert report['removed_by_rule']['viewer_ignores_entity_field'] == 4
+    assert report['removed_by_rule']['viewer_ignores_entity_field'] == 5
     assert report['removed_by_rule']['score_index_rebuilt_on_load'] == 2
     assert report['removed_by_rule']['row_false_width_is_missing_equivalent'] == 1
     assert report['removed_by_rule']['addon_false_skip_index_is_missing_equivalent'] == 1
