@@ -95,6 +95,17 @@ def test_normalization_is_owned_by_the_source_compiler():
     assert "ICC Plus Local must not silently" in local_skill
     assert "source lowering and normalization to the project compiler" in develop_skill
 
+    function_expectations = {
+        "build.md": "does not decide how a higher-level semantic source should be normalized",
+        "project.md": "does not choose a compact ID scheme",
+        "rules.md": "belong in the source compiler",
+        "structure.md": "Those are source/compiler decisions",
+        "style.md": "deduplicating repeated style intent belongs in the source compiler",
+    }
+    for filename, expected in function_expectations.items():
+        text = (SKILLS / "iccplus-local/functions" / filename).read_text()
+        assert expected in text, filename
+
 
 def test_2108_addon_changelog_is_not_described_as_a_row_selection_limit_fix():
     docs = [
@@ -109,5 +120,12 @@ def test_2108_addon_changelog_is_not_described_as_a_row_selection_limit_fix():
 
     guide = (ROOT / "docs/cyoa/guide/21-large-project-normalization.md").read_text()
     local_skill = (SKILLS / "iccplus-local/SKILL.md").read_text()
+    rules = (SKILLS / "iccplus-local/functions/rules.md").read_text()
+    ship = (SKILLS / "cyoa-ship/SKILL.md").read_text()
+
     assert "Do not assume ordinary Row choice limits correctly enforce selectable Addon radio sets" not in guide
     assert "Do not assume Row choice limits can replace selectable-Addon radio/exclusion logic" not in local_skill
+    assert "addonWidth" in rules
+    assert "evidence about `allowedChoices`" in rules
+    assert "addonWidth" in ship
+    assert "Row selection-limit fix" in ship
