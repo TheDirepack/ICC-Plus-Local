@@ -8,10 +8,11 @@ Creator-complete authoring artifacts remain complete. Creator Save-to-Disk and C
 
 ## Automatic omissions
 
-The serializer currently removes these classes of values by default:
+The serializer currently removes three broad classes of data: exact built-in defaults that the Viewer reconstructs, values the Viewer always ignores/discards, and narrow legacy values whose modern replacement already preserves the same behavior.
 
-- top-level values that exactly equal pinned `defaultApp`, except `version`;
-- top-level runtime/legacy fields that the Viewer discards during load;
+### Exact or reconstructed defaults
+
+- top-level values that exactly equal pinned `defaultApp`, except `version` and the separately handled special fields below;
 - stock `viewerConfig`, `styling`, and `backpack` only when the entire object or array exactly equals the pinned built-in value;
 - the five explicitly reconstructed multi-choice styling members in a retained custom global `styling` object;
 - Row and Choice `index`, which the Viewer rebuilds from array position;
@@ -22,7 +23,6 @@ The serializer currently removes these classes of values by default:
 - Word `replaceText: ""`;
 - Group `elements` and `rowElements` when they are empty, because the Viewer reconstructs both arrays during load;
 - Design Group `activatedId`, `elements`, `backpackElements`, and `groupElements` when they equal the loader defaults;
-- exact legacy-OR `orRequireds` payloads when they equal what the pinned loader deterministically regenerates from `orRequired`, limited to the same Row/Choice/Score/Addon/Global-Requirement containers and one nested Requirement level that `initializeApp` migrates;
 - Choice `initMultipleTimesMinus` only when it equals the value the Viewer will derive;
 - Choice `addonJustify` only when it equals the effective inherited project/default value;
 - object properties whose value is `null`, matching the proven object-property portion of the Viewer import cleanup;
@@ -30,7 +30,26 @@ The serializer currently removes these classes of values by default:
 
 The private-filter distinction matters: the pinned global styling default for `unselFilterSatur` is `1`, while the private missing-field initializer uses `0`. An explicit private `unselFilterSatur: 1` therefore remains serialized.
 
-The OR-Requirement rule is deliberately structural rather than a blanket empty-array rule. It removes `orRequireds` only when the serialized value exactly matches the loader-derived children. Sound Effect requirements, selectable-Addon Score requirements, deeper nesting, and any nonmatching `orRequireds` remain explicit because the pinned loader does not perform the same migration there.
+### Viewer-discarded or Creator-only data
+
+The following are removed regardless of whether they equal stock defaults:
+
+- top-level runtime/legacy fields in the Viewer's `keysToRemove` list;
+- the Creator category table and per-entity `category` indices on Point Types, Variables, Words, Groups, Global Requirements, and Row/Choice Design Groups; these organize Creator dialogs and have no player-Viewer read path;
+- Creator edit state: top-level `isEditModeOnAll`, Row `isEditModeOn` / `isSimpleEditMode` / `isRequirementOpen`, and Choice/Addon `isEditModeOn`;
+- Creator temporary buffers `tmpRow`, `tmpChoice`, `tmpRequired`, `tmpScore`, `tmpAddon`, `tmpGroup`, and `tmpDesignGroup`;
+- Creator-only autosave/confirmation state: `printThis`, `autoSaveIsOn`, `buildAutoSaveIsOn`, `buildAutoSaveInterval`, `checkDeleteRow`, `checkDeleteObject`, and `checkSelectAll`;
+- Creator-only authoring UI preferences `compressImageAuto`, `useTextEditor`, `useChoiceEditBtn`, and `enableShortcut`;
+- Creator construction defaults that have already been copied into created entities: Row/Choice/Addon default titles/text, Point/Requirement label defaults, Row/Choice/Addon template/width defaults, Row justify/allowed-choice defaults, and the default Addon/Score/Requirement creation toggles.
+
+This last group is intentionally narrow. Several similarly named app settings are still part of Viewer behavior and remain serialized when customized. In particular, `defaultChoiceMaxNum` is a runtime fallback for multiple-selection limits, `defaultAddonJustify` is a loader fallback for Choices, `orderOrReqText` / `defaultOrReq` and the selected-from equivalents affect displayed Requirement text, `rowIdLength` / `objectIdLength` are used if identities must be generated, and settings such as `cropperPosition`, `tooltipDelay`, `isPointerCursor`, `importedChoicesIsOpen`, `hideScoresUpdated`, and `useToolbarBtn` still have Viewer read paths.
+
+### Conditional legacy normalization
+
+- exact legacy-OR `orRequireds` payloads are removed when they equal what the pinned loader deterministically regenerates from `orRequired`, limited to the same Row/Choice/Score/Addon/Global-Requirement containers and one nested Requirement level that `initializeApp` migrates;
+- legacy Choice/Selectable-Addon `sfxId` is removed only when every enabled SFX direction already has an explicit `sfxIdOnSelect` / `sfxIdOnDeselect`; otherwise it remains because the loader still needs it for backfill.
+
+The OR-Requirement rule is deliberately structural rather than a blanket empty-array rule. Sound Effect requirements, selectable-Addon Score requirements, deeper nesting, and any nonmatching `orRequireds` remain explicit because the pinned loader does not perform the same migration there.
 
 ## Deliberately not automatic yet
 
@@ -45,7 +64,8 @@ The unresolved set includes:
 - guarded empty membership arrays whose known Viewer uses tolerate absence but which are not explicitly reconstructed during load: `Row.groups`, `Row.rowDesignGroups`, `Choice.groups`, `Choice.objectDesignGroups`, and `Group.designGroups`;
 - list-level filtering of `null` or empty-object entries;
 - Creator Save-to-Disk's empty `activated: [""]` representation versus omitting `activated` and taking the Viewer's built-in empty state;
-- any other Row, Choice, Addon, Requirement, Score, or styling field without an explicit loader reconstruction rule or equivalent pinned-Viewer proof.
+- legacy transition fields until their migration/override behavior is represented by an exact conditional rule;
+- any other Row, Choice, Addon, Requirement, Score, or styling field without an explicit loader reconstruction rule, a proven no-read Viewer boundary, or equivalent pinned-Viewer proof.
 
 Fields already shown by source/schema behavior to be required or directly behavior-bearing are treated as unsafe rather than queued for redundant browser testing.
 
