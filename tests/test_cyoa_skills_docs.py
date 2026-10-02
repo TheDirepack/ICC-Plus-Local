@@ -29,6 +29,7 @@ def test_retained_skill_dependencies_are_packaged():
     assert (ROOT / "docs/cyoa/guide/20-troubleshooting.md").is_file()
     assert (ROOT / "docs/cyoa/guide/21-large-project-normalization.md").is_file()
     assert (ROOT / "docs/COMPILER_BOUNDARY.md").is_file()
+    assert (ROOT / "docs/SPARSE_RUNTIME_SERIALIZATION.md").is_file()
     assert (ROOT / "docs/cyoa/legacy/legacy-icc-migration-reference.md").is_file()
     assert (SKILLS / "cyoa-plan/references/plan-checklist.md").is_file()
     assert (SKILLS / "cyoa-review/references/review-checklist.md").is_file()
@@ -46,6 +47,9 @@ def test_current_docs_use_rc13_and_2107():
     assert "ICC Plus 2.10.7" in field_reference
     assert "removeSpace" in field_reference
     assert "ICC Plus 2.10.7" in (ROOT / "docs/FIELD_CATALOG.md").read_text()
+    sparse = (ROOT / "docs/SPARSE_RUNTIME_SERIALIZATION.md").read_text()
+    assert "ICC Plus 2.10.7" in sparse
+    assert "load success alone" in sparse.lower()
 
 
 def test_current_routing_declares_retired_wrappers():
@@ -105,6 +109,18 @@ def test_normalization_is_owned_by_the_source_compiler():
     for filename, expected in function_expectations.items():
         text = (SKILLS / "iccplus-local/functions" / filename).read_text()
         assert expected in text, filename
+
+
+def test_runtime_sparsification_stays_native_serialization_not_source_normalization():
+    boundary = (ROOT / "docs/COMPILER_BOUNDARY.md").read_text()
+    sparse = (ROOT / "docs/SPARSE_RUNTIME_SERIALIZATION.md").read_text()
+    project = (SKILLS / "iccplus-local/functions/project.md").read_text()
+    ship = (SKILLS / "cyoa-ship/SKILL.md").read_text()
+
+    assert "player-facing runtime payload is a different serialization target" in boundary
+    assert "not source normalization" in sparse
+    assert "default runtime policy" in project
+    assert "behavior-preserving sparse serializer by default" in ship
 
 
 def test_2108_addon_changelog_is_not_described_as_a_row_selection_limit_fix():
