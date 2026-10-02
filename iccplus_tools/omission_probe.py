@@ -98,8 +98,6 @@ def omission_probe_cases() -> list[dict[str, Any]]:
     viewer_defaults = default_export_project()['viewerConfig']
     for key in viewer_defaults:
         baseline = _base_project()
-        # Force viewerConfig to remain present even when the field under test is
-        # a stock value. Use a different custom member as the anchor.
         anchor = 'loadingText' if key == 'title' else 'title'
         baseline['viewerConfig'][anchor] = 'OMISSION PROBE CUSTOM VALUE'
         candidate = copy.deepcopy(baseline)
@@ -149,11 +147,12 @@ def omission_probe_cases() -> list[dict[str, Any]]:
         note='Pinned global default is 1 while the private missing-field initializer is 0. Keep explicit 1 unless Viewer testing disproves the source-derived mismatch.',
     ))
 
-    # Use a real native ICC Plus array for removeNulls probes so the experiment
-    # does not also depend on unknown top-level-key handling.
+    # mdObjects is a native string array. The dirty baseline deliberately adds
+    # the null/empty-object entry that removeNulls is expected to discard, while
+    # the candidate remains schema-valid with the same surviving string entry.
     for case_id, array_value, label in (
-        ('array-null-entry', [None, {'id': 'probe-md'}], 'null array member'),
-        ('array-empty-object-entry', [{}, {'id': 'probe-md'}], 'empty-object array member'),
+        ('array-null-entry', [None, 'probe-md'], 'null array member'),
+        ('array-empty-object-entry', [{}, 'probe-md'], 'empty-object array member'),
     ):
         baseline = _base_project()
         baseline['mdObjects'] = copy.deepcopy(array_value)
