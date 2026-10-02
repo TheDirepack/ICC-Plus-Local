@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from .upstream_2106 import ICCPLUS_VERSION, json_stringify
+from .sparse_project import sparsify_project
 
 _DATA_URL = re.compile(r'^data:(image/[^;]+);base64,(.+)$', re.DOTALL)
 _EXTENSIONS = {
@@ -410,12 +411,15 @@ def _rewrite_loading_css(css: str, viewer: dict[str, Any]) -> str:
 
 
 def build_viewer_package(project: dict[str, Any], template_zip: str | Path, output: str | Path, *, mode: str | None = None, separate_images: bool | None = None) -> dict[str, Any]:
-    """Reproduce Creator exportWithViewer using an official viewer template ZIP.
+    """Reproduce Creator exportWithViewer with sparse runtime serialization.
 
     The official template is an explicit input so its version can be pinned.
-    Project/image transformations follow 2.10.7 source. HTML formatting and
-    loading-text sanitization are semantic rather than byte-identical to the
-    browser's DOMPurify + js-beautify pass.
+    Project/image transformations follow 2.10.7 source. The complete native
+    object remains available for package metadata and loading-screen generation,
+    while the player-facing JSON/local embed uses every proven behavior-
+    preserving omission by default. HTML formatting and loading-text sanitization
+    are semantic rather than byte-identical to the browser's DOMPurify +
+    js-beautify pass.
     """
     base = _remove_nulls(creator_save_payload(project))
     if not isinstance(base, dict):
@@ -433,7 +437,8 @@ def build_viewer_package(project: dict[str, Any], template_zip: str | Path, outp
         base['version'] = ICCPLUS_VERSION
         temp, assets = viewer_image_separation(base)
     viewer = temp.get('viewerConfig') if isinstance(temp.get('viewerConfig'), dict) else {}
-    save_data = json_stringify(temp)
+    runtime_project, runtime_serialization = sparsify_project(temp, require_complete=True)
+    save_data = json_stringify(runtime_project)
     save_bytes = save_data.encode('utf-8')
 
     template_zip = Path(template_zip)
@@ -485,7 +490,10 @@ def build_viewer_package(project: dict[str, Any], template_zip: str | Path, outp
         'image_count': len(assets),
         'icc_plus_version': ICCPLUS_VERSION,
         'template': str(template_zip),
-        'content_parity': '2.10.7 exportWithViewer project/image/local-embed logic',
+        'runtime_sparse': True,
+        'runtime_omissions': runtime_serialization['removed_count'],
+        'runtime_bytes_removed': runtime_serialization['bytes_removed'],
+        'content_parity': '2.10.7 exportWithViewer project/image/local-embed logic plus pinned behavior-preserving runtime omissions',
         'html_byte_parity': False,
         'html_note': 'HTML keeps template formatting; loading sanitization is conservative rather than DOMPurify byte parity.',
     }
