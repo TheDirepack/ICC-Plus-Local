@@ -27,7 +27,7 @@ iccplus-local reference schema structure-ops
 
 Single and bulk edits use the same phase commands. Prefer `items`, `refs`, and `where` selectors over issuing many one-object commands. Use `expect` when selector cardinality matters.
 
-Normal edits hydrate missing official Creator defaults and complete-validate automatically before write. Do not plan a separate validation command after each edit. Before handing off, packaging, or publishing an externally supplied legacy project, use `project validate`; use `project hydrate` first only when the report shows missing official baseline fields.
+Normal edits hydrate missing official Creator defaults and complete-validate automatically before writing the normal sparse project form. Do not plan a separate validation command after each edit. Use `project validate` for the normal saved artifact and `project validate --complete` when you need to check the fully materialized shape. `project hydrate` still saves sparse by default; add `--not-sparse` only when you explicitly need a materialized output file.
 
 ## Style and images
 

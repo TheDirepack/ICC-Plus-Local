@@ -25,9 +25,9 @@ Inspect an unfamiliar project before mutation. If it is not Viewer-format ICC Pl
 
 For a project with a compiler, structured source, or phased build manifest, make changes there. Do not repair the generated `project.json` as a second authoring source.
 
-## Normal writes complete the project automatically
+## Normal writes validate complete, then save sparse
 
-`structure`, `rules`, and `style` fill missing official Creator defaults and run complete-project validation before replacing the project. A failed validation must leave the target unchanged. Generated and build outputs use the same complete-project boundary.
+`generate`, `build`, `structure`, `rules`, and `style` fill missing official Creator defaults and run complete-project validation before replacing the project. A failed validation must leave the target unchanged. Successful writes then serialize the pinned sparse saved-project form.
 
 Use:
 
@@ -38,9 +38,9 @@ Use:
 
 Use explicit refs or selectors with an expected match count for broad work. Use `--dry-run` where the current command supports it.
 
-Do not add a separate routine validation command after every normal phase write. Use `project validate` for the final completeness check on an imported or externally supplied project. Use `project hydrate` when a legacy project is missing official baseline sections or safe Creator-eager defaults. Hydration must not invent missing IDs or downgrade a project from a newer ICC Plus version.
+Do not add a separate routine validation command after every normal phase write. Use `project validate` for the normal sparse saved artifact. Use `project validate --complete` when you intentionally need to prove the materialized Creator-complete shape. `project hydrate` reconstructs that shape in memory but saves sparse by default; add `--not-sparse` to retain it on disk. Hydration must not invent missing IDs or downgrade a project from a newer ICC Plus version.
 
-For read-only work on intentionally sparse legacy input, compatibility validation remains available. Do not treat compatibility mode as proof that a final generated project is Creator-complete.
+Compatibility validation is now the normal saved-project validation mode. Do not treat it as proof that a file is Creator-complete; use `project validate --complete` for that stronger claim.
 
 ## Player-safe testing
 

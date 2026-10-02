@@ -110,5 +110,5 @@ Use `structure` for structural deletion and ID migration. Inspect references fir
 - Re-resolve a selector after an earlier change that can alter its membership.
 - Prefer stable IDs over text matching.
 - Treat an unexpected match count as a stopped operation.
-- Read the write receipt. Normal writes hydrate safe missing Creator defaults and complete-validate before replacement.
-- Use `project validate` for the final Creator-complete check, not after every ordinary phase write.
+- Read the write receipt. Normal writes hydrate safe missing Creator defaults, complete-validate in memory, then save sparse.
+- Use `project validate` for the normal saved artifact. Use `project validate --complete` only for an intentionally complete Creator artifact, not after every ordinary phase write.

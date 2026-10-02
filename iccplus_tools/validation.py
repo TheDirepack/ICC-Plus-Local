@@ -167,7 +167,10 @@ def project_shape_diagnostics(project: Any) -> list[Diagnostic]:
     if not isinstance(project, dict):
         _diag(out, 'project.not_object', 'error', '', 'ICC Plus project JSON must be an object.')
         return out
-    if 'rows' not in project:
+    # The pinned sparse serializer may omit the default empty rows array from
+    # an otherwise valid blank 2.10.7 project. Keep the old shape guard for
+    # unversioned/non-ICC data so arbitrary structured JSON is still rejected.
+    if 'rows' not in project and project.get('version') != ICCPLUS_VERSION:
         _diag(out, 'structure.missing_rows', 'error', '/rows', 'ICC Plus project JSON must contain a rows array.')
     for key in PROJECT_ARRAY_FIELDS:
         if key in project and not isinstance(project[key], list):

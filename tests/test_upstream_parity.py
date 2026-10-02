@@ -7,8 +7,9 @@ import sys
 from pathlib import Path
 
 from iccplus_tools.editor import make_entity, new_project
+from iccplus_tools.sparse_project import sparsify_project
 from iccplus_tools.simulator import Simulator
-from iccplus_tools.upstream_2106 import default_export_bytes, default_project
+from iccplus_tools.upstream_2106 import default_export_bytes, default_export_project, default_project, json_stringify
 from iccplus_tools.validation import validate
 
 
@@ -51,17 +52,30 @@ def test_new_project_is_exact_frozen_default_app():
     assert 'reqImgFilterBorderColor' in p['styling']
 
 
-def test_default_cli_export_is_byte_identical_to_upstream_save_to_disk(tmp_path: Path):
+def test_default_cli_new_uses_sparse_saved_project_contract(tmp_path: Path):
     target = tmp_path / 'project.json'
     result = subprocess.run(
         [sys.executable, '-m', 'iccplus_tools', 'new', str(target)],
         cwd=Path(__file__).resolve().parents[1], text=True, capture_output=True,
     )
     assert result.returncode == 0, result.stderr
-    assert target.read_bytes() == default_export_bytes()
+    expected, _ = sparsify_project(default_export_project())
+    assert target.read_text('utf-8') == json_stringify(expected)
     data = json.loads(target.read_text('utf-8'))
     assert data['activated'] == ['']
+    assert 'viewerConfig' not in data
+    assert 'styling' not in data
     assert not target.read_bytes().endswith(b'\n')
+
+
+def test_cli_new_not_sparse_retains_upstream_save_to_disk_bytes(tmp_path: Path):
+    target = tmp_path / 'project.json'
+    result = subprocess.run(
+        [sys.executable, '-m', 'iccplus_tools', 'new', str(target), '--not-sparse'],
+        cwd=Path(__file__).resolve().parents[1], text=True, capture_output=True,
+    )
+    assert result.returncode == 0, result.stderr
+    assert target.read_bytes() == default_export_bytes()
 
 
 def test_creator_structural_ids_match_upstream():

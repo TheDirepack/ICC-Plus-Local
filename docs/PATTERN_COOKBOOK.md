@@ -10,7 +10,7 @@ iccplus-local template entity row
 iccplus-local template entity choice
 ```
 
-After a change, use the write receipt plus the smallest `play` audit that covers the mechanic. Use `project validate` for the final Creator-complete check.
+After a change, use the write receipt plus the smallest `play` audit that covers the mechanic. Use `project validate` for the normal sparse artifact and `project validate --complete` only when you intentionally materialize a Creator-complete artifact.
 
 ## Pick one or pick N
 

@@ -2,7 +2,7 @@
 
 Read this file when creating a new ICC Plus project from scratch.
 
-`generate` creates the exact blank ICC Plus 2.10.7 Creator project used as the clean starting point and verifies it with complete-project validation.
+`generate` creates the exact blank ICC Plus 2.10.7 Creator project in memory, verifies it with complete-project validation, then writes the normal sparse saved-project form.
 
 ```bash
 iccplus-local generate -o project.json

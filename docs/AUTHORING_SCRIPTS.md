@@ -8,7 +8,7 @@ ICC Plus Local starts from the blank Creator project and edits it in phases. The
 iccplus-local generate -o project.json
 ```
 
-This writes the exact ICC Plus 2.10.7 blank Creator export and verifies it against complete-project validation.
+This starts from the exact ICC Plus 2.10.7 blank Creator project, verifies complete-project validity in memory, and writes the normal sparse saved-project form.
 
 ## Add sections and content
 
@@ -56,7 +56,7 @@ For a maintained project, keep one or more files per phase and a version 2 build
 iccplus-local build project-src/iccplus.build.json -o build/project.json
 ```
 
-`build` starts from a fresh blank project every time, calls the same structure, rules, and style implementations as the direct commands, fills any missing official project sections from the pinned Creator defaults, and refuses to write unless the result passes complete-project validation.
+`build` starts from a fresh blank project every time, calls the same structure, rules, and style implementations as the direct commands, fills any missing official project sections from the pinned Creator defaults, refuses to write unless the result passes complete-project validation in memory, and then serializes the normal sparse project form.
 
 See `BUILD_SYSTEM.md` and `PHASED_AUTHORING.md`.
 

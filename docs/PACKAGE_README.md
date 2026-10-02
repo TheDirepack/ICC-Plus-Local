@@ -27,9 +27,10 @@ iccplus-local rules project.json @rules.json
 iccplus-local style project.json @style.json
 iccplus-local play project.json
 iccplus-local project validate project.json
+iccplus-local project validate project.json --complete   # only for explicit Creator-complete artifacts
 ```
 
-Normal `structure`, `rules`, and `style` writes hydrate missing official Creator defaults and require complete-project validation before replacing the target. Use `project hydrate` for supported sparse or legacy ICC Plus 2 input. Hydration preserves existing values, does not invent missing entity IDs, and does not downgrade a future project version.
+Normal `generate`, `build`, `structure`, `rules`, `style`, `apply`, and direct-edit writes hydrate missing official Creator defaults, require complete-project validation in memory, and then save the pinned sparse representation. Use `project hydrate` when you explicitly need a complete Creator artifact. Hydration preserves existing values, does not invent missing entity IDs, and does not downgrade a future project version.
 
 Bulk edits use `items`, explicit `refs`, or selectors with `expect`. Preview selectors through `inspect` before broad writes.
 
@@ -39,7 +40,7 @@ For styling, prefer project-wide native styling, then official Row/Choice Design
 
 ## Runtime release serialization
 
-Creator-complete authoring JSON and Creator-compatible project exports remain complete. Player-facing Viewer packages use behavior-preserving sparse serialization by default. The omission rules are pinned to ICC Plus 2.10.7 rather than inferred from schema optionality or Creator factory defaults.
+Every full-project JSON output uses behavior-preserving sparse serialization by default, including hydrated/formatted JSON, separate-image export packages, and Viewer packages. Use `--not-sparse` only when a materialized project is explicitly required. The omission rules are pinned to ICC Plus 2.10.7 rather than inferred from schema optionality or Creator factory defaults.
 
 Use `iccplus-sparse PROJECT -o runtime-project.json` when a standalone player runtime artifact is needed. Use `iccplus-omission-probe -o verification/sparse-omission` to generate isolated browser test cases for omission candidates that have not yet been proven safe. See `SPARSE_RUNTIME_SERIALIZATION.md` and `COMPILER_BOUNDARY.md`.
 

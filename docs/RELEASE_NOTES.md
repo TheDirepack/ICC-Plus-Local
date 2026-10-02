@@ -1,11 +1,19 @@
 ## 0.10.0rc14
 
+### Pending PR: sparse normal project saves
+
+- Normal ICC Plus Local project writes now hydrate and complete-validate in memory, then save the pinned behavior-preserving sparse representation by default.
+- `generate`, `build`, `structure`, `rules`, `style`, `apply`, and ordinary direct edits share the same sparse save path.
+- `project validate` now validates the normal sparse/compatible artifact; `project validate --complete` explicitly requires the full Creator shape.
+- Sparse serialization is the default for every full-project JSON output. Formatting style, hydration, separate-image export, and Viewer packaging do not bypass it; only `--not-sparse` / `--not_sparse` opts out.
+- Invalid writes requested through the hidden `--allow-invalid` escape hatch remain unsparsified because omission safety requires a complete source project.
+
 - Kept the ICC Plus engine target at 2.10.7 and the pinned upstream source commit `1ea9db888cde2286d18d0d5de50933cb8773b739`; rc14 changes ICC Plus Local behavior and release serialization without changing the target Viewer version.
 - Made the compiler/native ownership boundary explicit. ICC Plus Local owns native compatibility, validation, serialization, local simulation, explicit native edits, and reference integrity; source-level Requirement hoisting, style-intent consolidation, taxonomy pruning, Row merging, Pick-N inference, and deterministic runtime-ID compaction/remapping remain compiler responsibilities.
 - Locked native Row semantics with regression coverage: `allowedChoices: 0` means unlimited, and hiding a Row does not implicitly deselect already selected children.
 - Corrected the ICC Plus 2.10.8 Addon caveat: the upstream change is selectable-Addon width handling through `addonWidth`, not evidence of changed Row `allowedChoices` selection semantics.
 - Split CI into core runtime/validation, CLI contract, and checked-in-example jobs so failures and timeouts are attributable; main-only release-artifact construction remains gated on those jobs.
-- Added behavior-preserving sparse runtime serialization for player-facing Viewer payloads. Web `project.json` and local embedded Viewer JSON omit every 2.10.7 field currently proven behavior-equivalent when absent, while Creator Save-to-Disk and Creator-compatible project exports remain complete.
+- Added behavior-preserving sparse runtime serialization for player-facing Viewer payloads. Web `project.json` and local embedded Viewer JSON omit every 2.10.7 field currently proven behavior-equivalent when absent, while every full-project JSON output stays sparse by default and requires `--not-sparse` to opt out.
 - Added the standalone `iccplus-sparse` runtime serializer and `iccplus-omission-probe` browser-verification generator. The omission kit systematically covers retained `viewerConfig`, global/private styling fallbacks, private-style enable flags, list cleanup, build-state handling, and other unresolved cases one omission at a time; load success alone is not sufficient for promotion.
 - Added a permanent version-consistency regression covering the active package metadata and live documentation so future candidate bumps cannot leave stale current-version markers behind.
 

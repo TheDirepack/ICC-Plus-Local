@@ -1,10 +1,12 @@
-# Sparse runtime serialization
+# Sparse project serialization
 
 ICC Plus Local targets ICC Plus 2.10.7 at upstream commit `1ea9db888cde2286d18d0d5de50933cb8773b739`.
 
-Runtime `project.json` serialization should omit every field that is proven behavior-equivalent when absent in that pinned Viewer. This is the default runtime policy. It is not a generic "remove defaults" pass and it does not change source-level project intent.
+Normal saved `project.json` serialization should omit every field that is proven behavior-equivalent when absent in that pinned Viewer. This is the default project-save policy as well as the Viewer-package policy. It is not a generic "remove defaults" pass and it does not change source-level project intent.
 
-Creator-complete authoring artifacts remain complete. Creator Save-to-Disk and Creator-compatible project exports preserve the native structure needed for Creator round-tripping. Runtime sparsification is applied when producing the player-facing Viewer payload or an explicit sparse runtime artifact.
+ICC Plus Local hydrates and validates a Creator-complete in-memory project before a normal valid write, then sparsifies the full-project JSON. This rule applies to every project-JSON-producing path: normal edits, generation/builds, `project hydrate`, formatting, separate-image exports, and Viewer packages. A command writes a materialized/non-sparse project only when that command explicitly receives `--not-sparse` (or `--not_sparse`).
+
+This means a normal saved project is expected to pass compatibility validation, not complete validation. Use `project validate` for the normal artifact and `project validate --complete` only when checking an explicitly materialized Creator-complete form.
 
 ## Automatic omissions
 
@@ -90,4 +92,4 @@ Omission rules are native Viewer behavior and are pinned to the ICC Plus version
 
 ## Compiler boundary
 
-Sparse runtime serialization is not source normalization. The compiler remains responsible for semantic transformations such as Requirement hoisting, Row merging, taxonomy pruning, style-intent consolidation, Pick-N derivation, and runtime-ID compaction. ICC Plus Local only removes native serialized values whose omission has already been shown not to change the pinned Viewer's behavior.
+Sparse project serialization is not source normalization. The compiler remains responsible for semantic transformations such as Requirement hoisting, Row merging, taxonomy pruning, style-intent consolidation, Pick-N derivation, and runtime-ID compaction. ICC Plus Local only removes native serialized values whose omission has already been shown not to change the pinned Viewer's behavior.

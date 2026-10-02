@@ -29,7 +29,7 @@ Discover the native field first, then use the owning public workflow:
 - `structure` for Rows, Choices, Addons, IDs, text, and hierarchy.
 - `rules` for Points, Scores, Requirements, Groups, costs, limits, activation, and gameplay effects.
 - `style` for presentation and official Row/Choice Design Groups.
-- `project validate` for the final Creator-complete check.
+- `project validate` for the normal sparse saved artifact; add `--complete` for an explicit Creator-complete check.
 
 See `PATTERN_COOKBOOK.md`, `EFFECT_RECIPES.md`, and `ICCPLUS_FIELD_REFERENCE.md` for common combinations.
 

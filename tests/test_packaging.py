@@ -46,7 +46,7 @@ class PackagingTests(unittest.TestCase):
         self.assertEqual(list(assets), ['images/Bg.png', 'images/R1.png'])
         self.assertEqual(assets['images/Bg.png'], b'PNGDATA')
 
-    def test_export_project_zip_contains_complete_creator_project_and_assets(self):
+    def test_export_project_zip_uses_sparse_project_by_default_and_can_opt_out(self):
         p = new_project()
         p['viewerConfig']['loadingBgImage'] = data_url(b'BG')
         with tempfile.TemporaryDirectory() as td:
@@ -61,11 +61,19 @@ class PackagingTests(unittest.TestCase):
                 project = json.loads(raw)
                 self.assertEqual(project['viewerConfig']['loadingBgImage'], 'images/Loading.png')
                 self.assertEqual(project['version'], '2.10.7')
-                # Creator-compatible export remains complete rather than using
-                # the runtime omission serializer.
-                self.assertIn('rows', project)
-                self.assertIn('styling', project)
-                self.assertIn('backpack', project)
+                self.assertNotIn('rows', project)
+                self.assertNotIn('styling', project)
+                self.assertNotIn('backpack', project)
+                self.assertTrue(report['project_sparse'])
+
+            full = Path(td) / 'project-full.zip'
+            full_report = export_project_zip(p, full, not_sparse=True)
+            self.assertFalse(full_report['project_sparse'])
+            with zipfile.ZipFile(full) as zf:
+                full_project = json.loads(zf.read('project.json'))
+                self.assertIn('rows', full_project)
+                self.assertIn('styling', full_project)
+                self.assertIn('backpack', full_project)
 
     def _template(self, path: Path, *, local: bool = False) -> None:
         html = '<!doctype html><html><head><title>Old</title></head><body><span id="projectSize">0</span><div id="indicator" class="old">old</div></body></html>'
@@ -104,6 +112,20 @@ class PackagingTests(unittest.TestCase):
                 self.assertIn('<b>Loading</b>', html_text)
                 self.assertNotIn('<script>', html_text)
                 self.assertIn('--bg:', zf.read('css/loading.css').decode())
+
+
+    def test_build_web_viewer_not_sparse_opt_out_keeps_materialized_project(self):
+        p = new_project()
+        with tempfile.TemporaryDirectory() as td:
+            td = Path(td)
+            template = td / 'web.zip'; self._template(template)
+            out = td / 'built-full.zip'
+            report = build_viewer_package(p, template, out, mode='web', separate_images=False, not_sparse=True)
+            self.assertFalse(report['runtime_sparse'])
+            with zipfile.ZipFile(out) as zf:
+                runtime = json.loads(zf.read('project.json'))
+                self.assertIn('rows', runtime)
+                self.assertIn('styling', runtime)
 
     def test_build_local_viewer_embeds_sparse_project_marker(self):
         p = new_project()
