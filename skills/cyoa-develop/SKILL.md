@@ -6,7 +6,7 @@ compatibility: Designed for long-running ICC Plus 2 projects with a persistent w
 
 # CYOA develop
 
-Coordinate a long project across the reduced CYOA skill set. Keep one current working state and route each bounded pass to the skill or ICC Plus Local function that owns it.
+Coordinate a long project across the reduced CYOA skill set. Keep one current working state and route each bounded pass to the skill, compiler, or ICC Plus Local function that owns it.
 
 Apply the external Unslop skill to non-code written output.
 
@@ -22,25 +22,29 @@ For compiler-driven projects, also record the artifact boundary: authoritative s
 2. Identify the smallest coherent pass that moves the project forward.
 3. Separate design questions from implementation work.
 4. Preserve the authoritative source boundary. Generated output is not a second authoring source.
-5. Route design work to `cyoa-plan`, native ICC Plus 2 implementation, editing, styling, media, validation, and local testing to `iccplus-local`, design/content audits to `cyoa-review`, legacy conversion to `cyoa-migrate`, and final delivery checks to `cyoa-ship`. Use `cyoa-compress` only for an explicit exceptional external-asset pass.
+5. Route design work to `cyoa-plan`; source lowering and normalization to the project compiler; native ICC Plus 2 implementation, direct editing, styling, media, validation, serialization, and local testing to `iccplus-local`; design/content audits to `cyoa-review`; legacy conversion to `cyoa-migrate`; and final delivery checks to `cyoa-ship`. Use `cyoa-compress` only for an explicit exceptional external-asset pass.
 6. Calibrate a representative sample before a large batch.
-7. Run the selected skill or ICC Plus Local function checks.
+7. Run the selected compiler, skill, or ICC Plus Local checks.
 8. Run a small global check for project invariants the pass could have affected.
 9. Update additions, edits, removals, tests, unresolved issues, and the next work queue.
 10. Save a coherent artifact checkpoint that agrees with the working state.
 
 ## Large-project normalization passes
 
-When a project has become structurally repetitive or the generated JSON is unnecessarily large, use a separate bounded normalization pass. Read `../../docs/cyoa/guide/21-large-project-normalization.md` and consider, in this order:
+When a source-driven project has become structurally repetitive or the generated JSON is unnecessarily large, use a separate compiler normalization pass. Read `../../docs/COMPILER_BOUNDARY.md` and `../../docs/cyoa/guide/21-large-project-normalization.md` first.
 
-- move ordinary styling to project scope and reusable Design Groups;
-- use Group-linked Design Group inheritance instead of thousands of direct style assignments;
-- move shared visibility Requirements to the deepest owning Row;
-- remove redundant ancestor gates from descendants;
-- set real Row selection maxima for Pick 1 / Pick N Rows;
-- merge safe one-card Rows without mixing independent axes;
-- prune runtime Groups that have no runtime consumer while keeping useful source metadata;
-- optionally compact runtime IDs deterministically as a release transformation.
+Compiler-owned candidates include:
+
+- consolidating repeated ordinary styling into project scope and reusable Design Groups;
+- using Group-linked Design Group inheritance instead of repeated direct style assignments;
+- moving shared visibility Requirements to the deepest sufficient owning Row when the source graph proves equivalence;
+- removing redundant ancestor gates from descendants when implication is proved by the source model;
+- emitting real Row selection maxima for source-level Pick 1 / Pick N semantics;
+- merging safe one-card Rows without mixing independent axes;
+- omitting runtime Groups that have no runtime consumer while retaining useful source metadata;
+- optionally compacting runtime IDs deterministically as a release transformation with complete remapping and a reversible map.
+
+ICC Plus Local should validate and simulate the native output of those transformations. It should not infer or perform them on arbitrary projects.
 
 Normalize one layer at a time and measure both behavioral regressions and artifact size. Do not combine a large content rewrite with a large mechanical normalization pass unless the changes cannot be separated.
 
@@ -56,7 +60,7 @@ Normalize one layer at a time and measure both behavioral regressions and artifa
 - Keep local and global checks separate.
 - Record removals and structural remaps such as merged Rows.
 - Discover current tool capabilities at run time.
-- Do not carry validation status across project or tool revisions.
+- Do not carry validation status across project, compiler, or tool revisions.
 - Keep reusable generators, validators, and test helpers under `/CYOA/tools/`; keep revision folders focused on project source, inputs, outputs, and reports.
 
 ## Output
@@ -68,15 +72,16 @@ After each pass, leave the updated artifact checkpoint, updated working state, c
 - [ ] Current working state was loaded or rebuilt.
 - [ ] One bounded pass was defined.
 - [ ] The authoritative source boundary remained clear.
-- [ ] The appropriate task skill owned the work.
+- [ ] The compiler, task skill, or ICC Plus Local function that owns the work was used.
 - [ ] Representative work was calibrated before scaling.
 - [ ] Local checks passed or failures are recorded.
 - [ ] Relevant global invariants were checked.
 - [ ] Additions, edits, removals, and unresolved items are recorded.
 - [ ] Normalized release artifacts remain reproducible from semantic source when used.
+- [ ] ICC Plus Local validated the generated native project without being made responsible for source-level normalization decisions.
 - [ ] Working state and artifact checkpoint agree.
 - [ ] `references/develop-checklist.md` is complete.
 
 ## References
 
-Use `../../docs/cyoa/guide/03-development-protocol.md` for long-project rules and `../../docs/cyoa/guide/21-large-project-normalization.md` for structural normalization and release compaction. For native ICC Plus 2 implementation, editing, styling, validation, and local testing, use `iccplus-local` and the matching function guides.
+Use `../../docs/cyoa/guide/03-development-protocol.md` for long-project rules, `../../docs/COMPILER_BOUNDARY.md` for ownership boundaries, and `../../docs/cyoa/guide/21-large-project-normalization.md` for compiler/build normalization and release compaction. For native ICC Plus 2 implementation, editing, styling, validation, serialization, and local testing, use `iccplus-local` and the matching function guides.
