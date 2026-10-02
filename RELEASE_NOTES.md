@@ -1,3 +1,14 @@
+## 0.10.0rc14
+
+- Kept the ICC Plus engine target at 2.10.7 and the pinned upstream source commit `1ea9db888cde2286d18d0d5de50933cb8773b739`; rc14 changes ICC Plus Local behavior and release serialization without changing the target Viewer version.
+- Made the compiler/native ownership boundary explicit. ICC Plus Local owns native compatibility, validation, serialization, local simulation, explicit native edits, and reference integrity; source-level Requirement hoisting, style-intent consolidation, taxonomy pruning, Row merging, Pick-N inference, and deterministic runtime-ID compaction/remapping remain compiler responsibilities.
+- Locked native Row semantics with regression coverage: `allowedChoices: 0` means unlimited, and hiding a Row does not implicitly deselect already selected children.
+- Corrected the ICC Plus 2.10.8 Addon caveat: the upstream change is selectable-Addon width handling through `addonWidth`, not evidence of changed Row `allowedChoices` selection semantics.
+- Split CI into core runtime/validation, CLI contract, and checked-in-example jobs so failures and timeouts are attributable; main-only release-artifact construction remains gated on those jobs.
+- Added behavior-preserving sparse runtime serialization for player-facing Viewer payloads. Web `project.json` and local embedded Viewer JSON omit every 2.10.7 field currently proven behavior-equivalent when absent, while Creator Save-to-Disk and Creator-compatible project exports remain complete.
+- Added the standalone `iccplus-sparse` runtime serializer and `iccplus-omission-probe` browser-verification generator. The omission kit systematically covers retained `viewerConfig`, global/private styling fallbacks, private-style enable flags, list cleanup, build-state handling, and other unresolved cases one omission at a time; load success alone is not sufficient for promotion.
+- Added a permanent version-consistency regression covering the active package metadata and live documentation so future candidate bumps cannot leave stale current-version markers behind.
+
 ## 0.10.0rc13
 
 - Kept the ICC Plus engine target at 2.10.7 and the pinned upstream source commit `1ea9db888cde2286d18d0d5de50933cb8773b739`; rc13 is a CYOA skill/documentation packaging candidate rather than an engine-semantics change.
@@ -215,7 +226,7 @@ This patch tightens the LM player boundary and makes continuous play safer by de
 - Player point-bar output no longer exposes the creator-only `belowZeroNotAllowed` configuration flag. Affordability still appears through the normal visible selection result.
 - Fixed stale LM documentation that still said verbose player view returned raw Requirement traces.
 - Added regression coverage for row-capacity message leakage, unknown semantic codes, safe state-file continuation, hidden-versus-missing target probing, snapshot rejection in player-safe mode, and point-bar configuration leakage.
-- Normal suite now has 172 passing tests before packaging verification. Compression remains a separate suite.
+- Normal suite now has 172 passing tests before packaging verification. Compression remains separate at 6 passed with 3 optional encoder-dependent skips.
 
 ## 0.9.2
 

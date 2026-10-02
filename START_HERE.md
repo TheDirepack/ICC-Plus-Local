@@ -1,4 +1,4 @@
-# ICC Plus Local 0.10.0rc13 handoff
+# ICC Plus Local 0.10.0rc14 handoff
 
 The engine target remains ICC Plus 2.10.7, pinned to upstream commit `1ea9db888cde2286d18d0d5de50933cb8773b739`.
 
@@ -15,6 +15,12 @@ Normal `structure`, `rules`, and `style` writes fill missing official Creator de
 For styling, use project styling first, then official Row/Choice Design Groups. Use private Row or Choice styling only for genuine one-off exceptions. Use custom CSS only when native ICC Plus styling cannot express the result.
 
 `play` is the player-safe simulator and audit interface. It exposes visible Rows, direct Choices, and Addons as separate structures with explicit parent/child links. Keep continuation state private with `--state FILE`.
+
+## Runtime release serialization
+
+Creator authoring files and Creator-compatible project exports stay complete. Player-facing Viewer packages use the pinned behavior-preserving sparse serializer by default. `iccplus-sparse` can write that runtime artifact directly, and `iccplus-omission-probe` generates isolated Viewer tests for fields whose omission is not yet proven safe. Read `docs/SPARSE_RUNTIME_SERIALIZATION.md` before extending the omission set.
+
+Sparse runtime serialization is a native ICC Plus serialization concern. Source semantic normalization—Requirement hoisting, Row merging, taxonomy pruning, style-intent consolidation, Pick-N inference, and deterministic runtime-ID remapping—belongs in the source compiler/lowering layer. Read `docs/COMPILER_BOUNDARY.md`.
 
 ## CYOA skill routing
 

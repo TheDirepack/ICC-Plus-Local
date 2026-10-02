@@ -1,8 +1,8 @@
 # ICC Plus Local
 
-**Version 0.10.0rc13**
+**Version 0.10.0rc14**
 
-ICC Plus Local is a local command-line authoring and mechanical-testing tool for ICC Plus 2 projects. The current source in this repository is ICC Plus Local 0.10.0rc13, targeting ICC Plus 2.10.7 and pinned to upstream source commit `1ea9db888cde2286d18d0d5de50933cb8773b739`.
+ICC Plus Local is a local command-line authoring and mechanical-testing tool for ICC Plus 2 projects. The current source in this repository is ICC Plus Local 0.10.0rc14, targeting ICC Plus 2.10.7 and pinned to upstream source commit `1ea9db888cde2286d18d0d5de50933cb8773b739`.
 
 It is an independent local implementation. The official ICC Plus Creator and Viewer remain the authority for browser rendering and behavior outside the local tool's verified coverage.
 
@@ -43,6 +43,8 @@ python -m iccplus_tools play project.json
 
 `structure`, `rules`, and `style` fill missing official Creator defaults and require complete-project validation before replacing the target project. For an imported legacy project, `project validate` reports final-artifact completeness and `project hydrate` repairs missing official sections without inventing IDs. For styling, prefer project-wide native styling and official Row/Choice Design Groups; private per-entity styling is for genuine one-off exceptions. Image compression is automatic when local or embedded images are assigned through the current media/style workflow.
 
+Player-facing Viewer packages use the pinned behavior-preserving sparse runtime serializer by default. Creator Save-to-Disk and Creator-compatible project exports remain complete. `iccplus-sparse` writes the runtime artifact directly, while `iccplus-omission-probe` generates isolated pinned-Viewer verification cases for omissions that are not yet proven safe.
+
 ## Agent skill
 
 For native ICC Plus 2 project work, start with [`skills/iccplus-local/SKILL.md`](skills/iccplus-local/SKILL.md). It is the single implementation skill. Use the retained high-level CYOA skills only for planning, review, migration, long-project coordination, final release work, or exceptional external compression.
@@ -78,6 +80,8 @@ Start with these files when more detail is needed:
 - [`docs/PLAY_STRUCTURE.md`](docs/PLAY_STRUCTURE.md) for the current player-visible Row, Choice, and Addon model.
 - [`docs/GAMEPLAY_RUNNER.md`](docs/GAMEPLAY_RUNNER.md) for progressive player-safe tests.
 - [`docs/VISUAL_WORKFLOW.md`](docs/VISUAL_WORKFLOW.md) for images and presentation work.
+- [`docs/COMPILER_BOUNDARY.md`](docs/COMPILER_BOUNDARY.md) for the source-compiler versus ICC Plus Local ownership boundary.
+- [`docs/SPARSE_RUNTIME_SERIALIZATION.md`](docs/SPARSE_RUNTIME_SERIALIZATION.md) for the default Viewer-runtime omission policy and browser-verification queue.
 - [`COVERAGE.md`](COVERAGE.md) for the local simulator boundary.
 
 Historical per-version audit reports are retained as evidence and labeled by the version they audited. Current workflow instructions live in the non-historical docs and [`RELEASE_NOTES.md`](RELEASE_NOTES.md).
@@ -133,7 +137,7 @@ For prose cleanup, the recommended external companion is the [Unslop skill](http
 
 ## Verification
 
-rc13 keeps the rc12 ICC Plus 2.10.7 engine target and adds the compressed CYOA skill/documentation set. Final PR verification: **332 tests passed** and all checked-in examples passed, including the skill/documentation consistency checks.
+rc14 keeps the ICC Plus 2.10.7 engine target and pinned source commit unchanged. It incorporates the compiler/native ownership boundary, native Row semantic regressions, corrected 2.10.8 Addon-width interpretation, split CI attribution, default sparse Viewer-runtime serialization, and the generated omission-verification matrix. The GitHub Actions workflow is authoritative for the current candidate; browser-only omission cases remain separate pinned-Viewer verification work until promoted by evidence.
 
 Local mechanical tests do not replace final checks in the official Creator or Viewer for browser rendering, responsive layout, CSS, animation, dialogs, network-loaded assets, or behavior outside documented local coverage.
 
