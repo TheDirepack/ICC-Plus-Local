@@ -16,7 +16,8 @@ The serializer currently removes these classes of values by default:
 - the five explicitly reconstructed multi-choice styling members in a retained custom global `styling` object;
 - Row and Choice `index`, which the Viewer rebuilds from array position;
 - `isBackpack: true` on backpack Rows;
-- Addon `template: 1`, derived `parentId`, and empty `requireds`;
+- Addon `template` when it is `0` or `1`, because missing/`0`/`1` all normalize to effective template `1` in the pinned Viewer;
+- Addon derived `parentId` and empty `requireds`;
 - Point `initValue` when it equals `startingSum`;
 - Word `replaceText: ""`;
 - Design Group `activatedId`, `elements`, `backpackElements`, and `groupElements` when they equal the loader defaults;
@@ -48,7 +49,9 @@ Generate isolated baseline/candidate artifacts with:
 python -m iccplus_tools.omission_probe -o verification/sparse-omission
 ```
 
-The generated directory contains a manifest plus one baseline/candidate pair per unresolved omission. Each candidate differs from its baseline by one omission. Load both files separately in the pinned Viewer and compare load success, rendering, style source, interaction behavior, counters/scores, and browser-console errors.
+The generated directory contains a manifest plus one baseline/candidate pair per unresolved omission. Ordinary omission candidates differ from their baseline by one removed field. The array-cleanup probes deliberately use a pre-import baseline containing the null/empty member under test and a cleaned candidate control.
+
+Load each pair separately in the pinned Viewer and compare load success, rendering, style source, interaction behavior, counters/scores, and browser-console errors.
 
 Load success alone is not enough to promote a rule. Add an omission to the default serializer only after the behavior controlled by that field is indistinguishable in the pinned Viewer.
 
