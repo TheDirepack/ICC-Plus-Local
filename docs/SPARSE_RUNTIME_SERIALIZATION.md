@@ -22,12 +22,15 @@ The serializer currently removes these classes of values by default:
 - Word `replaceText: ""`;
 - Group `elements` and `rowElements` when they are empty, because the Viewer reconstructs both arrays during load;
 - Design Group `activatedId`, `elements`, `backpackElements`, and `groupElements` when they equal the loader defaults;
+- exact legacy-OR `orRequireds` payloads when they equal what the pinned loader deterministically regenerates from `orRequired`, limited to the same Row/Choice/Score/Addon/Global-Requirement containers and one nested Requirement level that `initializeApp` migrates;
 - Choice `initMultipleTimesMinus` only when it equals the value the Viewer will derive;
 - Choice `addonJustify` only when it equals the effective inherited project/default value;
 - object properties whose value is `null`, matching the proven object-property portion of the Viewer import cleanup;
 - Row/Choice private-filter missing-value defaults only while `privateFilterIsOn` remains explicitly true. These use the Row/Choice private initializer's own values, not global styling defaults. Design Groups are excluded from this rule because their load path does not reconstruct those private-filter values the same way.
 
 The private-filter distinction matters: the pinned global styling default for `unselFilterSatur` is `1`, while the private missing-field initializer uses `0`. An explicit private `unselFilterSatur: 1` therefore remains serialized.
+
+The OR-Requirement rule is deliberately structural rather than a blanket empty-array rule. It removes `orRequireds` only when the serialized value exactly matches the loader-derived children. Sound Effect requirements, selectable-Addon Score requirements, deeper nesting, and any nonmatching `orRequireds` remain explicit because the pinned loader does not perform the same migration there.
 
 ## Deliberately not automatic yet
 
