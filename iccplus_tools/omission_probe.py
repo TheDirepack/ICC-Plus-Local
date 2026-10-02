@@ -66,9 +66,6 @@ PRIVATE_STYLE_FAMILIES: tuple[tuple[str, dict[str, Any], tuple[str, ...]], ...] 
 ROW_PRIVATE_FLAGS = tuple(flag for flag, _, scopes in PRIVATE_STYLE_FAMILIES if 'row' in scopes)
 CHOICE_PRIVATE_FLAGS = tuple(flag for flag, _, scopes in PRIVATE_STYLE_FAMILIES if 'choice' in scopes)
 
-# Alternate visible style anchors keep a private style family active while the
-# target member is removed. Options are ordered and the first option that does
-# not contain the target key is used.
 PRIVATE_STYLE_ANCHORS: dict[str, tuple[dict[str, Any], ...]] = {
     'privateFilterIsOn': (
         {'selFilterBlurIsOn': True, 'selFilterBlur': 2},
@@ -167,11 +164,8 @@ def _add_core_cases(cases: list[dict[str, Any]]) -> None:
         candidate = copy.deepcopy(baseline)
         candidate['viewerConfig'].pop(key, None)
         cases.append(_case(
-            f'viewer-config-{key}',
-            baseline,
-            candidate,
-            path=f'/viewerConfig/{key}',
-            category='custom-viewer-config-member',
+            f'viewer-config-{key}', baseline, candidate,
+            path=f'/viewerConfig/{key}', category='custom-viewer-config-member',
             note='Whole stock viewerConfig omission is proven safe, but individual members of a retained custom object are not.',
         ))
 
@@ -186,9 +180,7 @@ def _add_core_cases(cases: list[dict[str, Any]]) -> None:
             target = candidate['rows'][0] if scope == 'row' else candidate['rows'][0]['objects'][0]
             target.pop(flag, None)
             cases.append(_case(
-                f'{scope}-{flag}',
-                baseline,
-                candidate,
+                f'{scope}-{flag}', baseline, candidate,
                 path=f'/rows/0' + ('' if scope == 'row' else '/objects/0') + f'/{flag}',
                 category='private-style-enable-inference',
                 note='Verify that omitting the explicit enable flag leaves the same private-style source, rendering, and interaction behavior.',
@@ -202,18 +194,12 @@ def _add_core_cases(cases: list[dict[str, Any]]) -> None:
     candidate = copy.deepcopy(baseline)
     candidate['rows'][0]['objects'][0]['styling'].pop('unselFilterSatur')
     cases.append(_case(
-        'private-filter-unsel-satur-one',
-        baseline,
-        candidate,
+        'private-filter-unsel-satur-one', baseline, candidate,
         path='/rows/0/objects/0/styling/unselFilterSatur',
-        category='known-private-default-mismatch',
-        expected='behavior-change-likely',
+        category='known-private-default-mismatch', expected='behavior-change-likely',
         note='Pinned global default is 1 while the private missing-field initializer is 0. Keep explicit 1 unless Viewer testing disproves the source-derived mismatch.',
     ))
 
-    # mdObjects is a native string array. The dirty baseline deliberately adds
-    # the null/empty-object entry that removeNulls is expected to discard, while
-    # the candidate remains schema-valid with the same surviving string entry.
     for case_id, array_value, label in (
         ('array-null-entry', [None, 'probe-md'], 'null array member'),
         ('array-empty-object-entry', [{}, 'probe-md'], 'empty-object array member'),
@@ -223,18 +209,13 @@ def _add_core_cases(cases: list[dict[str, Any]]) -> None:
         candidate = copy.deepcopy(baseline)
         candidate['mdObjects'].pop(0)
         cases.append(_case(
-            case_id,
-            baseline,
-            candidate,
-            path='/mdObjects/0',
-            category='remove-nulls-array-filtering',
+            case_id, baseline, candidate,
+            path='/mdObjects/0', category='remove-nulls-array-filtering',
             note=f'Confirm that the Viewer import path filters a {label} from native mdObjects exactly as if it had been omitted before serialization.',
         ))
 
 
 def _add_exhaustive_style_cases(cases: list[dict[str, Any]]) -> None:
-    # A retained custom global styling object is not known to merge every missing
-    # member with built-in styling. Probe each not-yet-proven member individually.
     stock_styling = DEFAULT_APP['styling']
     for key, value in stock_styling.items():
         if key in RETAINED_STYLING_DEFAULTS:
@@ -246,17 +227,11 @@ def _add_exhaustive_style_cases(cases: list[dict[str, Any]]) -> None:
         candidate = copy.deepcopy(baseline)
         candidate['styling'].pop(key, None)
         cases.append(_case(
-            f'global-styling-{key}',
-            baseline,
-            candidate,
-            path=f'/styling/{key}',
-            category='retained-global-styling-member',
+            f'global-styling-{key}', baseline, candidate,
+            path=f'/styling/{key}', category='retained-global-styling-member',
             note='Verify whether this stock-valued member may be omitted from an otherwise custom global styling object without changing rendering.',
         ))
 
-    # Private style objects may fall back to project/Design-Group styling, infer
-    # local defaults, or leave a directly consumed value undefined. Probe every
-    # family member whose omission is not already source-proven safe.
     for flag, defaults, scopes in PRIVATE_STYLE_FAMILIES:
         for key, value in defaults.items():
             if flag == 'privateFilterIsOn' and key in PRIVATE_FILTER_DEFAULTS:
@@ -271,38 +246,25 @@ def _add_exhaustive_style_cases(cases: list[dict[str, Any]]) -> None:
                 target = candidate['rows'][0] if scope == 'row' else candidate['rows'][0]['objects'][0]
                 target['styling'].pop(key, None)
                 cases.append(_case(
-                    f'private-{scope}-{flag}-{key}',
-                    baseline,
-                    candidate,
+                    f'private-{scope}-{flag}-{key}', baseline, candidate,
                     path=f'/rows/0' + ('' if scope == 'row' else '/objects/0') + f'/styling/{key}',
                     category='private-style-member-fallback',
                     note='Verify whether this private stock-valued style member may be omitted while the private style family remains explicitly enabled.',
                 ))
 
-    # Creator Save-to-Disk represents an empty live build as [""], while the
-    # built-in Viewer app begins with activated=[]. Whether omission is fully
-    # equivalent for import/save behavior is worth pinning in the actual Viewer.
     baseline = _base_project()
     baseline['activated'] = ['']
     candidate = copy.deepcopy(baseline)
     candidate.pop('activated', None)
     cases.append(_case(
-        'top-level-activated-empty-build',
-        baseline,
-        candidate,
-        path='/activated',
-        category='runtime-state-empty-build',
+        'top-level-activated-empty-build', baseline, candidate,
+        path='/activated', category='runtime-state-empty-build',
         note='Verify whether omitting Creator Save-to-Disk activated=[""] is behavior-equivalent to the pinned Viewer built-in empty activated state.',
     ))
 
 
 def omission_probe_cases(*, exhaustive: bool = True) -> list[dict[str, Any]]:
-    """Return one-omission-at-a-time Viewer verification cases.
-
-    ``exhaustive=False`` returns the compact high-risk smoke set used by tests.
-    The default includes the full global/private styling fallback matrix and is
-    what the user-facing generator writes.
-    """
+    """Return one-omission-at-a-time Viewer verification cases."""
     cases: list[dict[str, Any]] = []
     _add_core_cases(cases)
     if exhaustive:
@@ -319,10 +281,33 @@ The default generator includes individual retained-`viewerConfig` members, retai
 
 For ordinary omission cases, load `baseline.json` and `candidate.json` separately in the pinned Viewer and compare load success, visible layout/text/style, selection behavior, counters/scores, save/reload behavior where relevant, and browser console errors. For `remove-nulls-array-filtering` cases, the baseline deliberately contains the pre-import null/empty array member and the candidate is the cleaned control; compare the post-load result and console behavior.
 
-A candidate may be promoted into the default sparse serializer only when its behavior is indistinguishable from the baseline/control for the behavior the omitted field controls. Load success alone is not sufficient.
-
-The `behavior-change-likely` case is deliberately included as a negative control. It should remain explicit unless testing proves the source-derived mismatch irrelevant.
+Record each result in `results.json`: use `equivalent`, `behavior-change`, `load-failure`, or `needs-more-testing`. A candidate may be promoted into the default sparse serializer only when its relevant behavior is equivalent to the baseline/control. Load success alone is not sufficient.
 """
+
+
+def _result_ledger(manifest_cases: list[dict[str, Any]]) -> dict[str, Any]:
+    return {
+        'format': 'iccplus-omission-verification-results',
+        'format_version': 1,
+        'target': {'icc_plus_version': ICCPLUS_VERSION, 'source_commit': ICCPLUS_COMMIT},
+        'allowed_statuses': ['untested', 'equivalent', 'behavior-change', 'load-failure', 'needs-more-testing'],
+        'results': [
+            {
+                'id': case['id'],
+                'category': case['category'],
+                'expected': case['expected'],
+                'status': 'untested',
+                'viewer_build': '',
+                'browser': '',
+                'rendering_equivalent': None,
+                'interaction_equivalent': None,
+                'save_reload_equivalent': None,
+                'console_errors': [],
+                'notes': '',
+            }
+            for case in manifest_cases
+        ],
+    }
 
 
 def write_omission_probe_suite(
@@ -360,8 +345,32 @@ def write_omission_probe_suite(
         'cases': manifest_cases,
     }
     (output / 'manifest.json').write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+    (output / 'results.json').write_text(json.dumps(_result_ledger(manifest_cases), indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
     (output / 'README.md').write_text(_readme(len(selected)), encoding='utf-8')
     return manifest
+
+
+def _filter_cases(
+    cases: list[dict[str, Any]],
+    *,
+    case_ids: list[str] | None,
+    categories: list[str] | None,
+) -> list[dict[str, Any]]:
+    wanted_ids = set(case_ids or [])
+    wanted_categories = set(categories or [])
+    if not wanted_ids and not wanted_categories:
+        return cases
+    selected = [
+        case for case in cases
+        if (not wanted_ids or case['id'] in wanted_ids)
+        and (not wanted_categories or case['category'] in wanted_categories)
+    ]
+    missing = sorted(wanted_ids - {case['id'] for case in selected})
+    if missing:
+        raise ValueError('unknown or category-filtered omission case(s): ' + ', '.join(missing))
+    if not selected:
+        raise ValueError('omission probe filters selected no cases')
+    return selected
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -369,8 +378,17 @@ def main(argv: list[str] | None = None) -> int:
 
     parser = argparse.ArgumentParser(description='Generate ICC Plus 2.10.7 sparse-omission Viewer verification artifacts.')
     parser.add_argument('-o', '--output', required=True)
+    parser.add_argument('--case', action='append', dest='case_ids', help='Generate only this exact case ID. Repeat as needed.')
+    parser.add_argument('--category', action='append', help='Generate only this manifest category. Repeat as needed.')
+    parser.add_argument('--core-only', action='store_true', help='Generate the compact high-risk set instead of the exhaustive styling fallback matrix.')
     args = parser.parse_args(argv)
-    manifest = write_omission_probe_suite(args.output)
+    try:
+        cases = omission_probe_cases(exhaustive=not args.core_only)
+        cases = _filter_cases(cases, case_ids=args.case_ids, categories=args.category)
+        manifest = write_omission_probe_suite(args.output, cases=cases)
+    except ValueError as exc:
+        print(json.dumps({'ok': False, 'error': str(exc)}, ensure_ascii=False))
+        return 2
     print(json.dumps({
         'ok': True,
         'output': str(Path(args.output)),
