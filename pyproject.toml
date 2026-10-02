@@ -13,6 +13,7 @@ dependencies = []
 
 [project.scripts]
 iccplus-local = "iccplus_tools.cli:main"
+iccplus-sparse = "iccplus_tools.sparse_project:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
