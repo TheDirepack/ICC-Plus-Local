@@ -12,6 +12,8 @@ Use the ICC Plus 2 viewer template that matches the target release. Do not hand-
 
 Build from the official Viewer template or release package for the target version. Keep project generation and edits in reproducible CLI scripts instead of hand-editing generated Viewer output.
 
+ICC Plus Local writes sparse full-project JSON by default after complete in-memory hydration and validation. That sparse file remains a valid authoring artifact: omissions must preserve both target-Viewer behavior and later authoring. Use `--not-sparse` only when the release process specifically needs a materialized Creator-complete project file.
+
 ## Test the generated package
 
 A release test starts after packaging.
@@ -29,6 +31,8 @@ Check:
 - Custom CSS and external CSS load.
 - Images and audio load.
 - Phone layout works.
+
+When the release pipeline starts from a sparse authoring file, also verify that `project validate` succeeds before packaging. If you deliberately materialize a full project with `--not-sparse`, verify it with `project validate --complete`.
 
 ## Web release
 
@@ -62,6 +66,7 @@ Record:
 - Target ICC Plus 2 viewer version.
 - Date.
 - Local `iccplus-local` version and source snapshot used for scripted checks.
+- Whether the retained project artifact is normal sparse JSON or an intentionally materialized `--not-sparse` form.
 - Known compatibility notes.
 
 ## Public ID stability
@@ -69,6 +74,8 @@ Record:
 After release, changing visible text is much safer than changing IDs.
 
 If a release must rename public IDs, treat it as a migration and decide whether old shared builds will remain supported.
+
+Do not treat Viewer-generated runtime replacements as a substitute for stable authoring identities. In normal sparse project saves, Score `idx` values remain serialized because later authoring commands must address the same Scores.
 
 ## Release checklist
 
