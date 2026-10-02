@@ -24,7 +24,7 @@ Load:
 1. Rebuild from authoritative source when applicable, run `iccplus-local project validate`, and confirm required runtime tests, design review, and accessibility checks are complete.
 2. If the release pipeline performs structural normalization or runtime-ID compaction, rebuild the readable semantic artifact first and then derive the release artifact reproducibly. Read `../../docs/COMPILER_BOUNDARY.md` and `../../docs/cyoa/guide/21-large-project-normalization.md`.
 3. Choose the exact web, offline, or static release format.
-4. Build from the official ICC Plus Viewer release or template that matches the project target. The current rc14 tool target is ICC Plus 2.10.7. Viewer runtime payloads use the pinned behavior-preserving sparse serializer by default; Creator-compatible authoring/export artifacts remain complete.
+4. Build from the official ICC Plus Viewer release or template that matches the project target. The current ICC Plus Local 0.10.0rc14 tool target is ICC Plus 2.10.7. Viewer runtime payloads use the pinned behavior-preserving sparse serializer by default; Creator-compatible authoring/export artifacts remain complete.
 5. Test the generated package itself.
 6. For web releases, stage through HTTP and then test the final hosted URL.
 7. For offline releases, test the package exactly as delivered.
