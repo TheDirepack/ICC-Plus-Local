@@ -1,8 +1,8 @@
 # ICC Plus Local
 
-**Version 0.10.0rc14**
+**Version 0.10.0rc15**
 
-ICC Plus Local is a local command-line authoring and mechanical-testing tool for ICC Plus 2 projects. The current source in this repository is ICC Plus Local 0.10.0rc14, targeting ICC Plus 2.10.7 and pinned to upstream source commit `1ea9db888cde2286d18d0d5de50933cb8773b739`.
+ICC Plus Local is a local command-line authoring and mechanical-testing tool for ICC Plus 2 projects. The current source in this repository is ICC Plus Local 0.10.0rc15, targeting ICC Plus 2.10.7 and pinned to upstream source commit `1ea9db888cde2286d18d0d5de50933cb8773b739`.
 
 It is an independent local implementation. The official ICC Plus Creator and Viewer remain the authority for browser rendering and behavior outside the local tool's verified coverage.
 
@@ -41,9 +41,11 @@ python -m iccplus_tools style project.json @style.json
 python -m iccplus_tools play project.json
 ```
 
-`generate`, `build`, `structure`, `rules`, `style`, `apply`, and ordinary direct edits now use the normal sparse saved-project form. Before every valid write, ICC Plus Local hydrates a complete in-memory project and requires complete-project validation; only then does it omit fields proven behavior-equivalent in the pinned 2.10.7 Viewer. `project validate` checks the normal sparse/compatible form, while `project validate --complete` checks a materialized full shape. Every full-project JSON write remains sparse unless that specific command is given `--not-sparse` (the alias `--not_sparse` is also accepted). For styling, prefer project-wide native styling and official Row/Choice Design Groups; private per-entity styling is for genuine one-off exceptions. Image compression is automatic when local or embedded images are assigned through the current media/style workflow.
+`generate`, `build`, `structure`, `rules`, `style`, `apply`, and ordinary direct edits use the normal sparse saved-project form. Before every valid write, ICC Plus Local hydrates a complete in-memory project and requires complete-project validation. It then omits only fields that are safe under the pinned 2.10.7 Viewer rules and the authoring-round-trip contract. Stable identities and non-derivable authoring values remain serialized when later commands need them. In particular, canonical sparse saves retain Score `idx` and Sound Effect `name`.
 
-Every full-project JSON output uses the same pinned behavior-preserving sparse serializer by default, including normal saves, hydration output, formatting, separate-image export packages, and Viewer packages. A materialized/non-sparse project is written only when the producing command is given `--not-sparse` (or `--not_sparse`). `iccplus-sparse` writes the same sparse representation directly, while `iccplus-omission-probe` generates isolated pinned-Viewer verification cases for omissions that are not yet proven safe.
+`project validate` checks the normal sparse/compatible form, while `project validate --complete` checks a materialized full shape. Every full-project JSON write remains sparse unless that specific command is given `--not-sparse` (the alias `--not_sparse` is also accepted). For styling, prefer project-wide native styling and official Row/Choice Design Groups; private per-entity styling is for genuine one-off exceptions. Image compression is automatic when local or embedded images are assigned through the current media/style workflow.
+
+Every full-project JSON output uses the same pinned sparse serializer by default, including normal saves, hydration output, formatting, separate-image export packages, and Viewer packages. A materialized/non-sparse project is written only when the producing command is given `--not-sparse` (or `--not_sparse`). `iccplus-sparse` writes the same sparse representation directly, while `iccplus-omission-probe` generates isolated pinned-Viewer verification cases for omissions that are not yet proven safe.
 
 ## Agent skill
 
@@ -81,7 +83,7 @@ Start with these files when more detail is needed:
 - [`docs/GAMEPLAY_RUNNER.md`](docs/GAMEPLAY_RUNNER.md) for progressive player-safe tests.
 - [`docs/VISUAL_WORKFLOW.md`](docs/VISUAL_WORKFLOW.md) for images and presentation work.
 - [`docs/COMPILER_BOUNDARY.md`](docs/COMPILER_BOUNDARY.md) for the source-compiler versus ICC Plus Local ownership boundary.
-- [`docs/SPARSE_RUNTIME_SERIALIZATION.md`](docs/SPARSE_RUNTIME_SERIALIZATION.md) for the default Viewer-runtime omission policy and browser-verification queue.
+- [`docs/SPARSE_RUNTIME_SERIALIZATION.md`](docs/SPARSE_RUNTIME_SERIALIZATION.md) for the default sparse-save policy, authoring-round-trip invariant, and browser-verification queue.
 - [`COVERAGE.md`](COVERAGE.md) for the local simulator boundary.
 
 Historical per-version audit reports are retained as evidence and labeled by the version they audited. Current workflow instructions live in the non-historical docs and [`RELEASE_NOTES.md`](RELEASE_NOTES.md).
@@ -137,7 +139,7 @@ For prose cleanup, the recommended external companion is the [Unslop skill](http
 
 ## Verification
 
-rc14 keeps the ICC Plus 2.10.7 engine target and pinned source commit unchanged. It incorporates the compiler/native ownership boundary, native Row semantic regressions, corrected 2.10.8 Addon-width interpretation, split CI attribution, default sparse Viewer-runtime serialization, and the generated omission-verification matrix. The GitHub Actions workflow is authoritative for the current candidate; browser-only omission cases remain separate pinned-Viewer verification work until promoted by evidence.
+rc15 keeps the ICC Plus 2.10.7 engine target and pinned source commit unchanged. It includes the expanded sparse omission audit and makes sparse JSON the normal project representation while preserving authoring identities and labels needed across commands. The GitHub Actions workflow is authoritative for the current candidate; browser-only omission cases remain separate pinned-Viewer verification work until promoted by evidence.
 
 Local mechanical tests do not replace final checks in the official Creator or Viewer for browser rendering, responsive layout, CSS, animation, dialogs, network-loaded assets, or behavior outside documented local coverage.
 
