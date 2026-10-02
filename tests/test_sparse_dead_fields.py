@@ -1,7 +1,25 @@
 from __future__ import annotations
 
-from iccplus_tools.sparse_project import sparsify_project
+from iccplus_tools.sparse_project import SCORE_VIEWER_UNUSED_FIELDS, sparsify_project
 from iccplus_tools.upstream_2106 import ICCPLUS_VERSION
+
+
+def _dead_score_fields() -> dict:
+    return {
+        'type': 'creator-score-type',
+        'discountScoreCal': 99,
+        'isChangeDiscount': True,
+        'discountNum': 7,
+        'tmpDisScore': 88,
+        'tmpDiscount': [{'value': 1}],
+        'discountedFrom': ['choice-x'],
+        'dupTextA': {'x': 1},
+        'dupTextB': {'y': 2},
+        'discountTextA': ['a'],
+        'discountTextB': ['b'],
+        'notStackableDiscount': True,
+        'mulValue': [2, 3],
+    }
 
 
 def test_viewer_unused_fields_and_score_internal_ids_are_omitted() -> None:
@@ -28,9 +46,12 @@ def test_viewer_unused_fields_and_score_internal_ids_are_omitted() -> None:
                 'scores': [{
                     'idx': 'creator-score-id',
                     'id': 'points',
-                    'type': 'creator-score-type',
                     'value': 4,
                     'requireds': [],
+                    'discountScore': 3,
+                    'appliedDiscount': True,
+                    'removeSpace': True,
+                    **_dead_score_fields(),
                 }],
                 'addons': [{
                     'id': 'addon',
@@ -40,9 +61,12 @@ def test_viewer_unused_fields_and_score_internal_ids_are_omitted() -> None:
                     'scores': [{
                         'idx': 'creator-addon-score-id',
                         'id': 'points',
-                        'type': 'creator-addon-score-type',
                         'value': 2,
                         'requireds': [],
+                        'discountScore': 1,
+                        'appliedDiscount': True,
+                        'removeSpace': True,
+                        **_dead_score_fields(),
                     }],
                 }],
             }],
@@ -70,14 +94,20 @@ def test_viewer_unused_fields_and_score_internal_ids_are_omitted() -> None:
 
     for score in (choice_score, addon_score):
         assert 'idx' not in score
-        assert 'type' not in score
+        for key in SCORE_VIEWER_UNUSED_FIELDS:
+            assert key not in score
         assert score['id'] == 'points'
         assert score['value'] > 0
+        # Adjacent fields are active Viewer behavior and must remain.
+        assert score['discountScore'] >= 1
+        assert score['appliedDiscount'] is True
+        assert score['removeSpace'] is True
 
     assert 'skipIndex' not in addon
     assert addon['template'] == 2
 
-    assert report['removed_by_rule']['viewer_ignores_entity_field'] == 5
+    expected_unused = 3 + (2 * len(SCORE_VIEWER_UNUSED_FIELDS))
+    assert report['removed_by_rule']['viewer_ignores_entity_field'] == expected_unused
     assert report['removed_by_rule']['score_index_rebuilt_on_load'] == 2
     assert report['removed_by_rule']['row_false_width_is_missing_equivalent'] == 1
     assert report['removed_by_rule']['addon_false_skip_index_is_missing_equivalent'] == 1
