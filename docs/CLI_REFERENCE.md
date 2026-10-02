@@ -1,6 +1,6 @@
 # CLI reference
 
-The canonical rc14 surface has 11 top-level commands.
+The canonical ICC Plus Local 0.10.0rc14 surface has 11 top-level commands.
 
 ## `generate`
 
