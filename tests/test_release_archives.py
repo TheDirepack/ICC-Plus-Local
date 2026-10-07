@@ -23,6 +23,9 @@ def test_release_archives_keep_full_docs_and_skills_but_drop_tests(tmp_path: Pat
     assert not any(name.startswith("compression_tests/") for name in names)
     assert not any(name.startswith("online_tests/") for name in names)
     assert not any(name.startswith(".github/") for name in names)
+    assert "run-tests" not in names
+    assert "run-compression-tests" not in names
+    assert "run-upstream-parity-tests" not in names
 
 
 def test_viewer_archive_contains_runtime_skill_docs_and_no_authoring(tmp_path: Path):
@@ -51,3 +54,16 @@ def test_viewer_runtime_dependency_closure_is_authoring_free():
         if name.startswith("iccplus_tools/") and name.endswith(".py")
     }
     assert forbidden.isdisjoint(modules)
+
+
+def test_full_archive_marks_user_launchers_executable(tmp_path: Path):
+    full = release.build_full(tmp_path, "test-ref")
+    with zipfile.ZipFile(full) as zf:
+        infos = {
+            name.split("/", 1)[1]: info
+            for info in zf.infolist()
+            if "/" in (name := info.filename)
+        }
+    for name in ("iccplus-local", "cyoa-compress", "install.sh"):
+        mode = (infos[name].external_attr >> 16) & 0o777
+        assert mode & 0o111, f"{name} is not executable in the full release ZIP"
