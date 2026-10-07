@@ -4,7 +4,6 @@ import argparse
 import hashlib
 import json
 import shutil
-import tempfile
 import zipfile
 from pathlib import Path
 from typing import Iterable
@@ -99,7 +98,8 @@ def build_full(out_dir: Path, source_ref: str) -> Path:
     prefix = f"iccplus-local-full-{version}"
     with zipfile.ZipFile(dest, "w") as zf:
         for rel in _iter_full_files():
-            _zip_write(zf, ROOT / rel, f"{prefix}/{str(rel).replace('\\', '/')}")
+            rel_text = str(rel).replace("\\", "/")
+            _zip_write(zf, ROOT / rel, f"{prefix}/{rel_text}")
         _write_generated(zf, f"{prefix}/RELEASE_MANIFEST.json", _manifest("full", source_ref, files))
     return dest
 
