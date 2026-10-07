@@ -1,5 +1,9 @@
 ## Unreleased
 
+- Manual release version input is now authoritative. The workflow synchronizes `VERSION` and current package metadata automatically instead of requiring a pre-matched tag/version state.
+- CI and manual releases now use the same full ZIP + Viewer/test ZIP builder instead of maintaining a separate wheel/raw-source artifact path.
+- Version consistency checks now cover canonical package/runtime metadata rather than depending on README or release-note heading placement.
+
 - Made the repository launchers and installer symlink-safe so links created in `~/.local/bin` resolve the real repository root.
 - The full release ZIP now marks the install/launcher scripts executable and omits root test-launcher scripts whose test trees are intentionally not shipped.
 - The manual release workflow invokes repository test scripts through their required shells instead of relying on executable-bit preservation.

@@ -2,7 +2,7 @@
 
 ICC Plus Local has a manual GitHub Actions release workflow at `.github/workflows/manual-release.yml`.
 
-Run **Actions → Manual release → Run workflow**, supply the Git tag matching the repository `VERSION` value with a `v` prefix (for example, `VERSION=0.10.0rc16` requires `v0.10.0rc16`), and choose whether the GitHub Release is a prerelease. The workflow runs the maintained test suite and examples, builds both release ZIPs, writes SHA-256 checksums, stores the files as a workflow artifact, and creates the GitHub Release with the same files attached.
+Run **Actions → Manual release → Run workflow**, enter the version/tag text you want to release, and choose whether the GitHub Release is a prerelease. The entered value is authoritative: the workflow writes it into `VERSION`, synchronizes the package/current-document version markers, verifies the release ZIPs, commits that version update to the selected branch, rebuilds the final archives from that commit, and creates the GitHub Release using the same entered text as the tag.
 
 ## Full distribution
 
@@ -54,3 +54,11 @@ release-dist/SHA256SUMS.txt
 ```
 
 The archives contain `RELEASE_MANIFEST.json` with the package kind, source version, source ref, and packaged file list.
+
+## Version handling
+
+Manual releases do not require the repository to be pre-bumped. The workflow input is the source of truth for that run.
+
+`scripts/set_version.py VERSION` updates the canonical package metadata plus the small set of current docs that display the live tool version. Historical release-note headings and historical source notes are not rewritten.
+
+Normal CI does not try to infer or police documentation placement. Its version-consistency test checks only the canonical runtime/package metadata. The main-branch release-artifact job uses the same full/viewer ZIP builder as the manual release workflow, so CI and GitHub Releases test the same package shapes.

@@ -70,22 +70,15 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
-      - name: Install build environment
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install build
       - name: Build release artifacts
         run: |
-          python -m build --wheel
-          VERSION="$(cat VERSION)"
-          git archive --format=zip --prefix="iccplus-local-v${VERSION}/" HEAD > "iccplus-local-v${VERSION}-source.zip"
-          sha256sum "iccplus-local-v${VERSION}-source.zip" dist/*.whl > "ICCPlus_Local_${VERSION}_SHA256SUMS.txt"
+          python scripts/build_release_archives.py \
+            --output-dir release-dist \
+            --source-ref "${GITHUB_SHA}"
+          cat release-dist/SHA256SUMS.txt
       - name: Upload release artifacts
         uses: actions/upload-artifact@v4
         with:
           name: iccplus-local-release
-          path: |
-            iccplus-local-v*-source.zip
-            dist/*.whl
-            ICCPlus_Local_*_SHA256SUMS.txt
+          path: release-dist/*
           if-no-files-found: error
