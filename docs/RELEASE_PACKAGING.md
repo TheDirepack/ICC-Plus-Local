@@ -2,7 +2,7 @@
 
 ICC Plus Local has a manual GitHub Actions release workflow at `.github/workflows/manual-release.yml`.
 
-Run **Actions → Manual release → Run workflow**, supply a new Git tag, and choose whether the GitHub Release is a prerelease. The workflow runs the maintained test suite and examples, builds both release ZIPs, writes SHA-256 checksums, stores the files as a workflow artifact, and creates the GitHub Release with the same files attached.
+Run **Actions → Manual release → Run workflow**, supply the Git tag matching the repository `VERSION` value with a `v` prefix (for example, `VERSION=0.10.0rc16` requires `v0.10.0rc16`), and choose whether the GitHub Release is a prerelease. The workflow runs the maintained test suite and examples, builds both release ZIPs, writes SHA-256 checksums, stores the files as a workflow artifact, and creates the GitHub Release with the same files attached.
 
 ## Full distribution
 
