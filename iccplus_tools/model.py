@@ -46,6 +46,8 @@ class ProjectIndex:
         self.by_id: dict[str, list[Entity]] = {}
         self.by_kind: dict[str, list[Entity]] = {}
         self.by_path: dict[str, Entity] = {}
+        self.choices_by_row: dict[str, list[Entity]] = {}
+        self.addons_by_choice: dict[str, list[Entity]] = {}
         self._collect_rows('rows', 'row')
         self._collect_rows('backpack', 'backpack_row')
         for key, kind in self.TOP.items():
@@ -102,6 +104,7 @@ class ProjectIndex:
                 cpath = f'{rpath}/objects/{ci}'
                 cid = str(choice.get('id') or f'@{cpath}')
                 cent = self._add(Entity('choice', cid, choice, cpath, rid, rid, cid))
+                self.choices_by_row.setdefault(rid, []).append(cent)
                 self._collect_requirements(choice.get('requireds'), f'{cpath}/requireds', cid, rid, cid)
                 self._collect_scores(choice.get('scores'), f'{cpath}/scores', cid, rid, cid)
                 for ai, addon in enumerate(self._objects(choice.get('addons'))):
@@ -110,6 +113,7 @@ class ProjectIndex:
                     aid = str(addon.get('id') or f'@{apath}')
                     akind = 'selectable_addon' if selectable else 'addon'
                     aent = self._add(Entity(akind, aid, addon, apath, cid, rid, cid))
+                    self.addons_by_choice.setdefault(cid, []).append(aent)
                     self._collect_requirements(addon.get('requireds'), f'{apath}/requireds', aent.id, rid, cid)
                     if selectable:
                         self._collect_scores(addon.get('scores'), f'{apath}/scores', aid, rid, cid)
@@ -139,6 +143,14 @@ class ProjectIndex:
         if entity.kind not in {'addon', 'selectable_addon'} or not entity.parent_id:
             return None
         return self.one(entity.parent_id, 'choice')
+
+    def row_choices(self, row_id: str) -> list[Entity]:
+        """Return direct Choices for a Row in project order."""
+        return self.choices_by_row.get(row_id, [])
+
+    def choice_addons(self, choice_id: str) -> list[Entity]:
+        """Return Addons for a Choice in project order."""
+        return self.addons_by_choice.get(choice_id, [])
 
     def group_members(self, group_id: str) -> list[str]:
         group = self.one(group_id, 'group')

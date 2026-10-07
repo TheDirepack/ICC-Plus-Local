@@ -2,6 +2,8 @@
 
 - Added `Simulator.row_visible()` and `Simulator.visible_row_ids()` for lightweight Row-gating checks. They evaluate Row Requirements directly without constructing `player_view()`, calculating Choice statuses, cloning hypothetical selection states, or generating point previews.
 - Added focused regression coverage and documented when large test suites should use direct Row visibility queries instead of the full player-view path.
+- Indexed Row-to-Choice and Choice-to-Addon relationships in `ProjectIndex` so full player views and Row-button operations no longer rescan the complete project-wide Choice/Addon lists for each parent.
+- Reused `choice_status()` results within each `player_view()` call so visible Choices and selectable Addons are not re-evaluated solely to build the aggregate availability lists.
 
 ## 0.10.0rc15
 

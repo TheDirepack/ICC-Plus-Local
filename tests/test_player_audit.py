@@ -231,6 +231,22 @@ def test_player_view_exposes_rows_choices_and_parentage_as_separate_structures()
     assert choices['six_cost']['row_id'] == 'unlocked'
 
 
+def test_player_view_reuses_choice_status_within_one_view():
+    sim = Simulator(audit_project())
+    calls: dict[str, int] = {}
+    original = sim.choice_status
+
+    def counted(ident: str, **kwargs):
+        calls[ident] = calls.get(ident, 0) + 1
+        return original(ident, **kwargs)
+
+    sim.choice_status = counted  # type: ignore[method-assign]
+    view = sim.player_view(verbose=False)
+
+    assert view['choice_ids'] == ['key', 'too_expensive']
+    assert calls == {'key': 1, 'too_expensive': 1}
+
+
 def test_play_expectations_can_assert_row_choice_structure(tmp_path: Path):
     project_path = tmp_path / 'project.json'
     request_path = tmp_path / 'audit.json'
@@ -281,7 +297,11 @@ def test_player_view_exposes_addons_as_separate_children_without_flattening_them
             }],
         }],
     }
-    view = Simulator(project).player_view(verbose=False)
+    sim = Simulator(project)
+    assert [x.id for x in sim.index.row_choices('row_a')] == ['choice_a']
+    assert [x.id for x in sim.index.choice_addons('choice_a')] == ['info_a', 'addon_a']
+
+    view = sim.player_view(verbose=False)
     assert view['choice_ids'] == ['choice_a']
     assert view['addon_ids'] == ['info_a', 'addon_a']
     assert view['informational_addon_ids'] == ['info_a']
