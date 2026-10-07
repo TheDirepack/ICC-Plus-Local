@@ -47,6 +47,8 @@ The following behaviors are implemented from the ICC Plus 2.10.7 source model an
 
 `play` is the preferred continuing player loop. It performs one safe action, automatically resumes and atomically rewrites a machine-owned state file, and returns the current player view. `session --player-safe` provides the same output boundary for ordered multi-action batches. Both keep snapshots, runtime state, project fingerprints, raw event details, and internal status data out of player output.
 
+For Python regression tests that only need Row gating, use `Simulator.row_visible(id)` or `Simulator.visible_row_ids()`. These helpers evaluate Row Requirements directly and do not construct the full player view, calculate Choice selection status, clone hypothetical runtime states, or build point previews. Use `player_view()` when the test needs the complete player-visible structure or selection availability. `visible_row_ids(include_backpack=True)` includes Backpack Rows; the default returns ordinary Rows only.
+
 ## Reported but not fully emulated
 
 These fields are detected and surfaced because browser rendering, media, interactive dialogs, or mutable discount stacks make exact emulation more involved:
