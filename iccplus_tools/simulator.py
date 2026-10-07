@@ -2354,6 +2354,7 @@ class Simulator:
         *,
         verbose: bool,
         position: int | None = None,
+        status_cache: dict[str, ChoiceStatus] | None = None,
     ) -> dict[str, Any]:
         value = ent.value
         out: dict[str, Any] = {
@@ -2374,7 +2375,7 @@ class Simulator:
             if description:
                 out['description'] = description
         if ent.kind == 'selectable_addon':
-            status = self.choice_status(ent.id)
+            status = self._cached_choice_status(ent.id, status_cache)
             out['count'] = self._count(ent.id)
             out['can_select'] = status.selectable
             can_deselect, de_errors = self._deselect_status(ent)
@@ -2401,9 +2402,10 @@ class Simulator:
         *,
         verbose: bool,
         position: int | None = None,
+        status_cache: dict[str, ChoiceStatus] | None = None,
     ) -> dict[str, Any]:
         value = ent.value
-        status = self.choice_status(ent.id)
+        status = self._cached_choice_status(ent.id, status_cache)
         out: dict[str, Any] = {
             'id': ent.id,
             'kind': 'choice',
@@ -2425,9 +2427,11 @@ class Simulator:
             if description:
                 out['description'] = description
         addons: list[dict[str, Any]] = []
-        for addon in self.index.by_kind.get('addon', []) + self.index.by_kind.get('selectable_addon', []):
-            if addon.parent_id == ent.id and self._addon_visible(addon):
-                addons.append(self._view_addon(addon, row, ent, verbose=verbose, position=len(addons)))
+        for addon in self.index.choice_addons(ent.id):
+            if self._addon_visible(addon):
+                addons.append(self._view_addon(
+                    addon, row, ent, verbose=verbose, position=len(addons), status_cache=status_cache,
+                ))
         out['addon_ids'] = [addon['id'] for addon in addons]
         out['selectable_addon_ids'] = [addon['id'] for addon in addons if addon.get('kind') == 'selectable_addon']
         out['informational_addon_ids'] = [addon['id'] for addon in addons if addon.get('kind') == 'addon']
@@ -2463,6 +2467,19 @@ class Simulator:
             return bool(self.state.variables.get(gate, False))
         return self._activation_ref_met(gate)
 
+    def _cached_choice_status(
+        self,
+        ident: str,
+        cache: dict[str, ChoiceStatus] | None,
+    ) -> ChoiceStatus:
+        if cache is None:
+            return self.choice_status(ident)
+        status = cache.get(ident)
+        if status is None:
+            status = self.choice_status(ident)
+            cache[ident] = status
+        return status
+
     def player_view(self, *, verbose: bool = False, include_backpack: bool = False) -> dict[str, Any]:
         """Return a script-friendly representation of what the Viewer currently exposes.
 
@@ -2485,6 +2502,7 @@ class Simulator:
 
         flat_choices: list[dict[str, Any]] = []
         flat_addons: list[dict[str, Any]] = []
+        status_cache: dict[str, ChoiceStatus] = {}
 
         def rows_of(kind: str) -> list[dict[str, Any]]:
             rows: list[dict[str, Any]] = []
@@ -2506,9 +2524,15 @@ class Simulator:
                     if description:
                         row_out['description'] = description
                 choices: list[dict[str, Any]] = []
-                for choice in self.index.by_kind.get('choice', []):
-                    if choice.row_id == row.id and self._choice_visible(choice):
-                        choice_view = self._view_choice(choice, row, verbose=verbose, position=len(choices))
+                for choice in self.index.row_choices(row.id):
+                    if self._choice_visible(choice):
+                        choice_view = self._view_choice(
+                            choice,
+                            row,
+                            verbose=verbose,
+                            position=len(choices),
+                            status_cache=status_cache,
+                        )
                         choices.append(choice_view)
                         flat_choices.append(choice_view)
                         flat_addons.extend(choice_view.get('addons', []))
@@ -2534,7 +2558,7 @@ class Simulator:
         available_selectable_addon_ids: list[str] = []
         deselectable_selectable_addon_ids: list[str] = []
         for ent in visible_selectables:
-            status = self.choice_status(ent.id)
+            status = self._cached_choice_status(ent.id, status_cache)
             if status.visible and status.selectable:
                 available_selection_ids.append(ent.id)
                 if ent.kind == 'choice':
@@ -2600,7 +2624,7 @@ class Simulator:
         return event
 
     def _row_button_choices(self, row: Entity) -> list[Entity]:
-        return [x for x in self.index.by_kind.get('choice', []) if x.row_id == row.id]
+        return self.index.row_choices(row.id)
 
     def _row_button_valid_choices(self, row: Entity) -> list[Entity]:
         out: list[Entity] = []
