@@ -30,6 +30,7 @@ jobs:
 
       - name: Validate release tag
         env:
+          GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.tag }}
         run: |
           expected="v$(cat VERSION)"
@@ -41,8 +42,6 @@ jobs:
             echo "Release $RELEASE_TAG already exists." >&2
             exit 1
           fi
-        env:
-          GH_TOKEN: ${{ github.token }}
 
       - name: Run maintained tests
         run: |
