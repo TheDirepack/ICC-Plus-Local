@@ -1,3 +1,8 @@
+## Unreleased
+
+- Added `Simulator.row_visible()` and `Simulator.visible_row_ids()` for lightweight Row-gating checks. They evaluate Row Requirements directly without constructing `player_view()`, calculating Choice statuses, cloning hypothetical selection states, or generating point previews.
+- Added focused regression coverage and documented when large test suites should use direct Row visibility queries instead of the full player-view path.
+
 ## 0.10.0rc15
 
 - Made the sparse `project.json` representation the normal authoring format across generation, phased edits, low-level apply, hydration, formatting, exports, and Viewer packaging. `--not-sparse` / `--not_sparse` remains the explicit opt-out for materialized full-project JSON.
