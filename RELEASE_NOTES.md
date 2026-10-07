@@ -1,8 +1,6 @@
 ## Unreleased
 
-- Added a manually triggered GitHub Release workflow that runs validation and publishes full and Viewer/test ZIP distributions with SHA-256 checksums.
-- Added a release archive builder. The full ZIP ships source, docs, skills, examples, and verification material without test/CI trees; the Viewer/test ZIP ships only runtime simulation source plus Viewer/testing docs and its dedicated skill.
-- Split the shared browser text helper out of Creator-only helpers so the Viewer/test runtime does not need to ship authoring modules.
+- Added manual full and Viewer/test ZIP release packaging; see `docs/RELEASE_PACKAGING.md`.
 - Added `Simulator.row_visible()` and `Simulator.visible_row_ids()` for lightweight Row-gating checks. They evaluate Row Requirements directly without constructing `player_view()`, calculating Choice statuses, cloning hypothetical selection states, or generating point previews.
 - Added focused regression coverage and documented when large test suites should use direct Row visibility queries instead of the full player-view path.
 - Indexed Row-to-Choice and Choice-to-Addon relationships in `ProjectIndex` so full player views and Row-button operations no longer rescan the complete project-wide Choice/Addon lists for each parent.
