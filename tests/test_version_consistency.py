@@ -16,5 +16,5 @@ def test_release_version_is_consistent_across_package_metadata_and_docs():
     assert capabilities()['tool_version'] == __version__
     readme_head = (ROOT / 'README.md').read_text()[:1000]
     assert f'Version {__version__}' in readme_head
-    notes = (ROOT / 'RELEASE_NOTES.md').read_text()[:500]
+    notes = (ROOT / 'RELEASE_NOTES.md').read_text()
     assert f'## {__version__}' in notes

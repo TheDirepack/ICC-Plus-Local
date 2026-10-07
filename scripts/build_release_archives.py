@@ -15,6 +15,8 @@ FULL_EXCLUDE_PARTS = {
     "tests", "cli_tests", "compression_tests", "online_tests", "dist", "build",
 }
 FULL_EXCLUDE_SUFFIXES = {".pyc", ".pyo"}
+FULL_EXCLUDE_NAMES = {"run-tests", "run-compression-tests", "run-upstream-parity-tests"}
+FULL_EXECUTABLES = {"iccplus-local", "cyoa-compress", "install.sh"}
 
 VIEWER_CODE = [
     "iccplus_tools/__init__.py",
@@ -61,15 +63,24 @@ def _iter_full_files() -> Iterable[Path]:
             continue
         if path.suffix in FULL_EXCLUDE_SUFFIXES:
             continue
+        if rel.as_posix() in FULL_EXCLUDE_NAMES:
+            continue
         yield rel
 
 
-def _zip_write(zf: zipfile.ZipFile, source: Path, arcname: str) -> None:
+def _zip_write(
+    zf: zipfile.ZipFile,
+    source: Path,
+    arcname: str,
+    *,
+    executable: bool | None = None,
+) -> None:
     data = source.read_bytes()
     info = zipfile.ZipInfo(arcname)
     info.date_time = (2020, 1, 1, 0, 0, 0)
     info.compress_type = zipfile.ZIP_DEFLATED
-    info.external_attr = (0o755 if source.stat().st_mode & 0o111 else 0o644) << 16
+    is_executable = bool(source.stat().st_mode & 0o111) if executable is None else executable
+    info.external_attr = (0o755 if is_executable else 0o644) << 16
     zf.writestr(info, data)
 
 
@@ -99,7 +110,12 @@ def build_full(out_dir: Path, source_ref: str) -> Path:
     with zipfile.ZipFile(dest, "w") as zf:
         for rel in _iter_full_files():
             rel_text = str(rel).replace("\\", "/")
-            _zip_write(zf, ROOT / rel, f"{prefix}/{rel_text}")
+            _zip_write(
+                zf,
+                ROOT / rel,
+                f"{prefix}/{rel_text}",
+                executable=True if rel_text in FULL_EXECUTABLES else None,
+            )
         _write_generated(zf, f"{prefix}/RELEASE_MANIFEST.json", _manifest("full", source_ref, files))
     return dest
 
