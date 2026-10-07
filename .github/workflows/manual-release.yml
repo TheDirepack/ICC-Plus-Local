@@ -3,8 +3,8 @@ name: Manual release
 on:
   workflow_dispatch:
     inputs:
-      tag:
-        description: Git tag to create for this release (for example v0.10.0rc16)
+      version:
+        description: Version/tag text to use for this release
         required: true
         type: string
       prerelease:
@@ -28,21 +28,6 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Validate release tag
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ inputs.tag }}
-        run: |
-          expected="v$(cat VERSION)"
-          if [ "$RELEASE_TAG" != "$expected" ]; then
-            echo "Release tag must match VERSION: expected $expected, got $RELEASE_TAG" >&2
-            exit 1
-          fi
-          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-            echo "Release $RELEASE_TAG already exists." >&2
-            exit 1
-          fi
-
       - name: Run maintained tests
         run: |
           python -m pip install --upgrade pip pytest
@@ -50,11 +35,34 @@ jobs:
           sh ./run-tests
           bash ./examples/test_examples.sh
 
+      - name: Apply requested release version
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          python scripts/set_version.py "$RELEASE_VERSION"
+          python -m pytest -q tests/test_version_consistency.py
+          python scripts/build_release_archives.py \
+            --output-dir release-dist \
+            --source-ref PREVIEW
+
+      - name: Commit version update
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add VERSION iccplus_tools/version.py pyproject.toml README.md START_HERE.md docs/CLI_REFERENCE.md skills/iccplus-local/SKILL.md
+          if ! git diff --cached --quiet; then
+            git commit -m "Set release version to $RELEASE_VERSION"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
+          echo "RELEASE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
       - name: Build release ZIPs
         run: |
           python scripts/build_release_archives.py \
             --output-dir release-dist \
-            --source-ref "${GITHUB_SHA}"
+            --source-ref "${RELEASE_SHA}"
           unzip -l release-dist/iccplus-local-full-*.zip | head -80
           unzip -l release-dist/iccplus-viewer-test-*.zip | head -80
           cat release-dist/SHA256SUMS.txt
@@ -62,17 +70,21 @@ jobs:
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: iccplus-local-release-${{ inputs.tag }}
+          name: iccplus-local-release-${{ github.run_number }}
           path: release-dist/*
           if-no-files-found: error
 
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ inputs.tag }}
+          RELEASE_VERSION: ${{ inputs.version }}
           PRERELEASE: ${{ inputs.prerelease }}
         run: |
-          args=("$RELEASE_TAG" --target "$GITHUB_SHA" --title "$RELEASE_TAG" --generate-notes)
+          if gh release view "$RELEASE_VERSION" >/dev/null 2>&1; then
+            echo "Release $RELEASE_VERSION already exists." >&2
+            exit 1
+          fi
+          args=("$RELEASE_VERSION" --target "$RELEASE_SHA" --title "$RELEASE_VERSION" --generate-notes)
           if [ "$PRERELEASE" = "true" ]; then
             args+=(--prerelease)
           fi
