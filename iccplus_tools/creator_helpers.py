@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from html.parser import HTMLParser
 from typing import Any
 
 from .field_catalog import STYLE_FIELD_GROUPS
@@ -320,21 +319,7 @@ def export_design(project: dict[str, Any], target: str) -> dict[str, Any]:
     return {'version': ICCPLUS_VERSION, 'styling': deepcopy(styling)}
 
 
-class _BrowserTextContent(HTMLParser):
-    def __init__(self) -> None:
-        super().__init__(convert_charrefs=True)
-        self.parts: list[str] = []
-
-    def handle_data(self, data: str) -> None:
-        self.parts.append(data)
-
-
-def browser_text_content(value: Any) -> str:
-    """Small DOM ``textContent`` equivalent for Creator text utilities."""
-    parser = _BrowserTextContent()
-    parser.feed(str(value or ''))
-    parser.close()
-    return ''.join(parser.parts)
+from .viewer_text import browser_text_content
 
 
 def creator_id_csv(project: dict[str, Any]) -> str:
