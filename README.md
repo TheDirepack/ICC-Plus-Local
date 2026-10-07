@@ -145,6 +145,8 @@ Local mechanical tests do not replace final checks in the official Creator or Vi
 
 For large Python regression suites, use the simulator's lightweight `row_visible()` or `visible_row_ids()` helpers when the assertion only concerns Row Requirement gating. Reserve `player_view()` for tests that need the full player-facing Row/Choice/Addon structure or current selection availability. This avoids paying the full view-construction cost for a boolean Row visibility check.
 
+Full `player_view()` calls also use parent/child indexes and a request-local selection-status cache. Callers do not need to manage those optimizations; repeated status calculations are reused only within one observational view and are discarded before the next state change or view.
+
 ## License
 
 See [`LICENSE`](LICENSE).
