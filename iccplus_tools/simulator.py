@@ -15,7 +15,7 @@ from .requirements import RequirementEngine, RequirementTrace
 from .js_compat import parse_int
 from .version import __version__
 from .build_string import NativeBuildEntry, parse_build_string, serialize_build_entries
-from .creator_helpers import browser_text_content
+from .viewer_text import browser_text_content
 
 
 @dataclass(slots=True)
