@@ -1,5 +1,9 @@
 ## Unreleased
 
+- Made the repository launchers and installer symlink-safe so links created in `~/.local/bin` resolve the real repository root.
+- The full release ZIP now marks the install/launcher scripts executable even when Git file-mode metadata is unavailable, and omits root test-launcher scripts because the release archive intentionally does not ship test trees.
+- The manual release workflow invokes the test launchers through their required shells instead of depending on executable-bit preservation.
+
 - Added lightweight `Simulator.row_visible()` / `visible_row_ids()` helpers for fast Row-gating tests.
 - Indexed Row/Choice/Addon traversal and cached per-view Choice status to speed full `player_view()` calls.
 
