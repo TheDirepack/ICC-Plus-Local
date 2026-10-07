@@ -62,6 +62,20 @@ def choice(view: dict, ident: str) -> dict:
     return next(c for row in view['rows'] for c in row['choices'] if c['id'] == ident)
 
 
+def test_lightweight_row_visibility_queries_follow_runtime_requirements():
+    sim = Simulator(audit_project())
+
+    assert sim.row_visible('start') is True
+    assert sim.row_visible('unlocked') is False
+    assert sim.row_visible('secret_row') is False
+    assert sim.row_visible('not_a_real_row') is False
+    assert sim.visible_row_ids() == ['start']
+
+    assert sim.select('key').ok is True
+    assert sim.row_visible('unlocked') is True
+    assert sim.visible_row_ids() == ['start', 'unlocked']
+
+
 def test_player_view_is_progressive_audit_surface():
     sim = Simulator(audit_project())
 

@@ -998,7 +998,6 @@ class Simulator:
 
     def _count(self, ident: str) -> int:
         return int(self.state.activations.get(ident, 0))
-
     def _build_order_add(self, ident: str) -> None:
         if ident not in self.state.build_order:
             self.state.build_order.append(ident)
@@ -1105,6 +1104,28 @@ class Simulator:
             return False
         met, _ = self._requirements_met(row.value.get('requireds', []), row.path + '/requireds')
         return met
+
+    def row_visible(self, ident: str) -> bool:
+        """Return whether a Row is visible in the current runtime state.
+
+        This is the lightweight Row-gating query for tests and scripted audits that
+        do not need the complete player view. It evaluates only the Row's own
+        Requirements and avoids Choice status, score previews, and view assembly.
+        Both normal and Backpack Row IDs are accepted. Missing or ambiguous IDs
+        return ``False``.
+        """
+        row = self.index.one(ident, 'row') or self.index.one(ident, 'backpack_row')
+        return self._row_visible(row)
+
+    def visible_row_ids(self, *, include_backpack: bool = False) -> list[str]:
+        """Return visible Row IDs in project order without constructing a player view."""
+        kinds = ('row', 'backpack_row') if include_backpack else ('row',)
+        return [
+            row.id
+            for kind in kinds
+            for row in self.index.by_kind.get(kind, [])
+            if self._row_visible(row)
+        ]
 
     def _row_flag(self, row: Entity | None, name: str) -> bool:
         if not row:
@@ -1975,8 +1996,7 @@ class Simulator:
             target_ent = self._entity(target)
             if not target_ent or not self._active(target) or self.state.forced_by.get(target):
                 continue
-            if self._multiple_mode(target_ent) == 'variable':
-                current = max(0, self._count(target))
+            if self._multiple_mode(target_ent) == 'variable':                current = max(0, self._count(target))
                 if n is None or n == -1:
                     times = current
                 elif n > 0:
@@ -2976,7 +2996,6 @@ class Simulator:
 
         if not should_deselect:
             return
-
         if self._multiple_mode(parent) == 'variable':
             count = self._count(parent.id)
             # Viewer captures the parent count and walks it back to zero.

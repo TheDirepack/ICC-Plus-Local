@@ -143,6 +143,8 @@ rc15 keeps the ICC Plus 2.10.7 engine target and pinned source commit unchanged.
 
 Local mechanical tests do not replace final checks in the official Creator or Viewer for browser rendering, responsive layout, CSS, animation, dialogs, network-loaded assets, or behavior outside documented local coverage.
 
+For large Python regression suites, use the simulator's lightweight `row_visible()` or `visible_row_ids()` helpers when the assertion only concerns Row Requirement gating. Reserve `player_view()` for tests that need the full player-facing Row/Choice/Addon structure or current selection availability. This avoids paying the full view-construction cost for a boolean Row visibility check.
+
 ## License
 
 See [`LICENSE`](LICENSE).
