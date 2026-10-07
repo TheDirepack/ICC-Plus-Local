@@ -998,6 +998,7 @@ class Simulator:
 
     def _count(self, ident: str) -> int:
         return int(self.state.activations.get(ident, 0))
+
     def _build_order_add(self, ident: str) -> None:
         if ident not in self.state.build_order:
             self.state.build_order.append(ident)
@@ -1996,7 +1997,8 @@ class Simulator:
             target_ent = self._entity(target)
             if not target_ent or not self._active(target) or self.state.forced_by.get(target):
                 continue
-            if self._multiple_mode(target_ent) == 'variable':                current = max(0, self._count(target))
+            if self._multiple_mode(target_ent) == 'variable':
+                current = max(0, self._count(target))
                 if n is None or n == -1:
                     times = current
                 elif n > 0:
@@ -2996,6 +2998,7 @@ class Simulator:
 
         if not should_deselect:
             return
+
         if self._multiple_mode(parent) == 'variable':
             count = self._count(parent.id)
             # Viewer captures the parent count and walks it back to zero.
