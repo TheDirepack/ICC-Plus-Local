@@ -147,6 +147,10 @@ For large Python regression suites, use the simulator's lightweight `row_visible
 
 Full `player_view()` calls also use parent/child indexes and a request-local selection-status cache. Callers do not need to manage those optimizations; repeated status calculations are reused only within one observational view and are discarded before the next state change or view.
 
+## Release distributions
+
+The manual GitHub Actions release workflow builds two ZIP distributions: a full ICC Plus Local source/tooling package with all skills and documentation but no test/CI trees, and a minimal Viewer/runtime-testing package containing only the simulator dependency closure plus Viewer/testing skills and documentation. See `docs/RELEASE_PACKAGING.md`.
+
 ## License
 
 See [`LICENSE`](LICENSE).
