@@ -26,6 +26,8 @@ Do not add duplicated Choice Requirements merely to make a test observe cleanup 
 
 ## Large-suite practice
 
+When a Python regression only needs to know whether a Row Requirement gate is open, use `Simulator.row_visible(id)` or `Simulator.visible_row_ids()` instead of `player_view()`. The lightweight helpers skip Choice status, hypothetical state cloning, point previews, and full view assembly. Keep `player_view()` for assertions about the complete player-facing structure or current selection availability.
+
 On very large projects, split simulator-heavy release checks into bounded suites when a monolithic run obscures failures behind a timeout. Keep complete coverage, but distinguish project failures from stale assertions, environment/import failures, and performance timeouts.
 
 Reduce a long failing path to the shortest sequence that reproduces the behavior and keep that as the regression.
