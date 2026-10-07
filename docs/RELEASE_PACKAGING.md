@@ -16,6 +16,9 @@ The generated full archive deliberately excludes development-only test and CI tr
 - `online_tests/`
 - `.github/`
 - caches and generated `build/` / `dist/` directories
+- root `run-tests`, `run-compression-tests`, and `run-upstream-parity-tests` launchers, because their test trees are not shipped
+
+The full archive explicitly marks `iccplus-local`, `cyoa-compress`, and `install.sh` executable so the release does not depend on Git file-mode metadata surviving the packaging path.
 
 Tests remain in the Git repository and run before a manual release is created; they are simply not shipped in the end-user release ZIP.
 
