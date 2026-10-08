@@ -1,5 +1,7 @@
 ## Unreleased
 
+- Unified normal CI and manual-release test dependencies through the `test` optional dependency set so image and schema tests cannot be skipped by one workflow. This fixes manual-release failures caused by Pillow not being installed.
+
 - Manual release version input is now authoritative. The workflow synchronizes `VERSION` and current package metadata automatically instead of requiring a pre-matched tag/version state.
 - CI and manual releases now use the same full ZIP + Viewer/test ZIP builder instead of maintaining a separate wheel/raw-source artifact path.
 - Version consistency checks now cover canonical package/runtime metadata rather than depending on README or release-note heading placement.

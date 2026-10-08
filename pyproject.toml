@@ -11,6 +11,9 @@ license = {text = "MIT"}
 authors = [{name = "OpenAI"}]
 dependencies = []
 
+[project.optional-dependencies]
+test = ["pytest", "pillow", "jsonschema"]
+
 [project.scripts]
 iccplus-local = "iccplus_tools.cli:main"
 iccplus-sparse = "iccplus_tools.sparse_project:main"
