@@ -20,7 +20,7 @@ def test_symlinked_iccplus_launcher_resolves_real_repository_root(tmp_path: Path
         check=False,
     )
     assert result.returncode == 0, result.stderr
-    assert "0.10.0rc15" in result.stdout
+    assert "0.10.0rc16" in result.stdout
 
 
 def test_symlinked_installer_links_real_launchers_and_marks_them_executable(tmp_path: Path):

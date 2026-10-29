@@ -38,7 +38,7 @@ class PackagingTests(unittest.TestCase):
             }], 'rowDesignGroups': []
         }]
         out, assets = image_separation(p)
-        self.assertEqual(out['version'], '2.10.7')
+        self.assertEqual(out['version'], '2.10.14')
         self.assertEqual(out['styling']['backgroundImage'], 'images/Bg.png')
         self.assertEqual(out['rows'][0]['objects'][0]['image'], 'images/Bg.png')
         self.assertEqual(out['rows'][0]['image'], 'images/R1.png')
@@ -60,7 +60,7 @@ class PackagingTests(unittest.TestCase):
                 self.assertFalse(raw.endswith(b'\n'))
                 project = json.loads(raw)
                 self.assertEqual(project['viewerConfig']['loadingBgImage'], 'images/Loading.png')
-                self.assertEqual(project['version'], '2.10.7')
+                self.assertEqual(project['version'], '2.10.14')
                 self.assertNotIn('rows', project)
                 self.assertNotIn('styling', project)
                 self.assertNotIn('backpack', project)
@@ -101,7 +101,7 @@ class PackagingTests(unittest.TestCase):
             with zipfile.ZipFile(out) as zf:
                 self.assertIn('project.json', zf.namelist())
                 runtime = json.loads(zf.read('project.json'))
-                self.assertEqual(runtime['version'], '2.10.7')
+                self.assertEqual(runtime['version'], '2.10.14')
                 self.assertNotIn('rows', runtime)
                 self.assertNotIn('styling', runtime)
                 # viewerConfig remains because this test deliberately customizes it.
@@ -138,7 +138,7 @@ class PackagingTests(unittest.TestCase):
             with zipfile.ZipFile(out) as zf:
                 self.assertNotIn('project.json', zf.namelist())
                 js = zf.read('js/app.js').decode()
-                self.assertIn('"version":"2.10.7"', js)
+                self.assertIn('"version":"2.10.14"', js)
                 self.assertNotIn('"rows":[]', js)
                 self.assertNotIn('"viewerConfig":', js)
                 self.assertIn('/*! End */', js)

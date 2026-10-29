@@ -83,7 +83,7 @@ def test_probe_suite_writes_manifest_pairs_and_results_ledger(tmp_path) -> None:
     assert manifest['format_version'] == 2
     assert manifest['case_count'] == len(sample)
     assert manifest['case_count'] == len(manifest['cases'])
-    assert manifest['target']['icc_plus_version'] == '2.10.7'
+    assert manifest['target']['icc_plus_version'] == '2.10.14'
     assert sum(manifest['category_counts'].values()) == manifest['case_count']
     disk_manifest = json.loads((tmp_path / 'manifest.json').read_text(encoding='utf-8'))
     results = json.loads((tmp_path / 'results.json').read_text(encoding='utf-8'))
