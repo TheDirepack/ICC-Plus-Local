@@ -69,7 +69,7 @@ They do not disappear from the project. The simulator lists them in `unsupported
 
 The current target is ICC Plus 2.10.14 at upstream source commit `21d340238fa16f4e66a61727f797d334b0486fda`. The earlier 2.10.7 differential suite established the baseline. This update adds the `notDeselectedByReq` selection-protection flag, keeps newly live Score refund fields in sparse projects, and aligns active Addon visibility and result-row exclusions. The local simulation does not claim full dynamic-discount-stack or browser-layout emulation.
 
-The pinned upstream Viewer differential harness checks default export and actual runtime state in Chromium, including targeted 2.10.14 cases. It must run successfully before treating the current pin as source-verified. The offline Python and CLI tests alone do not prove Viewer parity.
+The pinned upstream Viewer differential harness checks default export and actual runtime state in Chromium, including targeted 2.10.14 cases. The 35-case 2.10.14 Chromium differential, default export, and TypeScript field/required-field checks passed in [GitHub Actions](https://github.com/TheDirepack/ICC-Plus-Local/actions/runs/40810229658). This verifies the enumerated cases only; browser layout, visual effects, dynamic discount stacks, and independent omission-probe cases remain outside this proof. The offline Python and CLI tests alone do not establish Viewer parity.
 
 The historical Revision 5 project snapshot used none of the advanced mechanics marked unsupported above. That observation does not imply subsequent project versions avoid them.
 

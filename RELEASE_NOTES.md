@@ -7,7 +7,7 @@
 - Retained `isChangeDiscount` and `tmpDisScore` in sparse Score serialization: upstream 2.10.14 reads these fields during discount refunds, making prior omissions unsafe.
 - Aligned active-Addon visibility and result-row exclusions, retaining Local's existing separate `addonWidth` handling.
 - Added regression tests for the new field, requirement protection, row-cap replacement, and newly runtime-sensitive sparse fields.
-- Maintained the Python CLI and native authoring skill API. Official Svelte UI, delay cancellation, CSS and browser runtime remain outside this headless port. Full local CI and browser differential tests are pending; this candidate does not claim complete Viewer parity.
+- Maintained the Python CLI and native authoring skill API. Official Svelte UI, delay cancellation, CSS and browser runtime remain outside this headless port. GitHub Actions core/CLI/example tests and the official pinned-source Chromium differential (35/35 gameplay cases plus TypeScript required-field checks) passed. The headless port still does not claim full visual, animation, media, or untested sparse-omission parity.
 
 ## Unreleased
 

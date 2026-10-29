@@ -10,7 +10,7 @@ A canonical sparse saved project must remain usable as an authoring artifact. Hy
 
 This means a normal saved project is expected to pass compatibility validation, not complete validation. Use `project validate` for the normal artifact and `project validate --complete` only when checking an explicitly materialized Creator-complete form.
 
-The omission inventory originated with verified 2.10.7 Viewer read paths. Upstream 2.10.14 now reads `isChangeDiscount` and `tmpDisScore` during refund processing, so both are retained instead of being treated as Viewer-unused Score fields. Remaining omissions are preserved from the earlier audited baseline pending the official 2.10.14 browser differential checks; the new upstream parity workflow is the verification gate, not an assumption that a version bump proves behavioral equivalence.
+The omission inventory originated with verified 2.10.7 Viewer read paths. Upstream 2.10.14 now reads `isChangeDiscount` and `tmpDisScore` during refund processing, so both are retained instead of being treated as Viewer-unused Score fields. The official pinned-source 2.10.14 Chromium differential now passes its 35 gameplay cases, default export check, field catalog, and required-field metadata comparison. The remaining omission rules are preserved from the earlier audited baseline; those targeted omission equivalence cases require their own browser evidence and are not proven by the general gameplay differential alone.
 
 ## Automatic omissions
 
