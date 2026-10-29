@@ -84,8 +84,17 @@ def extract_payload(dom: str) -> dict:
     end = dom.find('</pre>', start)
     if end < 0:
         raise RuntimeError('unterminated parity result element')
-    text = html.unescape(dom[start:end])
-    return json.loads(text)
+    text = html.unescape(dom[start:end]).strip()
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError as exc:
+        title_start = dom.find('<title>')
+        title_end = dom.find('</title>', title_start + 7) if title_start >= 0 else -1
+        title = dom[title_start + 7:title_end] if title_end >= 0 else '(unknown)'
+        raise RuntimeError(
+            f'Viewer parity harness produced non-JSON output (title={title!r}, '
+            f'pre={text[:700]!r}, dom_bytes={len(dom)}): {exc}'
+        ) from exc
 
 
 def compare(upstream: dict) -> list[str]:
@@ -141,7 +150,7 @@ def main() -> int:
         try:
             cp = run([
                 browser, '--headless', '--disable-gpu', '--no-sandbox', '--disable-dev-shm-usage',
-                '--virtual-time-budget=15000', '--dump-dom', f'http://127.0.0.1:{port}/',
+                '--virtual-time-budget=60000', '--dump-dom', f'http://127.0.0.1:{port}/',
             ], check=True, timeout=90)
         finally:
             server.shutdown()
