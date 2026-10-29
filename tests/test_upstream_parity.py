@@ -20,7 +20,7 @@ def project(*choices, points=None, groups=None, variables=None, words=None, glob
             'currentChoices': 0, 'requireds': [], 'objects': list(choices),
         }]
     return {
-        'version': '2.10.7', 'defaultChoiceMaxNum': 99,
+        'version': '2.10.14', 'defaultChoiceMaxNum': 99,
         'pointTypes': list(points or []), 'variables': list(variables or []),
         'words': list(words or []), 'groups': list(groups or []),
         'globalRequirements': list(global_requirements or []), 'rows': rows, 'backpack': [],
@@ -45,7 +45,7 @@ def point(ident: str, value: float, **extra):
 def test_new_project_is_exact_frozen_default_app():
     assert new_project() == default_project()
     p = new_project()
-    assert p['version'] == '2.10.7'
+    assert p['version'] == '2.10.14'
     assert p['backpack'][0]['id'] == 'default_backpack_row'
     # Preserve upstream spelling bugs because project JSON compatibility is literal.
     assert 'barBacktroundImage' in p['styling']
@@ -588,3 +588,39 @@ def test_generated_choice_types_are_self_contained(tmp_path: Path):
         text=True, capture_output=True,
     )
     assert result.returncode == 0, result.stderr or result.stdout
+
+
+def test_21014_requirement_cleanup_preserves_protected_choice_and_selectable_addon():
+    require_gate = {'required': True, 'type': 'id', 'reqId': 'gate'}
+    parent = choice('parent', addons=[{
+        'id': 'sub', 'title': 'Sub', 'text': '', 'isSelectable': True,
+        'parentId': 'parent', 'template': 1, 'addonWidth': 'col-12',
+        'requireds': [require_gate], 'scores': [], 'groups': [],
+        'notDeselectedByReq': True,
+    }])
+    sim = Simulator(project(
+        choice('gate'), parent,
+        choice('protected', requireds=[require_gate], notDeselectedByReq=True),
+        choice('ordinary', requireds=[require_gate]),
+    ))
+    assert sim.select('gate').ok
+    assert sim.select('parent').ok
+    assert sim.select('sub').ok
+    assert sim.select('protected').ok
+    assert sim.select('ordinary').ok
+    assert sim.deselect('gate').ok
+    assert sim._active('protected')
+    assert sim._active('sub')
+    assert not sim._active('ordinary')
+
+
+def test_21014_protected_choice_cannot_be_row_capacity_replacement():
+    sim = Simulator(project(rows=[{
+        'id': 'r', 'index': 0, 'title': 'R', 'titleText': '',
+        'allowedChoices': 1, 'currentChoices': 0, 'requireds': [],
+        'objects': [choice('protected', notDeselectedByReq=True), choice('next')],
+    }]))
+    assert sim.select('protected').ok
+    assert not sim.choice_status('next').selectable
+    assert not sim.select('next').ok
+    assert sim._active('protected')

@@ -1,3 +1,14 @@
+# ICC Plus Local release notes
+
+## 0.10.0rc16 — ICC Plus 2.10.14 compatibility candidate
+
+- Re-pinned the project defaults, schema catalogs, capabilities and sparse serializer to official ICC Plus 2.10.14 source commit `21d340238fa16f4e66a61727f797d334b0486fda` (eight upstream commits after 2.10.7).
+- Added `notDeselectedByReq` as a Choice/selectable-Addon boolean. Requirement-driven deselection and row-limit replacement respect the new protection flag.
+- Retained `isChangeDiscount` and `tmpDisScore` in sparse Score serialization: upstream 2.10.14 reads these fields during discount refunds, making prior omissions unsafe.
+- Aligned active-Addon visibility and result-row exclusions, retaining Local's existing separate `addonWidth` handling.
+- Added regression tests for the new field, requirement protection, row-cap replacement, and newly runtime-sensitive sparse fields.
+- Maintained the Python CLI and native authoring skill API. Official Svelte UI, delay cancellation, CSS and browser runtime remain outside this headless port. Full local CI and browser differential tests are pending; this candidate does not claim complete Viewer parity.
+
 ## Unreleased
 
 - Unified normal CI and manual-release test dependencies through the `test` optional dependency set so image and schema tests cannot be skipped by one workflow. This fixes manual-release failures caused by Pillow not being installed.

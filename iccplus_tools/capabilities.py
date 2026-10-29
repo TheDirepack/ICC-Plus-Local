@@ -50,9 +50,9 @@ def capabilities() -> dict[str, Any]:
         'tool': 'iccplus-local',
         'tool_version': __version__,
         'target': {
-            'icc_plus_version': '2.10.7',
+            'icc_plus_version': '2.10.14',
             'source_repository': 'wahaha303/ICC-Plus-Svelte',
-            'source_commit': '1ea9db888cde2286d18d0d5de50933cb8773b739',
+            'source_commit': '21d340238fa16f4e66a61727f797d334b0486fda',
         },
         'interface': 'command-line',
         'output': {
@@ -161,7 +161,7 @@ def capabilities() -> dict[str, Any]:
         },
         'build_system': {
             'blank_command': 'iccplus-local generate -o project.json',
-            'blank_source': 'exact ICC Plus 2.10.7 Creator default export',
+            'blank_source': 'exact ICC Plus 2.10.14 Creator default export',
             'mutation_commands': ['iccplus-local structure PROJECT SCRIPT', 'iccplus-local rules PROJECT SCRIPT', 'iccplus-local style PROJECT MANIFEST'],
             'repeatable_build_command': 'iccplus-local build BUILD.json -o project.json',
             'build_manifest_schema': 'iccplus-local reference schema build-manifest',

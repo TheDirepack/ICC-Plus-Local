@@ -1,6 +1,6 @@
 # Sparse project serialization
 
-ICC Plus Local targets ICC Plus 2.10.7 at upstream commit `1ea9db888cde2286d18d0d5de50933cb8773b739`.
+ICC Plus Local targets ICC Plus 2.10.14 at upstream commit `21d340238fa16f4e66a61727f797d334b0486fda`.
 
 Normal saved `project.json` serialization omits fields only when their absence is proven safe for both the pinned Viewer behavior and ICC Plus Local's authoring round trip. This is the default project-save policy as well as the Viewer-package policy. It is not a generic "remove defaults" pass and it does not change source-level project intent.
 
@@ -10,7 +10,7 @@ A canonical sparse saved project must remain usable as an authoring artifact. Hy
 
 This means a normal saved project is expected to pass compatibility validation, not complete validation. Use `project validate` for the normal artifact and `project validate --complete` only when checking an explicitly materialized Creator-complete form.
 
-The no-read rules below were checked against the pinned 2.10.7 Viewer source. The immediately following 2.10.8 upstream commit was also reviewed to make sure a field was not being classified as unused merely because its read path disappeared after 2.10.7; that commit changes the relevant Viewer store only for a Point legacy-version check and Addon width-stack handling.
+The no-read rules below were checked against the pinned 2.10.14 Viewer source. The immediately following 2.10.8 upstream commit was also reviewed to make sure a field was not being classified as unused merely because its read path disappeared after 2.10.14; that commit changes the relevant Viewer store only for a Point legacy-version check and Addon width-stack handling.
 
 ## Automatic omissions
 

@@ -30,6 +30,13 @@ class FieldTypeTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'expects boolean'):
             validate_field_value('choice', 'isAutoActive', 0)
 
+    def test_21014_new_requirement_protection_flag_is_typed_for_choices_and_addons(self):
+        for kind in ('choice', 'selectable_addon'):
+            validate_field_value(kind, 'notDeselectedByReq', True)
+            self.assertEqual(json_schema_for_kind(kind)['properties']['notDeselectedByReq'], {'type': 'boolean'})
+            with self.assertRaisesRegex(ValueError, 'expects boolean'):
+                validate_field_value(kind, 'notDeselectedByReq', 'true')
+
     def test_selectable_addon_discriminator_is_literal_true(self):
         validate_field_value('selectable_addon', 'isSelectable', True)
         with self.assertRaisesRegex(ValueError, 'literal true'):

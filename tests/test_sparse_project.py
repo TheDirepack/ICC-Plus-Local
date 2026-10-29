@@ -297,11 +297,11 @@ def test_runtime_discarded_fields_and_null_object_members_do_not_survive() -> No
 
 
 def test_wrong_target_version_is_rejected() -> None:
-    source = {'version': '2.10.8', 'rows': []}
+    source = {'version': '2.10.7', 'rows': []}
     try:
         sparsify_project(source, require_complete=False)
     except ValueError as exc:
-        assert 'pinned to ICC Plus 2.10.7' in str(exc)
+        assert 'pinned to ICC Plus 2.10.14' in str(exc)
     else:
         raise AssertionError('expected target-version rejection')
 
@@ -328,3 +328,19 @@ def test_cli_writes_separate_sparse_artifact(tmp_path) -> None:
     sparse = json.loads(output.read_text(encoding='utf-8'))
     assert sparse['version'] == ICCPLUS_VERSION
     assert 'rows' not in sparse
+
+
+def test_21014_sparse_export_retains_discount_refund_runtime_fields() -> None:
+    source = {
+        'version': ICCPLUS_VERSION,
+        'rows': [{'id': 'r', 'objects': [{'id': 'c', 'scores': [{
+            'idx': 'score-c-p', 'id': 'p', 'value': 6,
+            'discountIsOn': True, 'discountScore': 2,
+            'isChangeDiscount': True, 'tmpDisScore': 4,
+        }]}]}],
+        'pointTypes': [{'id': 'p', 'startingSum': 12, 'name': 'Points'}],
+    }
+    sparse, _ = sparsify_project(source, require_complete=False)
+    score = sparse['rows'][0]['objects'][0]['scores'][0]
+    assert score['isChangeDiscount'] is True
+    assert score['tmpDisScore'] == 4

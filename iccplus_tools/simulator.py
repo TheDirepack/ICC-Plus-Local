@@ -212,7 +212,7 @@ class Simulator:
         self.rng.setstate(fresh.rng.getstate())
 
     def export_build_string(self) -> str:
-        """Return ICC Plus 2.10.7's native Build Form string for this state."""
+        """Return ICC Plus 2.10.14's native Build Form string for this state."""
         entries: list[NativeBuildEntry] = []
         selectable_ids = {x.id for x in self.index.selectables()}
         variable_ids = {x.id for x in self.index.by_kind.get('variable', [])}
@@ -258,7 +258,7 @@ class Simulator:
         return serialize_build_entries(entries)
 
     def load_build_string(self, value: str) -> None:
-        """Load an ICC Plus 2.10.7 Build Form string into the local runtime.
+        """Load an ICC Plus 2.10.14 Build Form string into the local runtime.
 
         The replay uses the native random Score and random-activation payloads as
         deterministic overrides. This makes a browser-produced build reproducible
@@ -1150,13 +1150,16 @@ class Simulator:
         parent = self.index.parent_choice(ent)
         if not row or not parent or not self._choice_visible(parent):
             return False
-        addon_met, _ = self._requirements_met(ent.value.get('requireds', []), ent.path + '/requireds')
+        addon_req_met, _ = self._requirements_met(ent.value.get('requireds', []), ent.path + '/requireds')
+        addon_met = self._active(ent.id) or addon_req_met
         show_all = self.state.show_all_addons > 0
         parent_active = self._active(parent.id)
         ordinary_gate = show_all or ((not ent.value.get('hideAddon') or parent_active) and (ent.value.get('showAddon') or addon_met))
         if not ordinary_gate:
             return False
         if ent.kind == 'selectable_addon':
+            if row.value.get('isResultRow') and ent.value.get('isNotResult'):
+                return False
             if self._row_flag(row, 'unselAddonRemoved') and not self._active(ent.id):
                 return False
             if row.value.get('isResultRow') and not self._active(ent.id):
@@ -1413,7 +1416,7 @@ class Simulator:
                 continue
             if not self._counts_for_row(other):
                 continue
-            if other.value.get('selectOnce') or self.state.forced_by.get(other.id):
+            if other.value.get('selectOnce') or other.value.get('notDeselectedByReq') or self.state.forced_by.get(other.id):
                 continue
             # ICC Plus row-cap replacement handles multiple choices by calling
             # selectedOneLess once for each *positive* current repeat. A zero or
@@ -1595,7 +1598,7 @@ class Simulator:
         return base + ('/ON#' + parts[1] if len(parts) > 1 else '')
 
     def _duplicate_row_requirements(self, value: Any, suffix: str) -> None:
-        """Apply the 2.10.7 duplicateRow ID suffix rule to native Requirement data."""
+        """Apply the 2.10.14 duplicateRow ID suffix rule to native Requirement data."""
         if not isinstance(value, list):
             return
         for req in value:
@@ -1608,7 +1611,7 @@ class Simulator:
                 for item in req['orRequired']:
                     if isinstance(item, dict) and isinstance(item.get('req'), str):
                         item['req'] = self._dup_suffix_ref(item['req'], suffix)
-            # The pinned 2.10.7 source does not successfully descend into nested
+            # The pinned 2.10.14 source does not successfully descend into nested
             # requirements here. Keep that behavior instead of repairing it.
 
     def _duplicate_row_functions(self, choice: dict[str, Any], suffix: str) -> None:
@@ -1641,7 +1644,7 @@ class Simulator:
         return candidate
 
     def _duplicate_row_effect(self, ent: Entity) -> str | None:
-        """Mirror ICC Plus 2.10.7 ``duplicateRow()`` for a selected entity."""
+        """Mirror ICC Plus 2.10.14 ``duplicateRow()`` for a selected entity."""
         choice = ent.value
         if not choice.get('duplicateRow'):
             return None
@@ -1878,7 +1881,7 @@ class Simulator:
         before_count = self._count(target)
         registered = False
         if target_ent.value.get('isSelectableMultiple'):
-            # Preserve the 2.10.7 source behavior. A bare multiple target has a
+            # Preserve the 2.10.14 source behavior. A bare multiple target has a
             # force count of zero and the negative loop is unreachable.
             if n is not None and n > 0:
                 for _ in range(n):
@@ -2018,7 +2021,7 @@ class Simulator:
         for ident in list(self.state.selected_order):
             if ident == changed_id or not self._active(ident): continue
             ent = self._entity(ident)
-            if not ent: continue
+            if not ent or ent.value.get('notDeselectedByReq'): continue
             met, _ = self.req.evaluate(ent.value.get('requireds', []), self.state, ent.path + '/requireds')
             if not met:
                 self.deselect(ident, reason=f'requirements became unmet after {changed_id}', _depth=depth + 1, force_cleanup=True, _internal=True)
@@ -2650,7 +2653,7 @@ class Simulator:
         return self.select(choice.id, _internal=True, _dialogs=dialogs)
 
     def press_row_button(self, row_id: str, *, dialogs: dict[str, dict[str, Any]] | None = None) -> Event:
-        """Press an ICC Plus Row button using Viewer 2.10.7 buttonActivate rules."""
+        """Press an ICC Plus Row button using Viewer 2.10.14 buttonActivate rules."""
         before = self.state.clone()
         rng_before = self.rng.getstate()
         row = self.index.one(row_id, 'row') or self.index.one(row_id, 'backpack_row')
