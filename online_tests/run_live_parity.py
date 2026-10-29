@@ -93,7 +93,7 @@ def compare(upstream: dict) -> list[str]:
     if upstream.get('appVersion') != ICCPLUS_VERSION:
         errors.append(f"appVersion: upstream={upstream.get('appVersion')!r}, expected={ICCPLUS_VERSION!r}")
     if upstream.get('defaultExport') != default_export_text():
-        errors.append('default exported project bytes differ from ICC Plus 2.10.6 source runtime')
+        errors.append('default exported project bytes differ from ICC Plus 2.10.14 source runtime')
     if upstream.get('emptySelectedObjectId') != '':
         errors.append(f"empty getSelectedObjectId() returned {upstream.get('emptySelectedObjectId')!r}")
     local = local_results()
@@ -109,7 +109,7 @@ def compare(upstream: dict) -> list[str]:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description='Run live differential tests against pinned ICC Plus 2.10.6 source')
+    ap = argparse.ArgumentParser(description='Run live differential tests against pinned ICC Plus 2.10.14 source')
     ap.add_argument('--upstream-dir', type=Path, help='existing ICC-Plus-Svelte git checkout; avoids cloning from GitHub')
     ap.add_argument('--chromium', help='Chromium/Chrome executable')
     ap.add_argument('--keep-workdir', action='store_true')

@@ -451,6 +451,60 @@ def live_cases() -> list[dict[str, Any]]:
         'actions': [{'op': 'select', 'id': 'keep'}, {'op': 'set_point', 'id': 'p', 'value': 99}, {'op': 'reset'}],
     })
 
+    # 2.10.14: activated selections can deliberately survive lost Requirements.
+    # A normal neighboring choice must still be cleaned.
+    cases.append({
+        'name': 'protected_requirements_cleanup_21014',
+        'project': _project(rows=[_row('r', [
+            _choice('gate'),
+            _choice('protected', requireds=[_req('id', reqId='gate')], notDeselectedByReq=True),
+            _choice('ordinary', requireds=[_req('id', reqId='gate')]),
+        ])]),
+        'actions': [
+            {'op': 'select', 'id': 'gate'},
+            {'op': 'select', 'id': 'protected'},
+            {'op': 'select', 'id': 'ordinary'},
+            {'op': 'deselect', 'id': 'gate'},
+        ],
+        'check_requirements': ['protected', 'ordinary'],
+    })
+
+    # The 2.10.14 checkSelectable path also avoids row-cap replacement of a
+    # protected selection; explicit manual deselection remains a separate rule.
+    cases.append({
+        'name': 'protected_row_capacity_21014',
+        'project': _project(rows=[_row('r', [
+            _choice('protected', notDeselectedByReq=True),
+            _choice('next'),
+        ], allowed=1)]),
+        'actions': [
+            {'op': 'select', 'id': 'protected'},
+            {'op': 'select', 'id': 'next'},
+        ],
+    })
+
+    cases.append({
+        'name': 'protected_selectable_addon_requirements_21014',
+        'project': _project(rows=[_row('r', [
+            _choice('gate'),
+            _choice('parent', addons=[{
+                'id': 'sub', 'title': 'Sub', 'text': '', 'image': '',
+                'template': 1, 'addonWidth': 'col-12', 'parentId': 'parent',
+                'isSelectable': True, 'scores': [], 'groups': [],
+                'multipleUseVariable': 0, 'isActive': False,
+                'requireds': [_req('id', reqId='gate')],
+                'notDeselectedByReq': True,
+            }]),
+        ])]),
+        'actions': [
+            {'op': 'select', 'id': 'gate'},
+            {'op': 'select', 'id': 'parent'},
+            {'op': 'select', 'id': 'sub'},
+            {'op': 'deselect', 'id': 'gate'},
+        ],
+        'check_requirements': ['sub'],
+    })
+
     return cases
 
 
