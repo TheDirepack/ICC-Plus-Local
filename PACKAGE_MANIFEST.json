@@ -9,7 +9,7 @@
     "checked_in_examples": "CI workflow is authoritative for the current branch",
     "ci_workflow": ".github/workflows/tests.yml",
     "default_export_bytes": 13415,
-    "default_export_sha256": "10e9b3ba3ccee2a9ca7e2ce2753e2f61fc2e289549629f2c2d6235cc0705f68d"
+    "default_export_sha256": "4dd40c184a0e96c72a6ec665e8d86d87f784c6648f68136211cc6b8e3fafa63f"
   },
   "project_integrity": {
     "canonical_final_validation": "project validate --complete",
@@ -62,7 +62,7 @@
   "official_web_gui_verification": {
     "historical_2_10_6": "C01 official Creator export exactly matched the retained 2.10.6 round-trip fixture",
     "browser_authority": "official Creator/Viewer remains authoritative for rendering and browser-only behavior",
-    "current_2_10_15": "35 pinned official Viewer runtime sequences, blank default export and TypeScript native metadata matched in Chromium against 2.10.14; 2.10.15 is the new compatibility target pending its CI run"
+    "current_2_10_15": "The pinned 2.10.15 official Viewer already passed the 35-case runtime differential, default export and native field metadata checks; the later sparse equivalence suite is subject to its own CI run"
   },
   "historical_manifest": "PACKAGE_MANIFEST_RC11.json",
   "cyoa_skills": {
