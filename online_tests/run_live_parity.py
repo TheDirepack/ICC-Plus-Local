@@ -124,7 +124,16 @@ def main() -> int:
         fixtures = {'commit': ICCPLUS_COMMIT, 'cases': live_cases()}
         (viewer / 'public' / 'parity-fixtures.json').write_text(json.dumps(fixtures, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
 
-        run(['npm', 'ci'], cwd=viewer, timeout=900)
+        install = run(['npm', 'ci', '--no-audit', '--no-fund'], cwd=viewer, check=False, timeout=900)
+        if install.returncode != 0:
+            # Official 2.10.14 Viewer lockfile is missing picomatch@4.0.7.
+            # Repair it only in this disposable checkout, never in the pinned source.
+            if 'EUSAGE' not in install.stderr or 'Missing:' not in install.stderr:
+                raise RuntimeError('pinned Viewer npm ci failed: ' + install.stderr)
+            print('Upstream Viewer lockfile incomplete; repairing disposable checkout', file=sys.stderr)
+            run(['npm', 'install', '--package-lock-only', '--ignore-scripts', '--no-audit', '--no-fund'],
+                cwd=viewer, timeout=900)
+            run(['npm', 'ci', '--no-audit', '--no-fund'], cwd=viewer, timeout=900)
         run(['npx', 'vite', 'build', '--outDir', 'parity-dist', '--emptyOutDir'], cwd=viewer, timeout=600)
 
         browser = locate_chromium(args.chromium)
