@@ -112,12 +112,24 @@
                 for (const action of testCase.actions || []) await act(action);
                 results[testCase.name] = snapshot(testCase.check_requirements || []);
             }
+            const sparseResults: Record<string, any> = {};
+            for (const testCase of payload.sparse_cases || []) {
+                const runs: Record<string, any> = {};
+                for (const phase of ['baseline', 'candidate']) {
+                    localStorage.clear();
+                    await initializeApp(clone(testCase[phase]));
+                    for (const action of testCase.actions || []) await act(action);
+                    runs[phase] = snapshot(testCase.check_requirements || []);
+                }
+                sparseResults[testCase.name] = runs;
+            }
             output = JSON.stringify({
                 commit: payload.commit,
                 appVersion,
                 defaultExport: exactDefaultExport(),
                 emptySelectedObjectId,
                 results,
+                sparseResults,
             });
             document.title = 'ICCPLUS_PARITY_DONE';
         } catch (error) {

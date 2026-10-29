@@ -624,3 +624,18 @@ def test_21014_protected_choice_cannot_be_row_capacity_replacement():
     assert not sim.choice_status('next').selectable
     assert not sim.select('next').ok
     assert sim._active('protected')
+
+
+def test_live_viewer_sparse_equivalence_inventory_is_valid_and_nontrivial():
+    from iccplus_tools.live_parity import sparse_equivalence_cases
+    from iccplus_tools.validation import validate_complete
+
+    cases = sparse_equivalence_cases()
+    assert {case['name'] for case in cases} == {
+        'empty_default', 'single_choice_unselected',
+        'single_choice_selected', 'protected_choice_selected',
+    }
+    for case in cases:
+        assert validate_complete(case['baseline'])['valid'], case['name']
+        assert case['baseline'] != case['candidate'], case['name']
+        assert case['baseline']['version'] == case['candidate']['version']

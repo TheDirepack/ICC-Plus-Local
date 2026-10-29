@@ -508,6 +508,36 @@ def live_cases() -> list[dict[str, Any]]:
     return cases
 
 
+
+def sparse_equivalence_cases() -> list[dict[str, Any]]:
+    """Compare canonical Local sparse files with Creator-complete originals in
+    the actual pinned official Viewer, not just the Python hydration path.
+    """
+    from .omission_probe import _base_project
+    from .sparse_project import sparsify_project
+    from .upstream_2106 import default_export_project
+
+    cases: list[dict[str, Any]] = []
+    originals = [
+        ('empty_default', default_export_project(), []),
+        ('single_choice_unselected', _base_project(), []),
+        ('single_choice_selected', _base_project(), [{'op': 'select', 'id': 'probe-choice'}]),
+    ]
+    protected = _base_project()
+    protected['rows'][0]['objects'][0]['notDeselectedByReq'] = True
+    originals.append(('protected_choice_selected', protected, [{'op': 'select', 'id': 'probe-choice'}]))
+
+    for name, original, actions in originals:
+        candidate, receipt = sparsify_project(original)
+        if candidate == original or not receipt:
+            raise AssertionError(f'{name}: sparse serializer produced no measurable output')
+        cases.append({
+            'name': name, 'baseline': original, 'candidate': candidate,
+            'actions': actions, 'check_requirements': [],
+        })
+    return cases
+
+
 def _local_snapshot(sim: Simulator, check_requirements: list[str]) -> dict[str, Any]:
     entities = sim.index.selectables()
     entity_state = {

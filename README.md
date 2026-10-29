@@ -139,7 +139,7 @@ For prose cleanup, the recommended external companion is the [Unslop skill](http
 
 ## Verification
 
-rc15 keeps the ICC Plus 2.10.15 engine target and pinned source commit unchanged. It includes the expanded sparse omission audit and makes sparse JSON the normal project representation while preserving authoring identities and labels needed across commands. The GitHub Actions workflow is authoritative for the current candidate; browser-only omission cases remain separate pinned-Viewer verification work until promoted by evidence.
+Historical rc15 retained the earlier ICC Plus 2.10.7 engine target and source pin. It includes the expanded sparse omission audit and makes sparse JSON the normal project representation while preserving authoring identities and labels needed across commands. The GitHub Actions workflow is authoritative for the current candidate; browser-only omission cases remain separate pinned-Viewer verification work until promoted by evidence.
 
 Local mechanical tests do not replace final checks in the official Creator or Viewer for browser rendering, responsive layout, CSS, animation, dialogs, network-loaded assets, or behavior outside documented local coverage.
 

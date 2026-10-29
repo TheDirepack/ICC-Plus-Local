@@ -19,7 +19,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from iccplus_tools.live_parity import live_cases, local_results
+from iccplus_tools.live_parity import live_cases, local_results, sparse_equivalence_cases
 from iccplus_tools.upstream_2106 import ICCPLUS_COMMIT, ICCPLUS_VERSION, default_export_text
 from online_tests.source_format_check import compare_type_catalog
 
@@ -114,6 +114,17 @@ def compare(upstream: dict) -> list[str]:
             errors.append(f'{name}: missing upstream result')
         elif local[name] != remote[name]:
             errors.append(f'{name}: local != upstream\n  local={json.dumps(local[name], sort_keys=True)}\n  upstream={json.dumps(remote[name], sort_keys=True)}')
+    sparse_local = {c['name'] for c in sparse_equivalence_cases()}
+    sparse_remote = upstream.get('sparseResults', {})
+    if set(sparse_remote) != sparse_local:
+        errors.append(f'sparse fixture inventory differs: local={sorted(sparse_local)} upstream={sorted(sparse_remote)}')
+    for name, runs in sorted(sparse_remote.items()):
+        if runs.get('baseline') != runs.get('candidate'):
+            errors.append(
+                f'sparse/{name}: official Viewer outcomes differ between full and sparse project '
+                f'baseline={json.dumps(runs.get("baseline"), sort_keys=True)} '
+                f'candidate={json.dumps(runs.get("candidate"), sort_keys=True)}'
+            )
     return errors
 
 
@@ -130,7 +141,7 @@ def main() -> int:
         viewer = checkout / 'ICCPlus_Viewer'
         harness = ROOT / 'online_tests' / 'ParityHarness.svelte'
         shutil.copy2(harness, viewer / 'src' / 'App.svelte')
-        fixtures = {'commit': ICCPLUS_COMMIT, 'cases': live_cases()}
+        fixtures = {'commit': ICCPLUS_COMMIT, 'cases': live_cases(), 'sparse_cases': sparse_equivalence_cases()}
         (viewer / 'public' / 'parity-fixtures.json').write_text(json.dumps(fixtures, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
 
         install = run(['npm', 'ci', '--no-audit', '--no-fund'], cwd=viewer, check=False, timeout=900)
@@ -165,6 +176,7 @@ def main() -> int:
             'source_commit': ICCPLUS_COMMIT,
             'version': ICCPLUS_VERSION,
             'cases': len(live_cases()),
+            'sparse_equivalence_cases': len(sparse_equivalence_cases()),
             'errors': errors,
         }
         print(json.dumps(report, indent=2))
