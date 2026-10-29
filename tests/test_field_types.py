@@ -6,6 +6,7 @@ from iccplus_tools.field_catalog import FIELD_CATALOG
 from iccplus_tools.field_types import (
     FIELD_TYPE_CODES,
     field_details,
+    required_fields,
     json_schema_for_kind,
     python_typeddicts,
     typescript_declarations,
@@ -36,6 +37,16 @@ class FieldTypeTests(unittest.TestCase):
             self.assertEqual(json_schema_for_kind(kind)['properties']['notDeselectedByReq'], {'type': 'boolean'})
             with self.assertRaisesRegex(ValueError, 'expects boolean'):
                 validate_field_value(kind, 'notDeselectedByReq', 'true')
+
+    def test_upstream_native_required_fields_include_structural_ids_and_styling(self):
+        for kind, name in (
+            ('addon', 'id'),
+            ('selectable_addon', 'id'),
+            ('group', 'elements'),
+            ('row_design_group', 'styling'),
+            ('choice_design_group', 'styling'),
+        ):
+            self.assertIn(name, required_fields(kind), (kind, name))
 
     def test_selectable_addon_discriminator_is_literal_true(self):
         validate_field_value('selectable_addon', 'isSelectable', True)
