@@ -1,6 +1,6 @@
 # Sparse project serialization
 
-ICC Plus Local targets ICC Plus 2.10.14 at upstream commit `21d340238fa16f4e66a61727f797d334b0486fda`.
+ICC Plus Local targets ICC Plus 2.10.15 at upstream commit `128c05799b6df2574fd870449d15a37e410fe3e6`.
 
 Normal saved `project.json` serialization omits fields only when their absence is proven safe for both the pinned Viewer behavior and ICC Plus Local's authoring round trip. This is the default project-save policy as well as the Viewer-package policy. It is not a generic "remove defaults" pass and it does not change source-level project intent.
 

@@ -301,7 +301,7 @@ def test_wrong_target_version_is_rejected() -> None:
     try:
         sparsify_project(source, require_complete=False)
     except ValueError as exc:
-        assert 'pinned to ICC Plus 2.10.14' in str(exc)
+        assert 'pinned to ICC Plus 2.10.15' in str(exc)
     else:
         raise AssertionError('expected target-version rejection')
 

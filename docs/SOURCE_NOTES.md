@@ -1,16 +1,15 @@
 # Source notes
 
-ICC Plus Local 0.10.0rc13 targets ICC Plus 2.10.14.
+ICC Plus Local **0.10.0rc17** targets ICC Plus **2.10.15**, source commit `128c05799b6df2574fd870449d15a37e410fe3e6` (October 29, 2026).
 
-- Distribution repository: `wahaha303/ICCPlus`.
-- Creator and Viewer source: `wahaha303/ICC-Plus-Svelte`.
-- Pinned source commit: `21d340238fa16f4e66a61727f797d334b0486fda`.
-- Current audit date: 2026-09-25.
+- Distribution: `wahaha303/ICCPlus` (official Viewer release v2.10.15).
+- Creator and Viewer source: `wahaha303/ICC-Plus-Svelte`, pinned as above.
+- Current Python headless source parity tests: 35 runtime sequences in the official Chromium Viewer, plus exact blank default export and TypeScript schema/required-field comparisons.
+- The preceding 2.10.14 synchronization implemented protected Choices/selectable Addons and retained discount-refund Score state in sparse project saves.
+- The 2.10.15 update changes upstream Viewer hosting/packaging (including Neocities compatibility), not the underlying selection logic.
 
-The field catalog and generated type metadata are checked against the pinned `types.ts`. Runtime behavior is checked against the Viewer store and related Viewer components. Creator source is used for factory defaults, copy/clone behavior, style/design import rules, categories, Build Form serialization, Row buttons, project export, and other authoring actions.
+The field catalog and type metadata are checked against the pinned `types.ts`. The Viewer store and related components are used to audit game-state behavior. Creator source remains authoritative for authoring/import/export functionality and Svelte user-interface interactions.
 
-The strongest returned official-GUI Creator artifact remains the earlier 2.10.6 C01 Save to Disk round-trip match. The 2.10.14 upgrade is source-audited against its single upstream commit: the blank project shape is unchanged apart from the version, while Score gains optional `removeSpace` and the Point Type load migration is narrowed to projects without `appVersion`. A fresh 2.10.14 browser round-trip remains a separate release-verification item. The rc12 engine baseline passed 327 tests and all checked-in examples. rc13 keeps the same engine target, adds the compressed CYOA skill/documentation package, and passed 332 tests with all checked-in examples.
+The strongest returned external **Creator GUI** Save-to-Disk artifact is still the historical 2.10.6 C01 round-trip fixture. The pinned Chromium differential is an official **Viewer runtime** test, not a replacement for Creator GUI import/export validation. Dynamic discount stacks, separate omission probes, audio/media, site hosting and browser layout need their own coverage.
 
-rc11 adds a normalized player-safe hierarchy to `play`. Visible Rows, direct Choices, and Addons are returned as separate entity lists with explicit parent/child IDs. This changes how an agent can inspect the player surface, but it does not weaken the visibility boundary. Hidden content and private runtime state remain excluded.
-
-This package is an independent local command-line implementation. It does not bundle the ICC Plus browser application or claim that browser-only rendering, media playback, IndexedDB, screenshots, and modal behavior have been reproduced by the headless runner. The official Creator and Viewer remain the authority for final browser behavior and release verification.
+ICC Plus Local is an independent Python command-line tool; it does not ship a patched Svelte Viewer or implement hosting fixes itself. Use the official 2.10.15 Viewer distribution for Neocities deployment.

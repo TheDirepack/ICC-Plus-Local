@@ -65,6 +65,10 @@ These fields are detected and surfaced because browser rendering, media, interac
 
 They do not disappear from the project. The simulator lists them in `unsupported_effects` or validation diagnostics so tests can decide whether they matter.
 
+## 2.10.15 source-parity boundary
+
+The current release target is ICC Plus 2.10.15, source commit `128c05799b6df2574fd870449d15a37e410fe3e6`. Compared with 2.10.14, upstream changed the Viewer version and build/deployment process to address Neocities availability; no gameplay logic changed in the Viewer store. The pinned Chromium differential continues to test the 35 accumulated cases. Passing them does not validate the official Viewer distribution on every hosting environment, nor does the headless port replace upstream's newer site-deployment build.
+
 ## 2.10.14 source-parity boundary
 
 The current target is ICC Plus 2.10.14 at upstream source commit `21d340238fa16f4e66a61727f797d334b0486fda`. The earlier 2.10.7 differential suite established the baseline. This update adds the `notDeselectedByReq` selection-protection flag, keeps newly live Score refund fields in sparse projects, and aligns active Addon visibility and result-row exclusions. The local simulation does not claim full dynamic-discount-stack or browser-layout emulation.

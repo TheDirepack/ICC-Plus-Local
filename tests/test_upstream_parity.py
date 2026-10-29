@@ -20,7 +20,7 @@ def project(*choices, points=None, groups=None, variables=None, words=None, glob
             'currentChoices': 0, 'requireds': [], 'objects': list(choices),
         }]
     return {
-        'version': '2.10.14', 'defaultChoiceMaxNum': 99,
+        'version': '2.10.15', 'defaultChoiceMaxNum': 99,
         'pointTypes': list(points or []), 'variables': list(variables or []),
         'words': list(words or []), 'groups': list(groups or []),
         'globalRequirements': list(global_requirements or []), 'rows': rows, 'backpack': [],
@@ -45,7 +45,7 @@ def point(ident: str, value: float, **extra):
 def test_new_project_is_exact_frozen_default_app():
     assert new_project() == default_project()
     p = new_project()
-    assert p['version'] == '2.10.14'
+    assert p['version'] == '2.10.15'
     assert p['backpack'][0]['id'] == 'default_backpack_row'
     # Preserve upstream spelling bugs because project JSON compatibility is literal.
     assert 'barBacktroundImage' in p['styling']

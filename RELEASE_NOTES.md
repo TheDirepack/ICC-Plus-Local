@@ -1,5 +1,12 @@
 # ICC Plus Local release notes
 
+## 0.10.0rc17 — ICC Plus 2.10.15 compatibility candidate
+
+- Pinned to official ICC Plus 2.10.15 at source commit `128c05799b6df2574fd870449d15a37e410fe3e6`, released October 29, 2026, with the independent Python authoring and simulator capabilities preserved.
+- Upstream 2.10.15 changes are concentrated in Viewer deployment / Neocities compatibility, build tooling and packaging; its Viewer runtime store changes the version string only from 2.10.14. The official Svelte Viewer distribution, rather than the headless Local simulator, owns those deployment fixes.
+- Re-run the Chromium differential and TypeScript model/source checks against the new pinned official Viewer, including the 35 prior runtime scenarios, while retaining the historical R01–R32 browser-verification kit.
+- Preserve the 2.10.14-discovered discount refund fields and protected-selection behavior. Exact dynamic discount-stack and sparse omission behavior still require independent specialized browser tests.
+
 ## 0.10.0rc16 — ICC Plus 2.10.14 compatibility candidate
 
 - Re-pinned the project defaults, schema catalogs, capabilities and sparse serializer to official ICC Plus 2.10.14 source commit `21d340238fa16f4e66a61727f797d334b0486fda` (eight upstream commits after 2.10.7).

@@ -1,6 +1,6 @@
 # ICC Plus Local CLI
 
-Version 0.10.0rc16 targets ICC Plus 2.10.14 and pins official ICC Plus Svelte commit `21d340238fa16f4e66a61727f797d334b0486fda`.
+Version 0.10.0rc17 targets ICC Plus 2.10.15 and pins official ICC Plus Svelte commit `128c05799b6df2574fd870449d15a37e410fe3e6`.
 
 The canonical top-level interface has 11 commands:
 
@@ -40,7 +40,7 @@ For styling, prefer project-wide native styling, then official Row/Choice Design
 
 ## Runtime release serialization
 
-Every full-project JSON output uses behavior-preserving sparse serialization by default, including hydrated/formatted JSON, separate-image export packages, and Viewer packages. Use `--not-sparse` only when a materialized project is explicitly required. The omission rules are pinned to ICC Plus 2.10.14 rather than inferred from schema optionality or Creator factory defaults, and normal editable project saves must also preserve the authoring round trip.
+Every full-project JSON output uses behavior-preserving sparse serialization by default, including hydrated/formatted JSON, separate-image export packages, and Viewer packages. Use `--not-sparse` only when a materialized project is explicitly required. The omission rules are pinned to ICC Plus 2.10.15 rather than inferred from schema optionality or Creator factory defaults, and normal editable project saves must also preserve the authoring round trip.
 
 Use `iccplus-sparse PROJECT -o runtime-project.json` when a standalone player runtime artifact is needed. Use `iccplus-omission-probe -o verification/sparse-omission` to generate isolated browser test cases for omission candidates that have not yet been proven safe. See `SPARSE_RUNTIME_SERIALIZATION.md` and `COMPILER_BOUNDARY.md`.
 

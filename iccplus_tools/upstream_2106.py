@@ -4,13 +4,13 @@ import copy
 import json
 from typing import Any
 
-ICCPLUS_VERSION = "2.10.14"
-ICCPLUS_COMMIT = "21d340238fa16f4e66a61727f797d334b0486fda"
+ICCPLUS_VERSION = "2.10.15"
+ICCPLUS_COMMIT = "128c05799b6df2574fd870449d15a37e410fe3e6"
 ICCPLUS_REPOSITORY = "wahaha303/ICC-Plus-Svelte"
 
 # These values are transcribed from ICCPlus/src/lib/store/store.svelte.ts at
 # ICCPLUS_COMMIT. Field names and even upstream typos are intentionally kept
-# verbatim because a newly exported project must match ICC Plus 2.10.14.
+# verbatim because a newly exported project must match ICC Plus 2.10.15.
 FILTER_STYLING: dict[str, Any] = {
     "selFilterBlurIsOn": False,
     "selFilterBlur": 0,
@@ -564,12 +564,12 @@ DEFAULT_APP: dict[str, Any] = {
 
 
 def default_project() -> dict[str, Any]:
-    """Return an exact deep copy of ICC Plus 2.10.14 ``defaultApp``."""
+    """Return an exact deep copy of ICC Plus 2.10.15 ``defaultApp``."""
     return copy.deepcopy(DEFAULT_APP)
 
 
 def default_export_project() -> dict[str, Any]:
-    """Return the object emitted by ICC Plus 2.10.14 Save to Disk on a new project.
+    """Return the object emitted by ICC Plus 2.10.15 Save to Disk on a new project.
 
     Save to Disk runs ``app.activated = getSelectedObjectId().split(',')``.
     For an empty build ``getSelectedObjectId()`` is ``''``, so this is ``['']``.
