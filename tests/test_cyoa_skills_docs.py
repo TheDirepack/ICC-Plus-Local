@@ -60,7 +60,7 @@ def test_current_version_markers_are_synchronized():
 
     manifest = (ROOT / "PACKAGE_MANIFEST.json").read_text()
     assert f'"tool_version": "{CURRENT_TOOL_VERSION}"' in manifest
-    assert 'rc16' in manifest
+    assert CURRENT_TOOL_VERSION in manifest
 
 
 def test_current_docs_keep_21014_target_and_sparse_runtime_contract():

@@ -6,7 +6,7 @@ import difflib
 SOURCE_REPOSITORY = 'wahaha303/ICC-Plus-Svelte'
 SOURCE_COMMIT = '21d340238fa16f4e66a61727f797d334b0486fda'
 SOURCE_FILE = 'ICCPlus/src/lib/store/types.ts'
-ICC_PLUS_VERSION = '2.10.14'
+ICC_PLUS_VERSION = '2.10.15'
 
 
 def _words(value: str) -> list[str]:

@@ -26,4 +26,4 @@ def test_manifest_tracks_pinned_source_and_exact_default_export():
     assert manifest['target_icc_plus_version'] == ICCPLUS_VERSION
     assert manifest['target_source_commit'] == ICCPLUS_COMMIT
     assert manifest['local_regression']['default_export_bytes'] == len(exported)
-    assert manifest['local_regression']['default_export_sha256'] == hashlib.sha256(exported).hexdigest()
+    assert manifest['local_regression']['default_export_sha256'] == hashlib.sha256(exported).hexdigest(), hashlib.sha256(exported).hexdigest()

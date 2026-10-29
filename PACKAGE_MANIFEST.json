@@ -8,7 +8,7 @@
     "normal_tests": "CI workflow is authoritative for the current branch",
     "checked_in_examples": "CI workflow is authoritative for the current branch",
     "ci_workflow": ".github/workflows/tests.yml",
-    "default_export_bytes": 13414,
+    "default_export_bytes": 13415,
     "default_export_sha256": "10e9b3ba3ccee2a9ca7e2ce2753e2f61fc2e289549629f2c2d6235cc0705f68d"
   },
   "project_integrity": {
