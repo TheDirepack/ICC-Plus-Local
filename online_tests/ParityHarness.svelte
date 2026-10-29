@@ -18,7 +18,7 @@
         getSelectedObjectId,
     } from '$lib/store/store.svelte';
 
-    let output = 'running';
+    let output = $state('running');
 
     const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value));
     const options = () => ({ linkedObjects: [] as string[] });
