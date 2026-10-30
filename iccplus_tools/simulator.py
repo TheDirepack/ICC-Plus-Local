@@ -1579,7 +1579,7 @@ class Simulator:
             elif ident in before and ident not in after:
                 self._build_order_remove(ident)
 
-    def _direct_discount_value(self, ent: Entity, score: dict[str, Any], base: float) -> float | None:
+    def _direct_discount_value(self, ent: Entity, score: dict[str, Any], base: float, *, removed_provider: str | None = None) -> float | None:
         """Reproduce the verified fixed-source Viewer discount-arbitration path.
 
         The official Viewer keeps discount state per Score. For ordinary fixed
@@ -1732,6 +1732,34 @@ class Simulator:
         if not active:
             return base
 
+        # Official Viewer 2.10.16 quirk: with three *nonstackable* fixed
+        # subtraction providers, selectDiscount() can leave the middle
+        # provider marked ACTIVE when the strongest is selected. Removing
+        # that strongest provider then calls deselectDiscount(), whose
+        # active/nonstackable branch retains the original Score value rather
+        # than promoting the middle offer. The browser differential confirms
+        # both the resulting refund and the underlying discount states.
+        # Preserve that outcome in the existing Score ledger until another
+        # provider changes. This does not affect preview before a purchase.
+        if len(sources) == 3 and len(active) == 2 and all(
+            not source.value.get('stackableDiscount') for source in sources
+        ):
+            inactive = next((source for source in sources if source.id not in active), None)
+            if inactive is not None:
+                removed_amount = float(inactive.value['discountValue'])
+                stronger_than_remaining = all(
+                    removed_amount > float(source.value['discountValue'])
+                    for source in active.values()
+                )
+                if stronger_than_remaining:
+                    ledger = self.state.score_ledger.get(ent.id, [])
+                    prior_full_price = (
+                        len(ledger) == 1
+                        and float(ledger[0].get(str(score.get('id')), float('nan'))) == base
+                    )
+                    if removed_provider == inactive.id or prior_full_price:
+                        return base
+
         if len(sources) == 1 and sources[0].value.get('useDiscountCount'):
             provider = sources[0].value
             eligible_ids = quota_eligible_ids
@@ -1772,7 +1800,7 @@ class Simulator:
         return winner if winner is not None else base
 
 
-    def _reprice_direct_discounts(self) -> None:
+    def _reprice_direct_discounts(self, *, removed_provider: str | None = None) -> None:
         """Reconcile live fixed-cost ledgers when a direct discount toggles."""
         for ent in self.index.selectables():
             if not self._active(ent.id) or ent.value.get('isSelectableMultiple'):
@@ -1792,7 +1820,7 @@ class Simulator:
             raw = score.get('value', 0)
             if isinstance(raw, bool) or not isinstance(raw, (int, float)):
                 continue
-            target_value = self._direct_discount_value(ent, score, float(raw))
+            target_value = self._direct_discount_value(ent, score, float(raw), removed_provider=removed_provider)
             if target_value is None:
                 continue
             point = self.index.one(pid, 'point')
@@ -3555,7 +3583,7 @@ class Simulator:
         self._undo_activation_step(ent, _depth)
         self._undo_scores(ent)
         self.state.activations.pop(ent.id, None)
-        self._reprice_direct_discounts()
+        self._reprice_direct_discounts(removed_provider=ent.id)
         if self._counts_for_row(ent):
             self.state.row_counts[ent.row_id or ''] = max(0, self.state.row_counts.get(ent.row_id or '', 0) - 1)
         self.state.selected_order = [x for x in self.state.selected_order if x != ent.id]

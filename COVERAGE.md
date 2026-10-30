@@ -103,3 +103,5 @@ The normal regression suite runs deterministic action sequences across all 32 so
 The state is tied to a SHA-256 fingerprint of the base project JSON. Normal loading rejects a mismatch. Runtime-created duplicate Rows are stored separately as validated `dynamic_rows` and reconstructed before the remaining state is accepted. This is a safety check, not a migration system for live player saves between project revisions.
 
 Event history is optional and excluded by default. It is not required to continue the simulation.
+
+The official 2.10.16 Viewer has a source-confirmed edge case where deselecting the strongest of three nonstackable subtraction providers leaves the purchase at its **original** price, even though two weaker providers remain active. Local mirrors this narrow active-discount/refund-state outcome and preserves it through unrelated repricing, rather than substituting a nominal next-best discount.

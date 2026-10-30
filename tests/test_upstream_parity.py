@@ -822,7 +822,7 @@ def test_three_provider_discount_native_arbitration_21016():
         'triple_nonstack_increasing_21016': [40, 28, 29, 31, 33],
         'triple_nonstack_decreasing_21016': [40, 28, 33, 33, 33],
         'triple_nonstack_before_purchase_21016': [40, 40, 40, 40, 33],
-        'triple_nonstack_remove_best_21016': [40, 28, 29, 31, 33, 31],
+        'triple_nonstack_remove_best_21016': [40, 28, 29, 31, 33, 28],
         'triple_nonstack_remove_weakest_21016': [40, 28, 29, 31, 33, 33],
         'triple_stack_all_21016': [40, 28, 29, 32, 37],
         'triple_stack_before_21016': [40, 40, 40, 40, 37],
