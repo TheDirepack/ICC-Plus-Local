@@ -780,3 +780,18 @@ def test_single_provider_discount_quota_allocation_and_reuse():
         trace = run_local_case_trace(cases[name])
         assert [step['points']['p'] for step in trace] == values, name
     assert len(expected) == 8
+
+
+def test_quota_allocation_via_native_row_and_group_targets():
+    from iccplus_tools.live_parity import live_cases, run_local_case_trace
+
+    cases = {case['name']: case for case in live_cases()}
+    expected = {
+        'quota_row_two_purchases_21015': [50, 50, 45, 37],
+        'quota_row_reallocate_21015': [50, 50, 45, 37, 45],
+        'quota_group_two_purchases_21015': [50, 42, 34, 37],
+        'quota_group_reallocate_21015': [50, 50, 45, 37, 45],
+    }
+    for name, points in expected.items():
+        trace = run_local_case_trace(cases[name])
+        assert [step['points']['p'] for step in trace] == points, name
