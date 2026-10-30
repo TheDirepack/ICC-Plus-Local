@@ -106,11 +106,19 @@
             const response = await fetch('./parity-fixtures.json', { cache: 'no-store' });
             const payload = await response.json();
             const results: Record<string, any> = {};
+            const actionTraces: Record<string, any> = {};
             for (const testCase of payload.cases) {
                 localStorage.clear();
                 await initializeApp(clone(testCase.project));
-                for (const action of testCase.actions || []) await act(action);
-                results[testCase.name] = snapshot(testCase.check_requirements || []);
+                const checkpoints = testCase.check_action_trace
+                    ? [snapshot(testCase.check_requirements || [])] : null;
+                for (const action of testCase.actions || []) {
+                    await act(action);
+                    if (checkpoints) checkpoints.push(snapshot(testCase.check_requirements || []));
+                }
+                const finalState = snapshot(testCase.check_requirements || []);
+                results[testCase.name] = finalState;
+                if (checkpoints) actionTraces[testCase.name] = checkpoints;
             }
             const sparseResults: Record<string, any> = {};
             for (const testCase of payload.sparse_cases || []) {
@@ -133,6 +141,7 @@
                 defaultExport: exactDefaultExport(),
                 emptySelectedObjectId,
                 results,
+                actionTraces,
                 sparseResults,
             });
             document.title = 'ICCPLUS_PARITY_DONE';

@@ -550,6 +550,7 @@ def live_cases() -> list[dict[str, Any]]:
     ):
         cases.append({
             'name': case_name,
+            'check_action_trace': True,
             'project': _project(
                 rows=[_row('r', [
                     _choice('coupon', discountOther=True, isDisChoices=True,
@@ -699,11 +700,11 @@ def _local_snapshot(sim: Simulator, check_requirements: list[str]) -> dict[str, 
     }
 
 
-def run_local_case(case: dict[str, Any]) -> dict[str, Any]:
-    # initializeApp() itself does not perform a clean/reset pass, so avoid the
-    # simulator's initial auto-active convenience here. Cases that exercise reset
-    # invoke it explicitly, which then queues isAutoActive exactly like Viewer.
+def run_local_case_trace(case: dict[str, Any]) -> list[dict[str, Any]]:
+    """Capture the initial state and each action for official Viewer comparison."""
     sim = Simulator(case['project'], clean=False)
+    check = [str(x) for x in case.get('check_requirements', [])]
+    snapshots = [_local_snapshot(sim, check)]
     for action in case.get('actions', []):
         op = action['op']
         if op == 'select':
@@ -716,8 +717,12 @@ def run_local_case(case: dict[str, Any]) -> dict[str, Any]:
             sim.reset()
         else:
             raise ValueError(f'unsupported live parity action: {op}')
-    return _local_snapshot(sim, [str(x) for x in case.get('check_requirements', [])])
+        snapshots.append(_local_snapshot(sim, check))
+    return snapshots
 
+
+def run_local_case(case: dict[str, Any]) -> dict[str, Any]:
+    return run_local_case_trace(case)[-1]
 
 def local_results() -> dict[str, Any]:
     return {case['name']: run_local_case(case) for case in live_cases()}

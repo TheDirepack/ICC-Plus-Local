@@ -19,7 +19,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from iccplus_tools.live_parity import live_cases, local_results, sparse_equivalence_cases
+from iccplus_tools.live_parity import live_cases, local_results, run_local_case_trace, sparse_equivalence_cases
 from iccplus_tools.upstream_2106 import ICCPLUS_COMMIT, ICCPLUS_VERSION, default_export_text
 from online_tests.source_format_check import compare_type_catalog
 
@@ -114,6 +114,27 @@ def compare(upstream: dict) -> list[str]:
             errors.append(f'{name}: missing upstream result')
         elif local[name] != remote[name]:
             errors.append(f'{name}: local != upstream\n  local={json.dumps(local[name], sort_keys=True)}\n  upstream={json.dumps(remote[name], sort_keys=True)}')
+    expected_action_cases = {c['name']: c for c in live_cases() if c.get('check_action_trace')}
+    actual_traces = upstream.get('actionTraces', {})
+    if set(actual_traces) != set(expected_action_cases):
+        errors.append(
+            f'action trace inventory differs: local={sorted(expected_action_cases)} '
+            f'upstream={sorted(actual_traces)}'
+        )
+    for name, case in sorted(expected_action_cases.items()):
+        remote_trace = actual_traces.get(name)
+        if not isinstance(remote_trace, list):
+            continue
+        local_trace = run_local_case_trace(case)
+        if len(local_trace) != len(remote_trace):
+            errors.append(f'{name}: action checkpoints differ in length: local={len(local_trace)} upstream={len(remote_trace)}')
+        for step, (local_snap, remote_snap) in enumerate(zip(local_trace, remote_trace)):
+            if local_snap != remote_snap:
+                errors.append(
+                    f'{name}/step-{step}: local != upstream '
+                    f'local={json.dumps(local_snap, sort_keys=True)} '
+                    f'upstream={json.dumps(remote_snap, sort_keys=True)}'
+                )
     sparse_local = {c['name'] for c in sparse_equivalence_cases()}
     sparse_remote = upstream.get('sparseResults', {})
     if set(sparse_remote) != sparse_local:
@@ -176,6 +197,7 @@ def main() -> int:
             'source_commit': ICCPLUS_COMMIT,
             'version': ICCPLUS_VERSION,
             'cases': len(live_cases()),
+            'action_trace_cases': sum(bool(c.get('check_action_trace')) for c in live_cases()),
             'sparse_equivalence_cases': len(sparse_equivalence_cases()),
             'errors': errors,
         }

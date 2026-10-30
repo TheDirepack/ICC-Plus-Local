@@ -1342,6 +1342,12 @@ class Simulator:
             value = float(score['discountScore'])
             if not allow_float:
                 value = float(math.floor(value))
+        else:
+            direct_discount = self._direct_discount_value(ent, score, value)
+            if direct_discount is not None:
+                value = direct_discount
+                if not allow_float:
+                    value = float(math.floor(value))
         if score.get('multiplyByTimes'):
             ordinal = repeat_ordinal if repeat_ordinal is not None else abs(self._count(ent.id)) + 1
             value *= max(1, int(ordinal))
@@ -1569,6 +1575,93 @@ class Simulator:
                 self._build_order_add(ident)
             elif ident in before and ident not in after:
                 self._build_order_remove(ident)
+
+    def _direct_discount_value(self, ent: Entity, score: dict[str, Any], base: float) -> float | None:
+        """A deliberately narrow subset of Viewer selectDiscountOther().
+
+        Handles exactly one ordinary direct-choice discount source. The official
+        Viewer supports multiple providers, groups, per-selection counts and
+        competing stacks; avoid guessing their behavior until separately tested.
+        A configured but inactive source returns the undiscounted score amount.
+        """
+        if score.get('isNotDiscountable') or score.get('discountIsOn'):
+            return None
+        sources: list[Entity] = []
+        for source in self.index.selectables():
+            cfg = source.value
+            if not cfg.get('discountOther') or not cfg.get('isDisChoices'):
+                continue
+            targets = cfg.get('discountChoices')
+            if not isinstance(targets, list) or ent.id not in targets:
+                continue
+            sources.append(source)
+        if len(sources) != 1:
+            return None
+        source = sources[0]
+        cfg = source.value
+        if (source.value.get('isSelectableMultiple') or cfg.get('useDiscountCount')
+                or cfg.get('stackableDiscount')):
+            return None
+        point_filter = cfg.get('discountPointTypes', [])
+        if isinstance(point_filter, list) and point_filter and str(score.get('id', '')) not in point_filter:
+            return None
+        if not self._active(source.id):
+            return base
+        operator = str(cfg.get('discountOperator', ''))
+        raw_value = cfg.get('discountValue')
+        if isinstance(raw_value, bool) or not isinstance(raw_value, (int, float)):
+            return None
+        value = float(raw_value)
+        if operator == '1':
+            discounted = base - value
+        elif operator == '2':
+            discounted = base + value
+        elif operator == '3':
+            discounted = base * value
+        elif operator == '4':
+            if value == 0:
+                return None
+            discounted = base / value
+        elif operator == '5':
+            discounted = value
+        else:
+            return None
+        if cfg.get('discountLowLimitIsOn'):
+            low = cfg.get('discountLowLimit')
+            if isinstance(low, (int, float)) and not isinstance(low, bool):
+                discounted = max(discounted, float(low))
+        return discounted
+
+    def _reprice_direct_discounts(self) -> None:
+        """Reconcile live fixed-cost ledgers when a direct discount toggles."""
+        for ent in self.index.selectables():
+            if not self._active(ent.id) or ent.value.get('isSelectableMultiple'):
+                continue
+            scores = ent.value.get('scores')
+            if not isinstance(scores, list) or len(scores) != 1:
+                continue
+            score = scores[0]
+            if not isinstance(score, dict) or score.get('isRandom') or score.get('useExpression'):
+                continue
+            if score.get('multiplyByTimes'):
+                continue
+            pid = str(score.get('id', ''))
+            history = self.state.score_ledger.get(ent.id, [])
+            if pid not in self.state.points or len(history) != 1 or pid not in history[0]:
+                continue
+            raw = score.get('value', 0)
+            if isinstance(raw, bool) or not isinstance(raw, (int, float)):
+                continue
+            target_value = self._direct_discount_value(ent, score, float(raw))
+            if target_value is None:
+                continue
+            point = self.index.one(pid, 'point')
+            if not (point and point.value.get('allowFloat')):
+                target_value = float(math.floor(target_value))
+            previous = history[0][pid]
+            if previous != target_value:
+                self.state.points[pid] += previous - target_value
+                history[0][pid] = target_value
 
     def _apply_scores(self, ent: Entity) -> None:
         hypothetical = self.state.clone()
@@ -2971,6 +3064,7 @@ class Simulator:
 
             self._set_variables(ent, True, first=not was_active and is_active)
             self._apply_scores(ent)
+            self._reprice_direct_discounts()
             duplicated_row = None
             if mode is None or current >= 0:
                 duplicated_row = self._duplicate_row_effect(ent)
@@ -3316,6 +3410,7 @@ class Simulator:
         self._undo_activation_step(ent, _depth)
         self._undo_scores(ent)
         self.state.activations.pop(ent.id, None)
+        self._reprice_direct_discounts()
         if self._counts_for_row(ent):
             self.state.row_counts[ent.row_id or ''] = max(0, self.state.row_counts.get(ent.row_id or '', 0) - 1)
         self.state.selected_order = [x for x in self.state.selected_order if x != ent.id]

@@ -668,3 +668,21 @@ def test_empty_discount_refund_quirk_does_not_apply_to_nonempty_discount_lists()
     score = active['project']['rows'][0]['objects'][0]['scores'][0]
     score['discounts'] = [{'id': 'separate-source', 'state': 1}]
     assert run_local_case(active)['points']['p'] == 20
+
+
+def test_single_direct_coupon_reprices_purchase_and_undo_ledger():
+    from iccplus_tools.live_parity import live_cases, run_local_case_trace
+
+    cases = {case['name']: case for case in live_cases()}
+    expectations = {
+        'dynamic_discount_before_purchase_21015': [20, 20, 14],
+        'dynamic_discount_after_purchase_21015': [20, 12, 14],
+        'dynamic_discount_remove_source_21015': [20, 12, 14, 12],
+        'dynamic_discount_refund_after_source_21015': [20, 20, 14, 20],
+    }
+    for name, expected in expectations.items():
+        case = cases[name]
+        assert case['check_action_trace'] is True
+        trace = run_local_case_trace(case)
+        assert [state['points']['p'] for state in trace] == expected, name
+    assert len(expectations) == 4
