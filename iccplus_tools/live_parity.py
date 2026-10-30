@@ -705,6 +705,54 @@ def live_cases() -> list[dict[str, Any]]:
             'actions': actions,
         })
 
+    # Limited-use provider allocation across independent, nonrepeatable
+    # purchases. Official Viewer maintains appliedDisChoices and FULL states;
+    # these traces establish what really happens before implementing it.
+    quota_scenarios = (
+        ('quota_one_two_purchases_21015', 1,
+         ['coupon', 'a', 'b']),
+        ('quota_one_after_two_purchases_21015', 1,
+         ['a', 'b', 'coupon']),
+        ('quota_one_remove_first_21015', 1,
+         ['coupon', 'a', 'b', '-a']),
+        ('quota_one_remove_first_then_reselect_21015', 1,
+         ['coupon', 'a', 'b', '-a', 'a']),
+        ('quota_one_remove_source_21015', 1,
+         ['coupon', 'a', 'b', '-coupon']),
+        ('quota_two_three_purchases_21015', 2,
+         ['coupon', 'a', 'b', 'c']),
+        ('quota_two_remove_middle_21015', 2,
+         ['coupon', 'a', 'b', 'c', '-b']),
+        ('quota_one_purchase_refund_21015', 1,
+         ['coupon', 'a', '-a', 'b']),
+    )
+    for name, limit, sequence in quota_scenarios:
+        purchases = [
+            _choice(ident, scores=[{
+                'idx': f'score-{ident}', 'id': 'p', 'value': 8,
+                'requireds': [], 'showScore': True,
+            }])
+            for ident in ('a', 'b', 'c')
+        ]
+        coupon = _choice(
+            'coupon', discountOther=True, isDisChoices=True,
+            discountChoices=['a', 'b', 'c'], discountOperator='1',
+            discountValue=3, useDiscountCount=True, discountCount=limit,
+        )
+        cases.append({
+            'name': name,
+            'check_action_trace': True,
+            'project': _project(
+                rows=[_row('r', [coupon, *purchases])],
+                points=[_point('p', 50)],
+            ),
+            'actions': [
+                {'op': 'deselect' if token.startswith('-') else 'select',
+                 'id': token.removeprefix('-')}
+                for token in sequence
+            ],
+        })
+
     return cases
 
 
