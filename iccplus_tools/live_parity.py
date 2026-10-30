@@ -530,6 +530,40 @@ def live_cases() -> list[dict[str, Any]]:
             'actions': actions,
         })
 
+    # Single-source dynamic discounts: source before purchase, after purchase,
+    # then source removal. Each input is tested against pinned Viewer behavior.
+    for case_name, actions in (
+        ('dynamic_discount_before_purchase_21015', [
+            {'op': 'select', 'id': 'coupon'}, {'op': 'select', 'id': 'purchase'},
+        ]),
+        ('dynamic_discount_after_purchase_21015', [
+            {'op': 'select', 'id': 'purchase'}, {'op': 'select', 'id': 'coupon'},
+        ]),
+        ('dynamic_discount_remove_source_21015', [
+            {'op': 'select', 'id': 'purchase'}, {'op': 'select', 'id': 'coupon'},
+            {'op': 'deselect', 'id': 'coupon'},
+        ]),
+        ('dynamic_discount_refund_after_source_21015', [
+            {'op': 'select', 'id': 'coupon'}, {'op': 'select', 'id': 'purchase'},
+            {'op': 'deselect', 'id': 'purchase'},
+        ]),
+    ):
+        cases.append({
+            'name': case_name,
+            'project': _project(
+                rows=[_row('r', [
+                    _choice('coupon', discountOther=True, isDisChoices=True,
+                            discountChoices=['purchase'], discountOperator='1', discountValue=2),
+                    _choice('purchase', scores=[{
+                        'idx': 'discount-score', 'id': 'p', 'value': 8,
+                        'requireds': [], 'showScore': True,
+                    }]),
+                ])],
+                points=[_point('p', 20)],
+            ),
+            'actions': actions,
+        })
+
     return cases
 
 
