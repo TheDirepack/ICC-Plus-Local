@@ -704,3 +704,17 @@ def test_single_provider_discount_operators_low_limit_and_point_filter():
         assert case['check_action_trace'] is True
         trace = run_local_case_trace(case)
         assert [step['points']['p'] for step in trace] == values, name
+
+
+def test_direct_discount_row_and_group_routes():
+    from iccplus_tools.live_parity import live_cases, run_local_case_trace
+
+    cases = {case['name']: case for case in live_cases()}
+    expected = {
+        'dynamic_discount_row_target_21015': [20, 12, 14],
+        'dynamic_discount_group_target_21015': [20, 20, 14],
+        'dynamic_discount_group_remove_21015': [20, 12, 14, 12],
+    }
+    for name, values in expected.items():
+        trace = run_local_case_trace(cases[name])
+        assert [step['points']['p'] for step in trace] == values, name

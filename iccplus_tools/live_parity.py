@@ -607,6 +607,44 @@ def live_cases() -> list[dict[str, Any]]:
             'actions': actions,
         })
 
+    # Native Row and Group targeting use the same single-provider discount
+    # calculation but traverse different Viewer targeting paths.
+    routed_cases = (
+        ('dynamic_discount_row_target_21015', True, [
+            {'op': 'select', 'id': 'purchase'}, {'op': 'select', 'id': 'coupon'},
+        ]),
+        ('dynamic_discount_group_target_21015', False, [
+            {'op': 'select', 'id': 'coupon'}, {'op': 'select', 'id': 'purchase'},
+        ]),
+        ('dynamic_discount_group_remove_21015', False, [
+            {'op': 'select', 'id': 'purchase'}, {'op': 'select', 'id': 'coupon'},
+            {'op': 'deselect', 'id': 'coupon'},
+        ]),
+    )
+    for name, by_row, actions in routed_cases:
+        source = _choice('coupon', discountOther=True, isDisChoices=by_row,
+                         discountRows=['purchase-row'] if by_row else [],
+                         discountGroups=[] if by_row else ['purchase-group'],
+                         discountOperator='1', discountValue=2)
+        purchase = _choice('purchase', scores=[{
+            'idx': 'discount-score', 'id': 'p', 'value': 8,
+            'requireds': [], 'showScore': True,
+        }])
+        groups = [] if by_row else [{
+            'id': 'purchase-group', 'name': 'Discounted Purchases',
+            'category': -1, 'elements': ['purchase'], 'rowElements': [],
+        }]
+        rows = (
+            [_row('coupon-row', [source]), _row('purchase-row', [purchase])]
+            if by_row else [_row('r', [source, purchase])]
+        )
+        cases.append({
+            'name': name,
+            'check_action_trace': True,
+            'project': _project(rows=rows, points=[_point('p', 20)], groups=groups),
+            'actions': actions,
+        })
+
     return cases
 
 

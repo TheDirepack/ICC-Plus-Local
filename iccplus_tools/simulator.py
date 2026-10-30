@@ -1579,7 +1579,8 @@ class Simulator:
     def _direct_discount_value(self, ent: Entity, score: dict[str, Any], base: float) -> float | None:
         """A deliberately narrow subset of Viewer selectDiscountOther().
 
-        Handles exactly one ordinary direct-choice discount source. The official
+        Handles exactly one ordinary Choice discount source, targeting Choices
+        directly, through a Row, or through an ICC Plus Group. The official
         Viewer supports multiple providers, groups, per-selection counts and
         competing stacks; avoid guessing their behavior until separately tested.
         A configured but inactive source returns the undiscounted score amount.
@@ -1589,12 +1590,28 @@ class Simulator:
         sources: list[Entity] = []
         for source in self.index.selectables():
             cfg = source.value
-            if not cfg.get('discountOther') or not cfg.get('isDisChoices'):
+            if not cfg.get('discountOther'):
                 continue
-            targets = cfg.get('discountChoices')
-            if not isinstance(targets, list) or ent.id not in targets:
-                continue
-            sources.append(source)
+            if cfg.get('isDisChoices'):
+                choices = cfg.get('discountChoices', [])
+                rows = cfg.get('discountRows', [])
+                matched = (
+                    isinstance(choices, list) and ent.id in choices
+                    or isinstance(rows, list) and ent.row_id in rows
+                )
+            else:
+                group_ids = cfg.get('discountGroups', [])
+                matched = (
+                    isinstance(group_ids, list)
+                    and any(
+                        isinstance(group, dict)
+                        and group.get('id') in group_ids
+                        and ent.id in group.get('elements', [])
+                        for group in self.project.get('groups', [])
+                    )
+                )
+            if matched:
+                sources.append(source)
         if len(sources) != 1:
             return None
         source = sources[0]
