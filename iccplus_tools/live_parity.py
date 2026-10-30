@@ -828,6 +828,57 @@ def live_cases() -> list[dict[str, Any]]:
             'actions': actions,
         })
 
+    # Three-provider source arbitration. Probes capture transition order and
+    # refund/point re-pricing; the native Viewer, not formula intuition, defines
+    # the expected results. All use fixed Scores and positive subtraction only.
+    triple_scenarios = (
+        ('triple_nonstack_increasing_21016', (False, False, False), (1, 3, 5),
+         ['purchase', 'a', 'b', 'c']),
+        ('triple_nonstack_decreasing_21016', (False, False, False), (5, 3, 1),
+         ['purchase', 'a', 'b', 'c']),
+        ('triple_nonstack_before_purchase_21016', (False, False, False), (1, 3, 5),
+         ['a', 'b', 'c', 'purchase']),
+        ('triple_nonstack_remove_best_21016', (False, False, False), (1, 3, 5),
+         ['purchase', 'a', 'b', 'c', '-c']),
+        ('triple_nonstack_remove_weakest_21016', (False, False, False), (1, 3, 5),
+         ['purchase', 'a', 'b', 'c', '-a']),
+        ('triple_stack_all_21016', (True, True, True), (1, 3, 5),
+         ['purchase', 'a', 'b', 'c']),
+        ('triple_stack_before_21016', (True, True, True), (1, 3, 5),
+         ['a', 'b', 'c', 'purchase']),
+        ('triple_stack_remove_middle_21016', (True, True, True), (1, 3, 5),
+         ['purchase', 'a', 'b', 'c', '-b']),
+        ('triple_stack_remove_first_21016', (True, True, True), (1, 3, 5),
+         ['purchase', 'a', 'b', 'c', '-a']),
+        ('triple_mixed_single_wins_21016', (True, False, True), (1, 7, 3),
+         ['purchase', 'a', 'b', 'c']),
+        ('triple_mixed_stack_wins_21016', (True, False, True), (3, 2, 4),
+         ['purchase', 'a', 'b', 'c']),
+        ('triple_mixed_remove_single_21016', (True, False, True), (1, 7, 3),
+         ['purchase', 'a', 'b', 'c', '-b']),
+    )
+    for name, stack_flags, values, sequence in triple_scenarios:
+        sources = [
+            _choice(ident, discountOther=True, isDisChoices=True,
+                    discountChoices=['purchase'], discountOperator='1',
+                    discountValue=amount, stackableDiscount=stacking)
+            for ident, amount, stacking in zip('abc', values, stack_flags)
+        ]
+        purchase = _choice('purchase', scores=[{
+            'idx': 'purchase-score', 'id': 'p', 'value': 12,
+            'requireds': [], 'showScore': True,
+        }])
+        cases.append({
+            'name': name, 'check_action_trace': True,
+            'project': _project(rows=[_row('r', [*sources, purchase])],
+                                points=[_point('p', 40)]),
+            'actions': [
+                {'op': 'deselect' if token.startswith('-') else 'select',
+                 'id': token.removeprefix('-')}
+                for token in sequence
+            ],
+        })
+
     return cases
 
 
