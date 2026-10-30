@@ -753,6 +753,49 @@ def live_cases() -> list[dict[str, Any]]:
             ],
         })
 
+    # Quota allocation routed via native Rows and Groups: same finite coupon
+    # accounting, different source targeting in selectDiscountOther/addCount.
+    routed_quota = (
+        ('quota_row_two_purchases_21015', True, ['coupon', 'a', 'b']),
+        ('quota_row_reallocate_21015', True, ['coupon', 'a', 'b', '-a']),
+        ('quota_group_two_purchases_21015', False, ['a', 'b', 'coupon']),
+        ('quota_group_reallocate_21015', False, ['coupon', 'a', 'b', '-a']),
+    )
+    for name, row_target, sequence in routed_quota:
+        a = _choice('a', scores=[{
+            'idx': 'score-a', 'id': 'p', 'value': 8,
+            'requireds': [], 'showScore': True,
+        }])
+        b = _choice('b', scores=[{
+            'idx': 'score-b', 'id': 'p', 'value': 8,
+            'requireds': [], 'showScore': True,
+        }])
+        coupon = _choice(
+            'coupon', discountOther=True, isDisChoices=row_target,
+            discountRows=['purchases'] if row_target else [],
+            discountGroups=[] if row_target else ['discounted'],
+            discountOperator='1', discountValue=3,
+            useDiscountCount=True, discountCount=1,
+        )
+        rows = (
+            [_row('coupon-row', [coupon]), _row('purchases', [a, b])]
+            if row_target else [_row('r', [coupon, a, b])]
+        )
+        groups = [] if row_target else [{
+            'id': 'discounted', 'name': 'Discounted', 'category': -1,
+            'elements': ['a', 'b'], 'rowElements': [],
+        }]
+        cases.append({
+            'name': name,
+            'check_action_trace': True,
+            'project': _project(rows=rows, points=[_point('p', 50)], groups=groups),
+            'actions': [
+                {'op': 'deselect' if token.startswith('-') else 'select',
+                 'id': token.removeprefix('-')}
+                for token in sequence
+            ],
+        })
+
     return cases
 
 
