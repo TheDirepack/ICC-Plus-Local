@@ -811,3 +811,45 @@ def test_load_build_respects_force_allow_deselect_21016():
     for name, state in expected.items():
         snapshots = run_local_case_trace(cases[name])
         assert [step['entities']['target']['active'] for step in snapshots] == state, name
+
+
+def test_three_provider_discount_native_arbitration_21016():
+    """Chromium-confirmed three-source fixed subtraction states and refunds."""
+    from iccplus_tools.live_parity import live_cases, run_local_case_trace
+
+    cases = {case['name']: case for case in live_cases()}
+    checkpoints = {
+        'triple_nonstack_increasing_21016': [40, 28, 29, 31, 33],
+        'triple_nonstack_decreasing_21016': [40, 28, 33, 33, 33],
+        'triple_nonstack_before_purchase_21016': [40, 40, 40, 40, 33],
+        'triple_nonstack_remove_best_21016': [40, 28, 29, 31, 33, 31],
+        'triple_nonstack_remove_weakest_21016': [40, 28, 29, 31, 33, 33],
+        'triple_stack_all_21016': [40, 28, 29, 32, 37],
+        'triple_stack_before_21016': [40, 40, 40, 40, 37],
+        'triple_stack_remove_middle_21016': [40, 28, 29, 32, 37, 34],
+        'triple_stack_remove_first_21016': [40, 28, 29, 32, 37, 36],
+        'triple_mixed_single_wins_21016': [40, 28, 29, 35, 35],
+        'triple_mixed_stack_wins_21016': [40, 28, 31, 31, 35],
+        'triple_mixed_remove_single_21016': [40, 28, 29, 35, 35, 32],
+    }
+    for name, values in checkpoints.items():
+        assert cases[name]['check_action_trace'] is True
+        trace = run_local_case_trace(cases[name])
+        assert [checkpoint['points']['p'] for checkpoint in trace] == values, name
+    assert len(checkpoints) == 12
+
+
+def test_three_provider_arbitration_boundary_abstains_on_fourth_source():
+    from iccplus_tools.live_parity import live_cases
+    import copy
+
+    case = copy.deepcopy(next(case for case in live_cases()
+                              if case['name'] == 'triple_nonstack_increasing_21016'))
+    project = case['project']
+    extra = copy.deepcopy(project['rows'][0]['objects'][0])
+    extra['id'] = 'fourth'
+    project['rows'][0]['objects'].append(extra)
+    sim = Simulator(project, clean=False)
+    target = sim.index.one('purchase', 'choice')
+    assert target is not None
+    assert sim._direct_discount_value(target, target.value['scores'][0], 12.0) is None

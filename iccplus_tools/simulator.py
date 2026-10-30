@@ -1580,10 +1580,10 @@ class Simulator:
                 self._build_order_remove(ident)
 
     def _direct_discount_value(self, ent: Entity, score: dict[str, Any], base: float) -> float | None:
-        """Reproduce the verified two-provider Viewer discount-arbitration path.
+        """Reproduce the verified fixed-source Viewer discount-arbitration path.
 
         The official Viewer keeps discount state per Score. For ordinary fixed
-        Scores with at most two providers, the native
+        Scores with up to three providers, the native
         selection sequence reduces to: accumulate compatible stackable offers,
         but compare an incompatible offer against the currently winning total.
         The source's selection order matters. Return None for features whose
@@ -1619,14 +1619,14 @@ class Simulator:
                 if isinstance(point_filter, list) and point_filter and str(score.get('id', '')) not in point_filter:
                     continue
                 sources.append(source)
-        if not sources or len(sources) > 2:
+        if not sources or len(sources) > 3:
             return None
 
-        # The two-provider differential fixtures establish the upstream
+        # The two- and three-provider differential fixtures establish the upstream
         # arbitration for fixed, non-negative subtraction discounts only.
         # Do not extrapolate their stateful interactions to mixed operators,
         # per-discount floors, or cost-increasing values without a new probe.
-        if len(sources) == 2:
+        if len(sources) >= 2:
             for source in sources:
                 cfg = source.value
                 value = cfg.get('discountValue')
