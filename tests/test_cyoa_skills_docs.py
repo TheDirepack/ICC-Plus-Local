@@ -4,8 +4,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / "skills"
-CURRENT_TOOL_VERSION = "0.10.0rc15"
-CURRENT_ICCPLUS_VERSION = "2.10.7"
+CURRENT_TOOL_VERSION = "0.10.0rc17"
+CURRENT_ICCPLUS_VERSION = "2.10.16"
 
 RETAINED = {
     "iccplus-local",
@@ -60,10 +60,10 @@ def test_current_version_markers_are_synchronized():
 
     manifest = (ROOT / "PACKAGE_MANIFEST.json").read_text()
     assert f'"tool_version": "{CURRENT_TOOL_VERSION}"' in manifest
-    assert 'rc15' in manifest
+    assert CURRENT_TOOL_VERSION in manifest
 
 
-def test_current_docs_keep_2107_target_and_sparse_runtime_contract():
+def test_current_docs_keep_21014_target_and_sparse_runtime_contract():
     field_reference = (ROOT / "docs/ICCPLUS_FIELD_REFERENCE.md").read_text()
     assert f"ICC Plus {CURRENT_ICCPLUS_VERSION}" in field_reference
     assert "removeSpace" in field_reference

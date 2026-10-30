@@ -15,10 +15,11 @@
         selectedOneMore,
         selectedOneLess,
         cleanActivated,
+        loadActivated,
         getSelectedObjectId,
     } from '$lib/store/store.svelte';
 
-    let output = 'running';
+    let output = $state('running');
 
     const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value));
     const options = () => ({ linkedObjects: [] as string[] });
@@ -83,6 +84,10 @@
             await cleanActivated();
             return;
         }
+        if (action.op === 'load_build') {
+            await loadActivated(String(action.value));
+            return;
+        }
         const item = choiceMap.get(String(action.id));
         if (!item) throw new Error(`missing choice ${action.id}`);
         const entity: any = item.choice;
@@ -106,11 +111,52 @@
             const response = await fetch('./parity-fixtures.json', { cache: 'no-store' });
             const payload = await response.json();
             const results: Record<string, any> = {};
+            const actionTraces: Record<string, any> = {};
+            const discountDebug: Record<string, any> = {};
             for (const testCase of payload.cases) {
                 localStorage.clear();
                 await initializeApp(clone(testCase.project));
-                for (const action of testCase.actions || []) await act(action);
-                results[testCase.name] = snapshot(testCase.check_requirements || []);
+                const checkpoints = testCase.check_action_trace
+                    ? [snapshot(testCase.check_requirements || [])] : null;
+                const discountSnapshots: any[] = [];
+                const discountState = () => {
+                    const target = choiceMap.get('purchase')?.choice;
+                    const score: any = target?.scores?.[0];
+                    return score ? {
+                        scoreValue: score.value,
+                        discountScore: score.discountScore,
+                        discountIsOn: score.discountIsOn,
+                        appliedDiscount: score.appliedDiscount,
+                        isChangeDiscount: score.isChangeDiscount,
+                        tmpDisScore: score.tmpDisScore,
+                        discounts: clone(score.discounts ?? []),
+                    } : null;
+                };
+                if (testCase.debug_discounts) discountSnapshots.push(discountState());
+                for (const action of testCase.actions || []) {
+                    await act(action);
+                    if (checkpoints) checkpoints.push(snapshot(testCase.check_requirements || []));
+                    if (testCase.debug_discounts) discountSnapshots.push(discountState());
+                }
+                if (testCase.debug_discounts) discountDebug[testCase.name] = discountSnapshots;
+                const finalState = snapshot(testCase.check_requirements || []);
+                results[testCase.name] = finalState;
+                if (checkpoints) actionTraces[testCase.name] = checkpoints;
+            }
+            const sparseResults: Record<string, any> = {};
+            for (const testCase of payload.sparse_cases || []) {
+                const runs: Record<string, any> = {};
+                for (const phase of ['baseline', 'candidate']) {
+                    localStorage.clear();
+                    await initializeApp(clone(testCase[phase]));
+                    const checkpoints = [snapshot(testCase.check_requirements || [])];
+                    for (const action of testCase.actions || []) {
+                        await act(action);
+                        checkpoints.push(snapshot(testCase.check_requirements || []));
+                    }
+                    runs[phase] = checkpoints;
+                }
+                sparseResults[testCase.name] = runs;
             }
             output = JSON.stringify({
                 commit: payload.commit,
@@ -118,6 +164,9 @@
                 defaultExport: exactDefaultExport(),
                 emptySelectedObjectId,
                 results,
+                actionTraces,
+                discountDebug,
+                sparseResults,
             });
             document.title = 'ICCPLUS_PARITY_DONE';
         } catch (error) {

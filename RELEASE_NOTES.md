@@ -1,3 +1,31 @@
+# ICC Plus Local release notes
+
+## 0.10.0rc17 — ICC Plus 2.10.16 source sync (October 30, 2026)
+
+- Source pin updated to official `2bba0cf9ebc2e54241c2390794e95e1c5091b293`.
+- Build Form loading now preserves deliberately deselected targets of `isAllowDeselect` force providers, matching the official 2.10.16 fix.
+- Expanded source-verified ordinary discount competition through three fixed nonnegative subtraction providers; reproduced the upstream strongest-third-provider removal/refund edge case with portable state tracking.
+- Verified 94 gameplay differential cases, 57 per-action traces and 12 full/sparse comparison cases directly in official Chromium Viewer 2.10.16; the independent Python/CLI regression suite also passes.
+- Quota providers with repeatable purchases, mixed-operator stacks and 4+ interacting sources remain out of scope; see issue #21.
+- Add native Chromium restoration fixtures and continue discount parity regression coverage; see PR #20 and issue #21.
+
+
+## 0.10.0rc17 — ICC Plus 2.10.15 compatibility candidate
+
+- Pinned to official ICC Plus 2.10.15 at source commit `128c05799b6df2574fd870449d15a37e410fe3e6`, released October 29, 2026, with the independent Python authoring and simulator capabilities preserved.
+- Upstream 2.10.15 changes are concentrated in Viewer deployment / Neocities compatibility, build tooling and packaging; its Viewer runtime store changes the version string only from 2.10.14. The official Svelte Viewer distribution, rather than the headless Local simulator, owns those deployment fixes.
+- Re-run the Chromium differential and TypeScript model/source checks against the new pinned official Viewer, including the 35 prior runtime scenarios, while retaining the historical R01–R32 browser-verification kit.
+- Preserve the 2.10.14-discovered discount refund fields and protected-selection behavior. Exact dynamic discount-stack and sparse omission behavior still require independent specialized browser tests.
+
+## 0.10.0rc16 — ICC Plus 2.10.14 compatibility candidate
+
+- Re-pinned the project defaults, schema catalogs, capabilities and sparse serializer to official ICC Plus 2.10.14 source commit `21d340238fa16f4e66a61727f797d334b0486fda` (eight upstream commits after 2.10.7).
+- Added `notDeselectedByReq` as a Choice/selectable-Addon boolean. Requirement-driven deselection and row-limit replacement respect the new protection flag.
+- Retained `isChangeDiscount` and `tmpDisScore` in sparse Score serialization: upstream 2.10.14 reads these fields during discount refunds, making prior omissions unsafe.
+- Aligned active-Addon visibility and result-row exclusions, retaining Local's existing separate `addonWidth` handling.
+- Added regression tests for the new field, requirement protection, row-cap replacement, and newly runtime-sensitive sparse fields.
+- Maintained the Python CLI and native authoring skill API. Official Svelte UI, delay cancellation, CSS and browser runtime remain outside this headless port. GitHub Actions core/CLI/example tests and the official pinned-source Chromium differential (35/35 gameplay cases plus TypeScript required-field checks) passed. The headless port still does not claim full visual, animation, media, or untested sparse-omission parity.
+
 ## Unreleased
 
 - Unified normal CI and manual-release test dependencies through the `test` optional dependency set so image and schema tests cannot be skipped by one workflow. This fixes manual-release failures caused by Pillow not being installed.

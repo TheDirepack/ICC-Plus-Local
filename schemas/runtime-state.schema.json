@@ -250,6 +250,12 @@
             },
             "additionalProperties": false
           }
+        },
+        "discount_stale_nonstack": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         }
       },
       "additionalProperties": false

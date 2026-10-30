@@ -451,6 +451,649 @@ def live_cases() -> list[dict[str, Any]]:
         'actions': [{'op': 'select', 'id': 'keep'}, {'op': 'set_point', 'id': 'p', 'value': 99}, {'op': 'reset'}],
     })
 
+    # 2.10.14: activated selections can deliberately survive lost Requirements.
+    # A normal neighboring choice must still be cleaned.
+    cases.append({
+        'name': 'protected_requirements_cleanup_21014',
+        'project': _project(rows=[_row('r', [
+            _choice('gate'),
+            _choice('protected', requireds=[_req('id', reqId='gate')], notDeselectedByReq=True),
+            _choice('ordinary', requireds=[_req('id', reqId='gate')]),
+        ])]),
+        'actions': [
+            {'op': 'select', 'id': 'gate'},
+            {'op': 'select', 'id': 'protected'},
+            {'op': 'select', 'id': 'ordinary'},
+            {'op': 'deselect', 'id': 'gate'},
+        ],
+        'check_requirements': ['protected', 'ordinary'],
+    })
+
+    # The 2.10.14 checkSelectable path also avoids row-cap replacement of a
+    # protected selection; explicit manual deselection remains a separate rule.
+    cases.append({
+        'name': 'protected_row_capacity_21014',
+        'project': _project(rows=[_row('r', [
+            _choice('protected', notDeselectedByReq=True),
+            _choice('next'),
+        ], allowed=1)]),
+        'actions': [
+            {'op': 'select', 'id': 'protected'},
+            {'op': 'select', 'id': 'next'},
+        ],
+    })
+
+    cases.append({
+        'name': 'protected_selectable_addon_requirements_21014',
+        'project': _project(rows=[_row('r', [
+            _choice('gate'),
+            _choice('parent', addons=[{
+                'id': 'sub', 'title': 'Sub', 'text': '', 'image': '',
+                'template': 1, 'addonWidth': 'col-12', 'parentId': 'parent',
+                'isSelectable': True, 'scores': [], 'groups': [],
+                'multipleUseVariable': 0, 'isActive': False,
+                'requireds': [_req('id', reqId='gate')],
+                'notDeselectedByReq': True,
+            }]),
+        ])]),
+        'actions': [
+            {'op': 'select', 'id': 'gate'},
+            {'op': 'select', 'id': 'parent'},
+            {'op': 'select', 'id': 'sub'},
+            {'op': 'deselect', 'id': 'gate'},
+        ],
+        'check_requirements': ['sub'],
+    })
+
+    # Discount values already applied on a Score are supported natively by
+    # Local. Verify charged and refunded points against the official Viewer;
+    # dynamic discount stacking and discount-source updates remain separate.
+    fixed_score = {
+        'idx': 'discount-score', 'id': 'p', 'value': 8,
+        'requireds': [], 'showScore': True,
+        'discountIsOn': True, 'appliedDiscount': True,
+        'discountScore': 2, 'discounts': [],
+    }
+    for name, actions in (
+        ('preapplied_discount_charge_21015', [{'op': 'select', 'id': 'purchase'}]),
+        ('preapplied_discount_refund_21015', [
+            {'op': 'select', 'id': 'purchase'},
+            {'op': 'deselect', 'id': 'purchase'},
+        ]),
+    ):
+        cases.append({
+            'name': name,
+            'project': _project(
+                rows=[_row('r', [_choice('purchase', scores=[copy.deepcopy(fixed_score)])])],
+                points=[_point('p', 20)],
+            ),
+            'actions': actions,
+        })
+
+    # Single-source dynamic discounts: source before purchase, after purchase,
+    # then source removal. Each input is tested against pinned Viewer behavior.
+    for case_name, actions in (
+        ('dynamic_discount_before_purchase_21015', [
+            {'op': 'select', 'id': 'coupon'}, {'op': 'select', 'id': 'purchase'},
+        ]),
+        ('dynamic_discount_after_purchase_21015', [
+            {'op': 'select', 'id': 'purchase'}, {'op': 'select', 'id': 'coupon'},
+        ]),
+        ('dynamic_discount_remove_source_21015', [
+            {'op': 'select', 'id': 'purchase'}, {'op': 'select', 'id': 'coupon'},
+            {'op': 'deselect', 'id': 'coupon'},
+        ]),
+        ('dynamic_discount_refund_after_source_21015', [
+            {'op': 'select', 'id': 'coupon'}, {'op': 'select', 'id': 'purchase'},
+            {'op': 'deselect', 'id': 'purchase'},
+        ]),
+    ):
+        cases.append({
+            'name': case_name,
+            'check_action_trace': True,
+            'project': _project(
+                rows=[_row('r', [
+                    _choice('coupon', discountOther=True, isDisChoices=True,
+                            discountChoices=['purchase'], discountOperator='1', discountValue=2),
+                    _choice('purchase', scores=[{
+                        'idx': 'discount-score', 'id': 'p', 'value': 8,
+                        'requireds': [], 'showScore': True,
+                    }]),
+                ])],
+                points=[_point('p', 20)],
+            ),
+            'actions': actions,
+        })
+
+    # Different native discount operators, integer rounding, clamp and point
+    # targeting. These do not introduce discount stacks or count allocation.
+    operator_cases = (
+        ('discount_half_after_purchase_21015', '3', 0.5, {}, [
+            {'op': 'select', 'id': 'purchase'}, {'op': 'select', 'id': 'coupon'},
+        ]),
+        ('discount_half_before_purchase_21015', '3', 0.5, {}, [
+            {'op': 'select', 'id': 'coupon'}, {'op': 'select', 'id': 'purchase'},
+        ]),
+        ('discount_low_limit_21015', '1', 10, {
+            'discountLowLimitIsOn': True, 'discountLowLimit': 3,
+        }, [
+            {'op': 'select', 'id': 'coupon'}, {'op': 'select', 'id': 'purchase'},
+        ]),
+        ('discount_point_filter_excludes_21015', '1', 2, {
+            'discountPointTypes': ['other'],
+        }, [
+            {'op': 'select', 'id': 'coupon'}, {'op': 'select', 'id': 'purchase'},
+        ]),
+        ('discount_fixed_override_21015', '5', 3, {}, [
+            {'op': 'select', 'id': 'purchase'}, {'op': 'select', 'id': 'coupon'},
+        ]),
+    )
+    for name, operator, value, extra, actions in operator_cases:
+        cases.append({
+            'name': name,
+            'check_action_trace': True,
+            'project': _project(
+                rows=[_row('r', [
+                    _choice('coupon', discountOther=True, isDisChoices=True,
+                            discountChoices=['purchase'], discountOperator=operator,
+                            discountValue=value, **extra),
+                    _choice('purchase', scores=[{
+                        'idx': 'discount-score', 'id': 'p', 'value': 9,
+                        'requireds': [], 'showScore': True,
+                    }]),
+                ])],
+                points=[_point('p', 20)],
+            ),
+            'actions': actions,
+        })
+
+    # Native Row and Group targeting use the same single-provider discount
+    # calculation but traverse different Viewer targeting paths.
+    routed_cases = (
+        ('dynamic_discount_row_target_21015', True, [
+            {'op': 'select', 'id': 'purchase'}, {'op': 'select', 'id': 'coupon'},
+        ]),
+        ('dynamic_discount_group_target_21015', False, [
+            {'op': 'select', 'id': 'coupon'}, {'op': 'select', 'id': 'purchase'},
+        ]),
+        ('dynamic_discount_group_remove_21015', False, [
+            {'op': 'select', 'id': 'purchase'}, {'op': 'select', 'id': 'coupon'},
+            {'op': 'deselect', 'id': 'coupon'},
+        ]),
+    )
+    for name, by_row, actions in routed_cases:
+        source = _choice('coupon', discountOther=True, isDisChoices=by_row,
+                         discountRows=['purchase-row'] if by_row else [],
+                         discountGroups=[] if by_row else ['purchase-group'],
+                         discountOperator='1', discountValue=2)
+        purchase = _choice('purchase', scores=[{
+            'idx': 'discount-score', 'id': 'p', 'value': 8,
+            'requireds': [], 'showScore': True,
+        }])
+        groups = [] if by_row else [{
+            'id': 'purchase-group', 'name': 'Discounted Purchases',
+            'category': -1, 'elements': ['purchase'], 'rowElements': [],
+        }]
+        rows = (
+            [_row('coupon-row', [source]), _row('purchase-row', [purchase])]
+            if by_row else [_row('r', [source, purchase])]
+        )
+        cases.append({
+            'name': name,
+            'check_action_trace': True,
+            'project': _project(rows=rows, points=[_point('p', 20)], groups=groups),
+            'actions': actions,
+        })
+
+    # State-dependent multi-provider discount arbitration. Pin both orderings
+    # and each transition: two non-stackable providers, compatible stacks, and
+    # a stacked provider competing with a non-stackable alternative.
+    # Keep these as real Viewer action traces, not assumed formula outputs.
+    multi_scenarios = (
+        ('multi_nonstack_stronger_21015', False, False, 2, 5, [
+            'purchase', 'weak', 'strong']),
+        ('multi_nonstack_weaker_21015', False, False, 2, 5, [
+            'purchase', 'strong', 'weak']),
+        ('multi_nonstack_remove_strong_21015', False, False, 2, 5, [
+            'purchase', 'weak', 'strong', '-strong']),
+        ('multi_nonstack_remove_weak_21015', False, False, 2, 5, [
+            'purchase', 'weak', 'strong', '-weak']),
+        ('multi_nonstack_before_purchase_21015', False, False, 2, 5, [
+            'weak', 'strong', 'purchase']),
+        ('multi_stack_after_purchase_21015', True, True, 2, 3, [
+            'purchase', 'weak', 'strong']),
+        ('multi_stack_before_purchase_21015', True, True, 2, 3, [
+            'weak', 'strong', 'purchase']),
+        ('multi_stack_remove_first_21015', True, True, 2, 3, [
+            'purchase', 'weak', 'strong', '-weak']),
+        ('multi_stack_remove_last_21015', True, True, 2, 3, [
+            'purchase', 'weak', 'strong', '-strong']),
+        ('multi_mixed_stack_then_single_21015', True, False, 2, 6, [
+            'purchase', 'weak', 'strong']),
+        ('multi_mixed_single_then_stack_21015', False, True, 6, 2, [
+            'purchase', 'weak', 'strong']),
+        ('multi_mixed_replace_stack_21015', True, False, 2, 6, [
+            'purchase', 'weak', 'strong', '-strong']),
+    )
+    for name, first_stack, second_stack, first_value, second_value, sequence in multi_scenarios:
+        actions = [
+            {'op': 'deselect' if token.startswith('-') else 'select',
+             'id': token.removeprefix('-')}
+            for token in sequence
+        ]
+        sources = [
+            _choice('weak', discountOther=True, isDisChoices=True,
+                    discountChoices=['purchase'], discountOperator='1',
+                    discountValue=first_value, stackableDiscount=first_stack),
+            _choice('strong', discountOther=True, isDisChoices=True,
+                    discountChoices=['purchase'], discountOperator='1',
+                    discountValue=second_value, stackableDiscount=second_stack),
+        ]
+        cases.append({
+            'name': name,
+            'check_action_trace': True,
+            'project': _project(
+                rows=[_row('r', [
+                    *sources,
+                    _choice('purchase', scores=[{
+                        'idx': 'discount-score', 'id': 'p', 'value': 10,
+                        'requireds': [], 'showScore': True,
+                    }]),
+                ])],
+                points=[_point('p', 30)],
+            ),
+            'actions': actions,
+        })
+
+    # Limited-use provider allocation across independent, nonrepeatable
+    # purchases. Official Viewer maintains appliedDisChoices and FULL states;
+    # these traces establish what really happens before implementing it.
+    quota_scenarios = (
+        ('quota_one_two_purchases_21015', 1,
+         ['coupon', 'a', 'b']),
+        ('quota_one_after_two_purchases_21015', 1,
+         ['a', 'b', 'coupon']),
+        ('quota_one_remove_first_21015', 1,
+         ['coupon', 'a', 'b', '-a']),
+        ('quota_one_remove_first_then_reselect_21015', 1,
+         ['coupon', 'a', 'b', '-a', 'a']),
+        ('quota_one_remove_source_21015', 1,
+         ['coupon', 'a', 'b', '-coupon']),
+        ('quota_two_three_purchases_21015', 2,
+         ['coupon', 'a', 'b', 'c']),
+        ('quota_two_remove_middle_21015', 2,
+         ['coupon', 'a', 'b', 'c', '-b']),
+        ('quota_one_purchase_refund_21015', 1,
+         ['coupon', 'a', '-a', 'b']),
+    )
+    for name, limit, sequence in quota_scenarios:
+        purchases = [
+            _choice(ident, scores=[{
+                'idx': f'score-{ident}', 'id': 'p', 'value': 8,
+                'requireds': [], 'showScore': True,
+            }])
+            for ident in ('a', 'b', 'c')
+        ]
+        coupon = _choice(
+            'coupon', discountOther=True, isDisChoices=True,
+            discountChoices=['a', 'b', 'c'], discountOperator='1',
+            discountValue=3, useDiscountCount=True, discountCount=limit,
+        )
+        cases.append({
+            'name': name,
+            'check_action_trace': True,
+            'project': _project(
+                rows=[_row('r', [coupon, *purchases])],
+                points=[_point('p', 50)],
+            ),
+            'actions': [
+                {'op': 'deselect' if token.startswith('-') else 'select',
+                 'id': token.removeprefix('-')}
+                for token in sequence
+            ],
+        })
+
+    # Quota allocation routed via native Rows and Groups: same finite coupon
+    # accounting, different source targeting in selectDiscountOther/addCount.
+    routed_quota = (
+        ('quota_row_two_purchases_21015', True, ['coupon', 'a', 'b']),
+        ('quota_row_reallocate_21015', True, ['coupon', 'a', 'b', '-a']),
+        ('quota_group_two_purchases_21015', False, ['a', 'b', 'coupon']),
+        ('quota_group_reallocate_21015', False, ['coupon', 'a', 'b', '-a']),
+    )
+    for name, row_target, sequence in routed_quota:
+        a = _choice('a', scores=[{
+            'idx': 'score-a', 'id': 'p', 'value': 8,
+            'requireds': [], 'showScore': True,
+        }])
+        b = _choice('b', scores=[{
+            'idx': 'score-b', 'id': 'p', 'value': 8,
+            'requireds': [], 'showScore': True,
+        }])
+        coupon = _choice(
+            'coupon', discountOther=True, isDisChoices=row_target,
+            discountRows=['purchases'] if row_target else [],
+            discountGroups=[] if row_target else ['discounted'],
+            discountOperator='1', discountValue=3,
+            useDiscountCount=True, discountCount=1,
+        )
+        rows = (
+            [_row('coupon-row', [coupon]), _row('purchases', [a, b])]
+            if row_target else [_row('r', [coupon, a, b])]
+        )
+        groups = [] if row_target else [{
+            'id': 'discounted', 'name': 'Discounted', 'category': -1,
+            'elements': ['a', 'b'], 'rowElements': [],
+        }]
+        cases.append({
+            'name': name,
+            'check_action_trace': True,
+            'project': _project(rows=rows, points=[_point('p', 50)], groups=groups),
+            'actions': [
+                {'op': 'deselect' if token.startswith('-') else 'select',
+                 'id': token.removeprefix('-')}
+                for token in sequence
+            ],
+        })
+
+    # 2.10.16: loadActivated must NOT re-create a missing force-selected
+    # Choice when the source permits ordinary deselection.
+    for name, allow, actions, by_group in (
+        ('restore_allow_deselect_21016', True, [
+            {'op': 'select', 'id': 'source'}, {'op': 'deselect', 'id': 'target'},
+            {'op': 'load_build', 'value': 'source'},
+        ], False),
+        ('restore_protected_force_21016', False, [
+            {'op': 'select', 'id': 'source'}, {'op': 'load_build', 'value': 'source'},
+        ], False),
+        ('restore_allow_explicit_target_21016', True, [
+            {'op': 'load_build', 'value': 'source,target'},
+        ], False),
+        ('restore_allow_group_21016', True, [
+            {'op': 'load_build', 'value': 'source'},
+        ], True),
+    ):
+        cases.append({
+            'name': name, 'check_action_trace': True,
+            'project': _project(
+                rows=[_row('r', [
+                    _choice('source', activateOtherChoice=True,
+                            activateThisChoice='g' if by_group else 'target',
+                            isAllowDeselect=allow),
+                    _choice('target'),
+                ])],
+                groups=[{'id': 'g', 'name': 'g', 'category': -1,
+                         'elements': ['target'], 'rowElements': []}] if by_group else [],
+            ),
+            'actions': actions,
+        })
+
+    # Three-provider source arbitration. Probes capture transition order and
+    # refund/point re-pricing; the native Viewer, not formula intuition, defines
+    # the expected results. All use fixed Scores and positive subtraction only.
+    triple_scenarios = (
+        ('triple_nonstack_increasing_21016', (False, False, False), (1, 3, 5),
+         ['purchase', 'a', 'b', 'c']),
+        ('triple_nonstack_decreasing_21016', (False, False, False), (5, 3, 1),
+         ['purchase', 'a', 'b', 'c']),
+        ('triple_nonstack_before_purchase_21016', (False, False, False), (1, 3, 5),
+         ['a', 'b', 'c', 'purchase']),
+        ('triple_nonstack_remove_best_21016', (False, False, False), (1, 3, 5),
+         ['purchase', 'a', 'b', 'c', '-c']),
+        ('triple_nonstack_remove_weakest_21016', (False, False, False), (1, 3, 5),
+         ['purchase', 'a', 'b', 'c', '-a']),
+        ('triple_stack_all_21016', (True, True, True), (1, 3, 5),
+         ['purchase', 'a', 'b', 'c']),
+        ('triple_stack_before_21016', (True, True, True), (1, 3, 5),
+         ['a', 'b', 'c', 'purchase']),
+        ('triple_stack_remove_middle_21016', (True, True, True), (1, 3, 5),
+         ['purchase', 'a', 'b', 'c', '-b']),
+        ('triple_stack_remove_first_21016', (True, True, True), (1, 3, 5),
+         ['purchase', 'a', 'b', 'c', '-a']),
+        ('triple_mixed_single_wins_21016', (True, False, True), (1, 7, 3),
+         ['purchase', 'a', 'b', 'c']),
+        ('triple_mixed_stack_wins_21016', (True, False, True), (3, 2, 4),
+         ['purchase', 'a', 'b', 'c']),
+        ('triple_mixed_remove_single_21016', (True, False, True), (1, 7, 3),
+         ['purchase', 'a', 'b', 'c', '-b']),
+    )
+    for name, stack_flags, values, sequence in triple_scenarios:
+        sources = [
+            _choice(ident, discountOther=True, isDisChoices=True,
+                    discountChoices=['purchase'], discountOperator='1',
+                    discountValue=amount, stackableDiscount=stacking)
+            for ident, amount, stacking in zip('abc', values, stack_flags)
+        ]
+        purchase = _choice('purchase', scores=[{
+            'idx': 'purchase-score', 'id': 'p', 'value': 12,
+            'requireds': [], 'showScore': True,
+        }])
+        cases.append({
+            'name': name, 'check_action_trace': True,
+            'debug_discounts': name == 'triple_nonstack_remove_best_21016',
+            'project': _project(rows=[_row('r', [*sources, purchase])],
+                                points=[_point('p', 40)]),
+            'actions': [
+                {'op': 'deselect' if token.startswith('-') else 'select',
+                 'id': token.removeprefix('-')}
+                for token in sequence
+            ],
+        })
+
+    # Follow-up transitions after the official 2.10.16 three-nonstackable
+    # strongest-provider-removal quirk. Verify whether its full-price state
+    # persists through unrelated actions, refund, and provider changes.
+    stale_sequences = (
+        ('triple_nonstack_stale_neutral_21016',
+         ['purchase', 'a', 'b', 'c', '-c', 'neutral']),
+        ('triple_nonstack_stale_remove_middle_21016',
+         ['purchase', 'a', 'b', 'c', '-c', '-b']),
+        ('triple_nonstack_stale_remove_weak_21016',
+         ['purchase', 'a', 'b', 'c', '-c', '-a']),
+        ('triple_nonstack_stale_reselect_best_21016',
+         ['purchase', 'a', 'b', 'c', '-c', 'c']),
+        ('triple_nonstack_stale_refund_21016',
+         ['purchase', 'a', 'b', 'c', '-c', '-purchase']),
+    )
+    for name, sequence in stale_sequences:
+        sources = [
+            _choice(ident, discountOther=True, isDisChoices=True,
+                    discountChoices=['purchase'], discountOperator='1',
+                    discountValue=value, stackableDiscount=False)
+            for ident, value in zip('abc', (1, 3, 5))
+        ]
+        purchase = _choice('purchase', scores=[{
+            'idx': 'purchase-score', 'id': 'p', 'value': 12,
+            'requireds': [], 'showScore': True,
+        }])
+        cases.append({
+            'name': name,
+            'check_action_trace': True,
+            'project': _project(
+                rows=[_row('r', [*sources, purchase, _choice('neutral')])],
+                points=[_point('p', 40)],
+            ),
+            'actions': [
+                {'op': 'deselect' if token.startswith('-') else 'select',
+                 'id': token.removeprefix('-')}
+                for token in sequence
+            ],
+        })
+
+    # PR review regression: fixed multi-Score purchases aggregate charges by
+    # Point ID. A provider can target only one Score, or two Scores can charge
+    # the same Point. A fractional raw Score must be floored *before* discount
+    # arithmetic when its Point Type does not allow floats.
+    accounting_cases = (
+        ('review_two_score_point_filter_21016', [
+            {'idx': 'sp', 'id': 'p', 'value': 8, 'requireds': [], 'showScore': True},
+            {'idx': 'sq', 'id': 'q', 'value': 4, 'requireds': [], 'showScore': True},
+        ], ['p'], '1', 2, False, ['purchase', 'coupon', '-coupon']),
+        ('review_two_score_before_purchase_21016', [
+            {'idx': 'sp', 'id': 'p', 'value': 8, 'requireds': [], 'showScore': True},
+            {'idx': 'sq', 'id': 'q', 'value': 4, 'requireds': [], 'showScore': True},
+        ], ['p'], '1', 2, False, ['coupon', 'purchase']),
+        ('review_two_score_same_point_21016', [
+            {'idx': 'sp1', 'id': 'p', 'value': 8, 'requireds': [], 'showScore': True},
+            {'idx': 'sp2', 'id': 'p', 'value': 6, 'requireds': [], 'showScore': True},
+        ], ['p'], '1', 2, False, ['purchase', 'coupon', '-coupon']),
+        ('review_two_score_not_discountable_21016', [
+            {'idx': 'sp', 'id': 'p', 'value': 8, 'requireds': [], 'showScore': True},
+            {'idx': 'sq', 'id': 'q', 'value': 4, 'requireds': [], 'showScore': True,
+             'isNotDiscountable': True},
+        ], ['p', 'q'], '1', 2, False, ['purchase', 'coupon', '-coupon']),
+        ('review_fractional_float_point_21016', [
+            {'idx': 'sp', 'id': 'p', 'value': 8.9, 'requireds': [], 'showScore': True},
+        ], ['p'], '2', 0.5, True, ['purchase', 'coupon', 'neutral', '-coupon']),
+    )
+    for name, scores, point_ids, operator, value, allow_float, sequence in accounting_cases:
+        purchase = _choice('purchase', scores=scores)
+        coupon = _choice(
+            'coupon', discountOther=True, isDisChoices=True,
+            discountChoices=['purchase'], discountOperator=operator,
+            discountValue=value, discountPointTypes=point_ids,
+        )
+        cases.append({
+            'name': name,
+            'check_action_trace': True,
+            'project': _project(
+                rows=[_row('r', [purchase, coupon, _choice('neutral')])],
+                points=[_point('p', 50, allowFloat=allow_float),
+                        _point('q', 25, allowFloat=False)],
+            ),
+            'actions': [
+                {'op': 'deselect' if token.startswith('-') else 'select',
+                 'id': token.removeprefix('-')} for token in sequence
+            ],
+        })
+
+    return cases
+
+
+
+def sparse_equivalence_cases() -> list[dict[str, Any]]:
+    """Compare canonical Local sparse files with Creator-complete originals in
+    the actual pinned official Viewer, not just the Python hydration path.
+    """
+    from .omission_probe import _base_project
+    from .editor import make_entity
+    from .sparse_project import sparsify_project
+    from .upstream_2106 import default_export_project
+
+    cases: list[dict[str, Any]] = []
+    originals = [
+        ('empty_default', default_export_project(), []),
+        ('single_choice_unselected', _base_project(), []),
+        ('single_choice_selected', _base_project(), [{'op': 'select', 'id': 'probe-choice'}]),
+    ]
+    protected = _base_project()
+    protected['rows'][0]['objects'][0]['notDeselectedByReq'] = True
+    originals.append(('protected_choice_selected', protected, [{'op': 'select', 'id': 'probe-choice'}]))
+
+    # Exercise sparse transformations in realistic, stateful content: costs,
+    # row limits, selectable Addons, repeat counters and requirements.
+    points = _base_project()
+    points['pointTypes'].append(make_entity(points, 'point', {
+        'id': 'probe-points', 'name': 'Points', 'startingSum': 20, 'initValue': 20,
+    }))
+    points['rows'][0]['objects'][0]['scores'].append(make_entity(points, 'score', {
+        'idx': 'probe-score', 'id': 'probe-points', 'value': 4,
+    }))
+    originals.append(('point_cost_selected', points, [{'op': 'select', 'id': 'probe-choice'}]))
+    originals.append(('point_cost_refunded', copy.deepcopy(points), [
+        {'op': 'select', 'id': 'probe-choice'}, {'op': 'deselect', 'id': 'probe-choice'},
+    ]))
+
+    # An already-applicable fixed discount is exercised separately from
+    # unimplemented dynamic discounts and stacking in the headless simulator.
+    applied = copy.deepcopy(points)
+    applied_score = applied['rows'][0]['objects'][0]['scores'][0]
+    applied_score.update({
+        'discountIsOn': True, 'appliedDiscount': True,
+        'discountScore': 2, 'discounts': [],
+    })
+    originals.append(('applied_discount_selected', applied, [
+        {'op': 'select', 'id': 'probe-choice'},
+    ]))
+    originals.append(('applied_discount_refunded', copy.deepcopy(applied), [
+        {'op': 'select', 'id': 'probe-choice'}, {'op': 'deselect', 'id': 'probe-choice'},
+    ]))
+
+    # The pre-applied empty-discount test above checks the special refund
+    # path. This separate fixture exercises the *other-choice* branch inside
+    # selectUpdateScore(): a live coupon changes a previously selected target,
+    # creating isChangeDiscount/tmpDisScore before a different Choice triggers
+    # its reconciliation. Compare the complete and sparse versions after
+    # every activation and refund.
+    dynamic = copy.deepcopy(points)
+    dynamic['rows'][0]['objects'][0]['scores'][0].update({
+        'isChangeDiscount': True, 'tmpDisScore': 2,
+    })
+    dynamic['rows'][0]['objects'].append(make_entity(dynamic, 'choice', {
+        'id': 'probe-discount-source', 'title': 'Discount source', 'index': 1,
+        'discountOther': True, 'isDisChoices': True,
+        'discountChoices': ['probe-choice'],
+        'discountOperator': '1', 'discountValue': 2,
+    }))
+    originals.append(('dynamic_other_choice_discount_refund', dynamic, [
+        {'op': 'select', 'id': 'probe-choice'},
+        {'op': 'select', 'id': 'probe-discount-source'},
+        {'op': 'deselect', 'id': 'probe-discount-source'},
+        {'op': 'deselect', 'id': 'probe-choice'},
+    ]))
+
+    limited = _base_project()
+    limited['rows'][0]['allowedChoices'] = 1
+    limited['rows'][0]['objects'].append(make_entity(limited, 'choice', {
+        'id': 'probe-second', 'title': 'Replacement', 'index': 1,
+    }))
+    originals.append(('row_cap_replacement', limited, [
+        {'op': 'select', 'id': 'probe-choice'}, {'op': 'select', 'id': 'probe-second'},
+    ]))
+
+    repeat = _base_project()
+    repeat_choice = repeat['rows'][0]['objects'][0]
+    repeat_choice.update({
+        'isSelectableMultiple': True, 'isMultipleUseVariable': True,
+        'numMultipleTimesMinus': 0, 'numMultipleTimesPluss': 3,
+    })
+    originals.append(('multiple_choice_selected_twice', repeat, [
+        {'op': 'select', 'id': 'probe-choice'}, {'op': 'select', 'id': 'probe-choice'},
+    ]))
+
+    gated = _base_project()
+    gated['rows'][0]['objects'].insert(0, make_entity(gated, 'choice', {
+        'id': 'probe-gate', 'title': 'Gate', 'index': 0,
+    }))
+    gated['rows'][0]['objects'][1]['index'] = 1
+    gated['rows'][0]['objects'][1]['requireds'].append(
+        make_entity(gated, 'requirement', {'type': 'id', 'reqId': 'probe-gate'})
+    )
+    originals.append(('requirement_activation_cleanup', gated, [
+        {'op': 'select', 'id': 'probe-gate'},
+        {'op': 'select', 'id': 'probe-choice'},
+        {'op': 'deselect', 'id': 'probe-gate'},
+    ]))
+
+    addon_project = _base_project()
+    addon = make_entity(addon_project, 'selectable_addon', {
+        'id': 'probe-addon', 'title': 'Selectable Addon',
+        'multipleUseVariable': 0, 'isActive': False, 'groups': [],
+    }, parent='probe-choice')
+    addon_project['rows'][0]['objects'][0]['addons'].append(addon)
+    originals.append(('selectable_addon_selected', addon_project, [
+        {'op': 'select', 'id': 'probe-choice'},
+        {'op': 'select', 'id': 'probe-addon'},
+    ]))
+
+    for name, original, actions in originals:
+        candidate, receipt = sparsify_project(original)
+        if candidate == original or receipt['removed_count'] == 0:
+            raise AssertionError(f'{name}: sparse serializer produced no measurable output')
+        cases.append({
+            'name': name, 'baseline': original, 'candidate': candidate,
+            'actions': actions, 'check_requirements': [],
+        })
     return cases
 
 
@@ -482,11 +1125,11 @@ def _local_snapshot(sim: Simulator, check_requirements: list[str]) -> dict[str, 
     }
 
 
-def run_local_case(case: dict[str, Any]) -> dict[str, Any]:
-    # initializeApp() itself does not perform a clean/reset pass, so avoid the
-    # simulator's initial auto-active convenience here. Cases that exercise reset
-    # invoke it explicitly, which then queues isAutoActive exactly like Viewer.
+def run_local_case_trace(case: dict[str, Any]) -> list[dict[str, Any]]:
+    """Capture the initial state and each action for official Viewer comparison."""
     sim = Simulator(case['project'], clean=False)
+    check = [str(x) for x in case.get('check_requirements', [])]
+    snapshots = [_local_snapshot(sim, check)]
     for action in case.get('actions', []):
         op = action['op']
         if op == 'select':
@@ -497,10 +1140,16 @@ def run_local_case(case: dict[str, Any]) -> dict[str, Any]:
             sim.state.points[str(action['id'])] = float(action['value'])
         elif op == 'reset':
             sim.reset()
+        elif op == 'load_build':
+            sim.load_build_string(str(action['value']))
         else:
             raise ValueError(f'unsupported live parity action: {op}')
-    return _local_snapshot(sim, [str(x) for x in case.get('check_requirements', [])])
+        snapshots.append(_local_snapshot(sim, check))
+    return snapshots
 
+
+def run_local_case(case: dict[str, Any]) -> dict[str, Any]:
+    return run_local_case_trace(case)[-1]
 
 def local_results() -> dict[str, Any]:
     return {case['name']: run_local_case(case) for case in live_cases()}

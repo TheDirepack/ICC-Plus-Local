@@ -1,6 +1,6 @@
-# ICC Plus Local 0.10.0rc15 handoff
+# ICC Plus Local 0.10.0rc17 handoff
 
-The engine target remains ICC Plus 2.10.7, pinned to upstream commit `1ea9db888cde2286d18d0d5de50933cb8773b739`.
+The engine target remains ICC Plus 2.10.15, pinned to upstream commit `128c05799b6df2574fd870449d15a37e410fe3e6`.
 
 Use the workflow-centered ICC Plus Local interface:
 

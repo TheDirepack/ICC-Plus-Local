@@ -87,7 +87,7 @@ class CliTests(unittest.TestCase):
         self.assertGreater(value['count'], 10)
         self.assertTrue(all('discount' in name.lower() for name in value['fields']))
         self.assertIn('discountOther', value['fields'])
-        self.assertEqual(value['source']['icc_plus_version'], '2.10.7')
+        self.assertEqual(value['source']['icc_plus_version'], '2.10.16')
 
     def test_fields_command_suggests_close_names_when_filter_misses(self):
         result = run_cli('fields', 'choice', '--contains', 'titel')
@@ -188,7 +188,7 @@ class CliTests(unittest.TestCase):
             self.assertTrue(value['blank'])
             self.assertEqual(value['serialization']['mode'], 'sparse')
             saved = json.loads(out.read_text(encoding='utf-8'))
-            self.assertEqual(saved['version'], '2.10.7')
+            self.assertEqual(saved['version'], '2.10.16')
             self.assertNotIn('viewerConfig', saved)
             self.assertNotIn('styling', saved)
             self.assertGreater(value['serialization']['removed_count'], 0)
@@ -245,7 +245,7 @@ class CliTests(unittest.TestCase):
             self.assertTrue(value['ok'])
             self.assertGreater(value['change_count'], 0)
             hydrated = json.loads(project.read_text(encoding='utf-8'))
-            self.assertEqual(hydrated['version'], '2.10.7')
+            self.assertEqual(hydrated['version'], '2.10.16')
             self.assertEqual(hydrated['viewerConfig']['title'], 'Legacy title')
             self.assertIn('loadingType', hydrated['viewerConfig'])
             self.assertNotIn('styling', hydrated)
@@ -283,7 +283,7 @@ class CliTests(unittest.TestCase):
             self.assertTrue(value['ok'])
             self.assertEqual(value['serialization']['mode'], 'sparse')
             final = json.loads(project.read_text(encoding='utf-8'))
-            self.assertEqual(final['version'], '2.10.7')
+            self.assertEqual(final['version'], '2.10.16')
             self.assertNotIn('viewerConfig', final)
             self.assertNotIn('styling', final)
             self.assertEqual(final['rows'][0]['id'], 'row_added')
@@ -1133,7 +1133,7 @@ class PackagingCliTests(unittest.TestCase):
             self.assertEqual(exported_result.returncode, 0, exported_result.stderr)
             self.assertFalse(exported.read_bytes().endswith(b'\n'))
             exported_value = json.loads(exported.read_text(encoding='utf-8'))
-            self.assertEqual(exported_value['version'], '2.10.7')
+            self.assertEqual(exported_value['version'], '2.10.16')
             self.assertEqual(exported_value['styling'], gear['styling'])
 
     def test_design_import_export_supports_design_groups(self):
