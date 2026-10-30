@@ -758,3 +758,25 @@ def test_two_source_discount_does_not_guess_unverified_mixed_operators():
     assert purchase is not None
     score = purchase.value['scores'][0]
     assert sim._direct_discount_value(purchase, score, 10.0) is None
+
+
+def test_single_provider_discount_quota_allocation_and_reuse():
+    """Pinned official Viewer 2.10.15 action-by-action quota observations."""
+    from iccplus_tools.live_parity import live_cases, run_local_case_trace
+
+    cases = {case['name']: case for case in live_cases()}
+    expected = {
+        'quota_one_two_purchases_21015': [50, 50, 45, 37],
+        'quota_one_after_two_purchases_21015': [50, 42, 34, 37],
+        'quota_one_remove_first_21015': [50, 50, 45, 37, 45],
+        'quota_one_remove_first_then_reselect_21015': [50, 50, 45, 37, 45, 37],
+        'quota_one_remove_source_21015': [50, 50, 45, 37, 34],
+        'quota_two_three_purchases_21015': [50, 50, 45, 40, 32],
+        'quota_two_remove_middle_21015': [50, 50, 45, 40, 32, 40],
+        'quota_one_purchase_refund_21015': [50, 50, 45, 50, 45],
+    }
+    for name, values in expected.items():
+        assert cases[name]['check_action_trace'] is True
+        trace = run_local_case_trace(cases[name])
+        assert [step['points']['p'] for step in trace] == values, name
+    assert len(expected) == 8

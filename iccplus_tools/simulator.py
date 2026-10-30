@@ -1580,7 +1580,7 @@ class Simulator:
         """Reproduce the verified two-provider Viewer discount-arbitration path.
 
         The official Viewer keeps discount state per Score. For ordinary fixed
-        Scores with at most two providers and no quotas/repeat use, the native
+        Scores with at most two providers, the native
         selection sequence reduces to: accumulate compatible stackable offers,
         but compare an incompatible offer against the currently winning total.
         The source's selection order matters. Return None for features whose
@@ -1637,13 +1637,43 @@ class Simulator:
                 ):
                     return None
 
-        # A repeated or quota-limited source has its own per-discount allocation
-        # state and cannot be represented by this deterministic fixed-cost path.
+        # Finite-use allocation is supported only for one ordinary provider
+        # discounting independent, fixed-cost, nonrepeatable Choices. In the
+        # pinned Viewer, addCount() fills unallocated discounts at capacity
+        # and removeCount() transfers the released allocation to the earliest
+        # remaining eligible Choice. For this specific path, selected_order is
+        # the allocation order and re-pricing the ledger mirrors that transfer.
         for source in sources:
             cfg = source.value
-            if (cfg.get('isSelectableMultiple') or cfg.get('useDiscountCount')
-                    or cfg.get('countPerSelection')):
+            if cfg.get('isSelectableMultiple') or cfg.get('countPerSelection'):
                 return None
+            if cfg.get('useDiscountCount'):
+                if len(sources) != 1 or cfg.get('stackableDiscount'):
+                    return None
+                limit = cfg.get('discountCount')
+                if (isinstance(limit, bool) or not isinstance(limit, int)
+                        or limit < 1):
+                    return None
+                if not cfg.get('isDisChoices'):
+                    return None
+                choices = cfg.get('discountChoices')
+                if not isinstance(choices, list) or cfg.get('discountRows'):
+                    return None
+                # All targeted purchases need the same simple accounting
+                # structure. Multiple Scores, repeats or conditional cost
+                # requirements require Viewer's full allocation state.
+                for choice_id in choices:
+                    target = self.index.one(str(choice_id), 'choice')
+                    if target is None:
+                        continue
+                    scores = target.value.get('scores')
+                    if target.value.get('isSelectableMultiple') or not isinstance(scores, list) or len(scores) != 1:
+                        return None
+                    sc = scores[0]
+                    if (not isinstance(sc, dict) or sc.get('isRandom')
+                            or sc.get('useExpression') or sc.get('multiplyByTimes')
+                            or sc.get('requireds')):
+                        return None
 
         def apply_offer(amount: float, cfg: dict[str, Any]) -> float | None:
             raw_value = cfg.get('discountValue')
@@ -1674,6 +1704,20 @@ class Simulator:
         active = {source.id: source for source in sources if self._active(source.id)}
         if not active:
             return base
+
+        if len(sources) == 1 and sources[0].value.get('useDiscountCount'):
+            provider = sources[0].value
+            eligible_ids = set(provider['discountChoices'])
+            # A not-yet-selected Choice being previewed is last in line.
+            allocation_order = [
+                ident for ident in self.state.selected_order
+                if ident in eligible_ids and self._active(ident)
+            ]
+            if ent.id in eligible_ids and ent.id not in allocation_order:
+                allocation_order.append(ent.id)
+            if ent.id not in allocation_order[:provider['discountCount']]:
+                return base
+
         ordered = [active[ident] for ident in self.state.selected_order if ident in active]
         # Imported states may have active IDs but no selected-order metadata.
         for source in sources:
