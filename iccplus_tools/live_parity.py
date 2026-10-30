@@ -880,6 +880,46 @@ def live_cases() -> list[dict[str, Any]]:
             ],
         })
 
+    # Follow-up transitions after the official 2.10.16 three-nonstackable
+    # strongest-provider-removal quirk. Verify whether its full-price state
+    # persists through unrelated actions, refund, and provider changes.
+    stale_sequences = (
+        ('triple_nonstack_stale_neutral_21016',
+         ['purchase', 'a', 'b', 'c', '-c', 'neutral']),
+        ('triple_nonstack_stale_remove_middle_21016',
+         ['purchase', 'a', 'b', 'c', '-c', '-b']),
+        ('triple_nonstack_stale_remove_weak_21016',
+         ['purchase', 'a', 'b', 'c', '-c', '-a']),
+        ('triple_nonstack_stale_reselect_best_21016',
+         ['purchase', 'a', 'b', 'c', '-c', 'c']),
+        ('triple_nonstack_stale_refund_21016',
+         ['purchase', 'a', 'b', 'c', '-c', '-purchase']),
+    )
+    for name, sequence in stale_sequences:
+        sources = [
+            _choice(ident, discountOther=True, isDisChoices=True,
+                    discountChoices=['purchase'], discountOperator='1',
+                    discountValue=value, stackableDiscount=False)
+            for ident, value in zip('abc', (1, 3, 5))
+        ]
+        purchase = _choice('purchase', scores=[{
+            'idx': 'purchase-score', 'id': 'p', 'value': 12,
+            'requireds': [], 'showScore': True,
+        }])
+        cases.append({
+            'name': name,
+            'check_action_trace': True,
+            'project': _project(
+                rows=[_row('r', [*sources, purchase, _choice('neutral')])],
+                points=[_point('p', 40)],
+            ),
+            'actions': [
+                {'op': 'deselect' if token.startswith('-') else 'select',
+                 'id': token.removeprefix('-')}
+                for token in sequence
+            ],
+        })
+
     return cases
 
 
