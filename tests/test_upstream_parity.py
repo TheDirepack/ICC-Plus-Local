@@ -634,6 +634,10 @@ def test_live_viewer_sparse_equivalence_inventory_is_valid_and_nontrivial():
     assert {case['name'] for case in cases} == {
         'empty_default', 'single_choice_unselected',
         'single_choice_selected', 'protected_choice_selected',
+        'point_cost_selected', 'point_cost_refunded',
+        'applied_discount_selected', 'applied_discount_refunded',
+        'row_cap_replacement', 'multiple_choice_selected_twice',
+        'requirement_activation_cleanup', 'selectable_addon_selected',
     }
     for case in cases:
         assert validate_complete(case['baseline'])['valid'], case['name']

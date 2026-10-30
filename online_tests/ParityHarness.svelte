@@ -118,8 +118,12 @@
                 for (const phase of ['baseline', 'candidate']) {
                     localStorage.clear();
                     await initializeApp(clone(testCase[phase]));
-                    for (const action of testCase.actions || []) await act(action);
-                    runs[phase] = snapshot(testCase.check_requirements || []);
+                    const checkpoints = [snapshot(testCase.check_requirements || [])];
+                    for (const action of testCase.actions || []) {
+                        await act(action);
+                        checkpoints.push(snapshot(testCase.check_requirements || []));
+                    }
+                    runs[phase] = checkpoints;
                 }
                 sparseResults[testCase.name] = runs;
             }

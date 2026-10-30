@@ -514,6 +514,7 @@ def sparse_equivalence_cases() -> list[dict[str, Any]]:
     the actual pinned official Viewer, not just the Python hydration path.
     """
     from .omission_probe import _base_project
+    from .editor import make_entity
     from .sparse_project import sparsify_project
     from .upstream_2106 import default_export_project
 
@@ -527,9 +528,82 @@ def sparse_equivalence_cases() -> list[dict[str, Any]]:
     protected['rows'][0]['objects'][0]['notDeselectedByReq'] = True
     originals.append(('protected_choice_selected', protected, [{'op': 'select', 'id': 'probe-choice'}]))
 
+    # Exercise sparse transformations in realistic, stateful content: costs,
+    # row limits, selectable Addons, repeat counters and requirements.
+    points = _base_project()
+    points['pointTypes'].append(make_entity(points, 'point', {
+        'id': 'probe-points', 'name': 'Points', 'startingSum': 20, 'initValue': 20,
+    }))
+    points['rows'][0]['objects'][0]['scores'].append(make_entity(points, 'score', {
+        'idx': 'probe-score', 'id': 'probe-points', 'value': 4,
+    }))
+    originals.append(('point_cost_selected', points, [{'op': 'select', 'id': 'probe-choice'}]))
+    originals.append(('point_cost_refunded', copy.deepcopy(points), [
+        {'op': 'select', 'id': 'probe-choice'}, {'op': 'deselect', 'id': 'probe-choice'},
+    ]))
+
+    # An already-applicable fixed discount is exercised separately from
+    # unimplemented dynamic discounts and stacking in the headless simulator.
+    applied = copy.deepcopy(points)
+    applied_score = applied['rows'][0]['objects'][0]['scores'][0]
+    applied_score.update({
+        'discountIsOn': True, 'appliedDiscount': True,
+        'discountScore': 2, 'discounts': [],
+    })
+    originals.append(('applied_discount_selected', applied, [
+        {'op': 'select', 'id': 'probe-choice'},
+    ]))
+    originals.append(('applied_discount_refunded', copy.deepcopy(applied), [
+        {'op': 'select', 'id': 'probe-choice'}, {'op': 'deselect', 'id': 'probe-choice'},
+    ]))
+
+    limited = _base_project()
+    limited['rows'][0]['allowedChoices'] = 1
+    limited['rows'][0]['objects'].append(make_entity(limited, 'choice', {
+        'id': 'probe-second', 'title': 'Replacement', 'index': 1,
+    }))
+    originals.append(('row_cap_replacement', limited, [
+        {'op': 'select', 'id': 'probe-choice'}, {'op': 'select', 'id': 'probe-second'},
+    ]))
+
+    repeat = _base_project()
+    repeat_choice = repeat['rows'][0]['objects'][0]
+    repeat_choice.update({
+        'isSelectableMultiple': True, 'isMultipleUseVariable': True,
+        'numMultipleTimesMinus': 0, 'numMultipleTimesPluss': 3,
+    })
+    originals.append(('multiple_choice_selected_twice', repeat, [
+        {'op': 'select', 'id': 'probe-choice'}, {'op': 'select', 'id': 'probe-choice'},
+    ]))
+
+    gated = _base_project()
+    gated['rows'][0]['objects'].insert(0, make_entity(gated, 'choice', {
+        'id': 'probe-gate', 'title': 'Gate', 'index': 0,
+    }))
+    gated['rows'][0]['objects'][1]['index'] = 1
+    gated['rows'][0]['objects'][1]['requireds'].append(
+        make_entity(gated, 'requirement', {'type': 'id', 'reqId': 'probe-gate'})
+    )
+    originals.append(('requirement_activation_cleanup', gated, [
+        {'op': 'select', 'id': 'probe-gate'},
+        {'op': 'select', 'id': 'probe-choice'},
+        {'op': 'deselect', 'id': 'probe-gate'},
+    ]))
+
+    addon_project = _base_project()
+    addon = make_entity(addon_project, 'selectable_addon', {
+        'id': 'probe-addon', 'title': 'Selectable Addon',
+        'multipleUseVariable': 0, 'isActive': False, 'groups': [],
+    }, parent='probe-choice')
+    addon_project['rows'][0]['objects'][0]['addons'].append(addon)
+    originals.append(('selectable_addon_selected', addon_project, [
+        {'op': 'select', 'id': 'probe-choice'},
+        {'op': 'select', 'id': 'probe-addon'},
+    ]))
+
     for name, original, actions in originals:
         candidate, receipt = sparsify_project(original)
-        if candidate == original or not receipt:
+        if candidate == original or receipt['removed_count'] == 0:
             raise AssertionError(f'{name}: sparse serializer produced no measurable output')
         cases.append({
             'name': name, 'baseline': original, 'candidate': candidate,
