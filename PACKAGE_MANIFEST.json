@@ -9,7 +9,7 @@
     "checked_in_examples": "CI workflow is authoritative for the current branch",
     "ci_workflow": ".github/workflows/tests.yml",
     "default_export_bytes": 13415,
-    "default_export_sha256": "PENDING_21016_SHA256"
+    "default_export_sha256": "7bf9dfcea466bffe9964f0eb11304823bf1f1c39be16da33a9d92afb45629119"
   },
   "project_integrity": {
     "canonical_final_validation": "project validate --complete",
