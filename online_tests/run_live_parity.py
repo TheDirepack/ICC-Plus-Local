@@ -192,6 +192,10 @@ def main() -> int:
             raise RuntimeError(f"upstream harness failed: {payload['error']}\n{payload.get('stack', '')}")
         errors = compare(payload)
         errors.extend(f'format: {msg}' for msg in compare_type_catalog(checkout))
+        if errors and payload.get('discountDebug'):
+            print('Official Viewer discount-state diagnostics:', json.dumps(
+                payload['discountDebug'], ensure_ascii=False, sort_keys=True
+            ))
         report = {
             'ok': not errors,
             'source_commit': ICCPLUS_COMMIT,

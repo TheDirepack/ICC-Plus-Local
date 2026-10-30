@@ -112,15 +112,33 @@
             const payload = await response.json();
             const results: Record<string, any> = {};
             const actionTraces: Record<string, any> = {};
+            const discountDebug: Record<string, any> = {};
             for (const testCase of payload.cases) {
                 localStorage.clear();
                 await initializeApp(clone(testCase.project));
                 const checkpoints = testCase.check_action_trace
                     ? [snapshot(testCase.check_requirements || [])] : null;
+                const discountSnapshots: any[] = [];
+                const discountState = () => {
+                    const target = choiceMap.get('purchase')?.choice;
+                    const score: any = target?.scores?.[0];
+                    return score ? {
+                        scoreValue: score.value,
+                        discountScore: score.discountScore,
+                        discountIsOn: score.discountIsOn,
+                        appliedDiscount: score.appliedDiscount,
+                        isChangeDiscount: score.isChangeDiscount,
+                        tmpDisScore: score.tmpDisScore,
+                        discounts: clone(score.discounts ?? []),
+                    } : null;
+                };
+                if (testCase.debug_discounts) discountSnapshots.push(discountState());
                 for (const action of testCase.actions || []) {
                     await act(action);
                     if (checkpoints) checkpoints.push(snapshot(testCase.check_requirements || []));
+                    if (testCase.debug_discounts) discountSnapshots.push(discountState());
                 }
+                if (testCase.debug_discounts) discountDebug[testCase.name] = discountSnapshots;
                 const finalState = snapshot(testCase.check_requirements || []);
                 results[testCase.name] = finalState;
                 if (checkpoints) actionTraces[testCase.name] = checkpoints;
@@ -147,6 +165,7 @@
                 emptySelectedObjectId,
                 results,
                 actionTraces,
+                discountDebug,
                 sparseResults,
             });
             document.title = 'ICCPLUS_PARITY_DONE';

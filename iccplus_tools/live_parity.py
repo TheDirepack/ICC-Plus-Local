@@ -870,6 +870,7 @@ def live_cases() -> list[dict[str, Any]]:
         }])
         cases.append({
             'name': name, 'check_action_trace': True,
+            'debug_discounts': name == 'triple_nonstack_remove_best_21016',
             'project': _project(rows=[_row('r', [*sources, purchase])],
                                 points=[_point('p', 40)]),
             'actions': [
