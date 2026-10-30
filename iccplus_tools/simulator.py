@@ -1577,13 +1577,14 @@ class Simulator:
                 self._build_order_remove(ident)
 
     def _direct_discount_value(self, ent: Entity, score: dict[str, Any], base: float) -> float | None:
-        """A deliberately narrow subset of Viewer selectDiscountOther().
+        """Reproduce the verified two-provider Viewer discount-arbitration path.
 
-        Handles exactly one ordinary Choice discount source, targeting Choices
-        directly, through a Row, or through an ICC Plus Group. The official
-        Viewer supports multiple providers, groups, per-selection counts and
-        competing stacks; avoid guessing their behavior until separately tested.
-        A configured but inactive source returns the undiscounted score amount.
+        The official Viewer keeps discount state per Score. For ordinary fixed
+        Scores with at most two providers and no quotas/repeat use, the native
+        selection sequence reduces to: accumulate compatible stackable offers,
+        but compare an incompatible offer against the currently winning total.
+        The source's selection order matters. Return None for features whose
+        state machine is not yet modeled, instead of making up a charge.
         """
         if score.get('isNotDiscountable') or score.get('discountIsOn'):
             return None
@@ -1611,43 +1612,76 @@ class Simulator:
                     )
                 )
             if matched:
+                point_filter = cfg.get('discountPointTypes', [])
+                if isinstance(point_filter, list) and point_filter and str(score.get('id', '')) not in point_filter:
+                    continue
                 sources.append(source)
-        if len(sources) != 1:
+        if not sources or len(sources) > 2:
             return None
-        source = sources[0]
-        cfg = source.value
-        if (source.value.get('isSelectableMultiple') or cfg.get('useDiscountCount')
-                or cfg.get('stackableDiscount')):
-            return None
-        point_filter = cfg.get('discountPointTypes', [])
-        if isinstance(point_filter, list) and point_filter and str(score.get('id', '')) not in point_filter:
-            return None
-        if not self._active(source.id):
-            return base
-        operator = str(cfg.get('discountOperator', ''))
-        raw_value = cfg.get('discountValue')
-        if isinstance(raw_value, bool) or not isinstance(raw_value, (int, float)):
-            return None
-        value = float(raw_value)
-        if operator == '1':
-            discounted = base - value
-        elif operator == '2':
-            discounted = base + value
-        elif operator == '3':
-            discounted = base * value
-        elif operator == '4':
-            if value == 0:
+
+        # A repeated or quota-limited source has its own per-discount allocation
+        # state and cannot be represented by this deterministic fixed-cost path.
+        for source in sources:
+            cfg = source.value
+            if (cfg.get('isSelectableMultiple') or cfg.get('useDiscountCount')
+                    or cfg.get('countPerSelection')):
                 return None
-            discounted = base / value
-        elif operator == '5':
-            discounted = value
-        else:
-            return None
-        if cfg.get('discountLowLimitIsOn'):
-            low = cfg.get('discountLowLimit')
-            if isinstance(low, (int, float)) and not isinstance(low, bool):
-                discounted = max(discounted, float(low))
-        return discounted
+
+        def apply_offer(amount: float, cfg: dict[str, Any]) -> float | None:
+            raw_value = cfg.get('discountValue')
+            if isinstance(raw_value, bool) or not isinstance(raw_value, (int, float)):
+                return None
+            value = float(raw_value)
+            operator = str(cfg.get('discountOperator', ''))
+            if operator == '1':
+                amount -= value
+            elif operator == '2':
+                amount += value
+            elif operator == '3':
+                amount *= value
+            elif operator == '4':
+                if value == 0:
+                    return None
+                amount /= value
+            elif operator == '5':
+                amount = value
+            else:
+                return None
+            if cfg.get('discountLowLimitIsOn'):
+                low = cfg.get('discountLowLimit')
+                if isinstance(low, (int, float)) and not isinstance(low, bool):
+                    amount = max(amount, float(low))
+            return amount if math.isfinite(amount) else None
+
+        active = {source.id: source for source in sources if self._active(source.id)}
+        if not active:
+            return base
+        ordered = [active[ident] for ident in self.state.selected_order if ident in active]
+        # Imported states may have active IDs but no selected-order metadata.
+        for source in sources:
+            if source.id in active and source not in ordered:
+                ordered.append(source)
+
+        winner: float | None = None
+        winner_stackable = False
+        for source in ordered:
+            cfg = source.value
+            stackable = bool(cfg.get('stackableDiscount'))
+            candidate = apply_offer(
+                winner if winner is not None and winner_stackable and stackable else base,
+                cfg,
+            )
+            if candidate is None:
+                return None
+            if winner is None or candidate < winner:
+                winner = candidate
+                winner_stackable = stackable
+            elif winner_stackable and stackable:
+                # Same compatibility path: even a non-improving stacked offer
+                # is applied by Viewer selectDiscount() when both are active.
+                winner = candidate
+        return winner if winner is not None else base
+
 
     def _reprice_direct_discounts(self) -> None:
         """Reconcile live fixed-cost ledgers when a direct discount toggles."""

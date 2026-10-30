@@ -718,3 +718,29 @@ def test_direct_discount_row_and_group_routes():
     for name, values in expected.items():
         trace = run_local_case_trace(cases[name])
         assert [step['points']['p'] for step in trace] == values, name
+
+
+def test_multi_provider_discount_arbitration_and_removal_traces():
+    """Pinned Viewer 2.10.15 fixed-cost two-provider observations."""
+    from iccplus_tools.live_parity import live_cases, run_local_case_trace
+
+    cases = {case['name']: case for case in live_cases()}
+    checkpoints = {
+        'multi_nonstack_stronger_21015': [30, 20, 22, 25],
+        'multi_nonstack_weaker_21015': [30, 20, 25, 25],
+        'multi_nonstack_remove_strong_21015': [30, 20, 22, 25, 22],
+        'multi_nonstack_remove_weak_21015': [30, 20, 22, 25, 25],
+        'multi_nonstack_before_purchase_21015': [30, 30, 30, 25],
+        'multi_stack_after_purchase_21015': [30, 20, 22, 25],
+        'multi_stack_before_purchase_21015': [30, 30, 30, 25],
+        'multi_stack_remove_first_21015': [30, 20, 22, 25, 23],
+        'multi_stack_remove_last_21015': [30, 20, 22, 25, 22],
+        'multi_mixed_stack_then_single_21015': [30, 20, 22, 26],
+        'multi_mixed_single_then_stack_21015': [30, 20, 26, 26],
+        'multi_mixed_replace_stack_21015': [30, 20, 22, 26, 22],
+    }
+    for name, expected in checkpoints.items():
+        assert cases[name]['check_action_trace'] is True
+        snapshots = run_local_case_trace(cases[name])
+        assert [snap['points']['p'] for snap in snapshots] == expected, name
+    assert len(checkpoints) == 12
