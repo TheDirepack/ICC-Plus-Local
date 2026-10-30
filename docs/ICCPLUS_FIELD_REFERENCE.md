@@ -1,6 +1,6 @@
 # ICC Plus field reference for scripted work
 
-This is a compact field catalog for the ICC Plus 2.10.15 source snapshot used by this release. It is not a replacement for the official Viewer source. It exists so a generator can find the native field names without opening the Creator UI.
+This compact field catalog targets official ICC Plus 2.10.16. The field inventory was originally transcribed from the 2.10.14 `types.ts` snapshot; the unchanged field definitions have been checked against the pinned 2.10.16 source. It is not a replacement for the official Viewer source. It exists so a generator can find the native field names without opening the Creator UI.
 
 ## Requirement
 

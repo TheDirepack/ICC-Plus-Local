@@ -1,6 +1,6 @@
 # Sparse project serialization
 
-ICC Plus Local targets ICC Plus 2.10.15 at upstream commit `128c05799b6df2574fd870449d15a37e410fe3e6`.
+ICC Plus Local targets ICC Plus 2.10.16 at upstream commit `2bba0cf9ebc2e54241c2390794e95e1c5091b293`.
 
 Normal saved `project.json` serialization omits fields only when their absence is proven safe for both the pinned Viewer behavior and ICC Plus Local's authoring round trip. This is the default project-save policy as well as the Viewer-package policy. It is not a generic "remove defaults" pass and it does not change source-level project intent.
 
@@ -10,7 +10,7 @@ A canonical sparse saved project must remain usable as an authoring artifact. Hy
 
 This means a normal saved project is expected to pass compatibility validation, not complete validation. Use `project validate` for the normal artifact and `project validate --complete` only when checking an explicitly materialized Creator-complete form.
 
-The omission inventory originated with verified 2.10.7 Viewer read paths. Upstream 2.10.14 now reads `isChangeDiscount` and `tmpDisScore` during refund processing, so both are retained instead of being treated as Viewer-unused Score fields. The official pinned-source 2.10.14 Chromium differential now passes its 35 gameplay cases, default export check, field catalog, and required-field metadata comparison. The remaining omission rules are preserved from the earlier audited baseline; those targeted omission equivalence cases require their own browser evidence and are not proven by the general gameplay differential alone.
+The omission inventory originated with verified 2.10.7 Viewer read paths. Upstream 2.10.14 and the current pinned 2.10.16 Viewer read `isChangeDiscount` and `tmpDisScore` during refund processing, so both are retained rather than omitted. The official pinned-source 2.10.14 Chromium differential now passes its 35 gameplay cases, default export check, field catalog, and required-field metadata comparison. The remaining omission rules are preserved from the earlier audited baseline; those targeted omission equivalence cases require their own browser evidence and are not proven by the general gameplay differential alone.
 
 ## Automatic omissions
 
@@ -56,7 +56,7 @@ The following are removed regardless of whether they equal stock defaults, unles
 - Requirement structural `id`, which has no Viewer read path;
 - `Requirement.more: []`, because the point-comparison evaluator only iterates it when present and an empty list contributes no operation;
 - Choice `selectedThisManyTimesProp`, Row `imageIsUrl`, and Point Type `imageIsURL`, which survive type/schema history but have no player Viewer read path;
-- Score `type` and the unread Score scratch/history members `discountScoreCal`, `isChangeDiscount`, `discountNum`, `tmpDisScore`, `tmpDiscount`, `discountedFrom`, `dupTextA`, `dupTextB`, `discountTextA`, `discountTextB`, `notStackableDiscount`, and `mulValue`.
+- Score `type` and the unread Score scratch/history members `discountScoreCal`, `discountNum`, `tmpDiscount`, `discountedFrom`, `dupTextA`, `dupTextB`, `discountTextA`, `discountTextB`, `notStackableDiscount`, and `mulValue`.
 
 This group is intentionally source-driven. Adjacent similarly named fields remain when the Viewer actually consumes them or when ICC Plus Local needs them to preserve authoring state. For example, Score `discountScore`, `appliedDiscount`, and `removeSpace` affect rendering; Score `idx` is stable authoring identity; Sound Effect `name` is a non-derivable authoring label; `defaultChoiceMaxNum` is a runtime fallback for multiple-selection limits; `defaultAddonJustify` is a loader fallback for Choices; `orderOrReqText` / `defaultOrReq` and the selected-from equivalents affect displayed Requirement text; `rowIdLength` / `objectIdLength` are used if identities must be generated; and settings such as `cropperPosition`, `tooltipDelay`, `isPointerCursor`, `importedChoicesIsOpen`, `hideScoresUpdated`, and `useToolbarBtn` still have Viewer read paths.
 
