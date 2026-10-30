@@ -686,3 +686,21 @@ def test_single_direct_coupon_reprices_purchase_and_undo_ledger():
         trace = run_local_case_trace(case)
         assert [state['points']['p'] for state in trace] == expected, name
     assert len(expectations) == 4
+
+
+def test_single_provider_discount_operators_low_limit_and_point_filter():
+    from iccplus_tools.live_parity import live_cases, run_local_case_trace
+
+    cases = {case['name']: case for case in live_cases()}
+    expected = {
+        'discount_half_after_purchase_21015': [20, 11, 16],
+        'discount_half_before_purchase_21015': [20, 20, 16],
+        'discount_low_limit_21015': [20, 20, 17],
+        'discount_point_filter_excludes_21015': [20, 20, 11],
+        'discount_fixed_override_21015': [20, 11, 17],
+    }
+    for name, values in expected.items():
+        case = cases[name]
+        assert case['check_action_trace'] is True
+        trace = run_local_case_trace(case)
+        assert [step['points']['p'] for step in trace] == values, name

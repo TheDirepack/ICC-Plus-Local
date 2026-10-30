@@ -565,6 +565,48 @@ def live_cases() -> list[dict[str, Any]]:
             'actions': actions,
         })
 
+    # Different native discount operators, integer rounding, clamp and point
+    # targeting. These do not introduce discount stacks or count allocation.
+    operator_cases = (
+        ('discount_half_after_purchase_21015', '3', 0.5, {}, [
+            {'op': 'select', 'id': 'purchase'}, {'op': 'select', 'id': 'coupon'},
+        ]),
+        ('discount_half_before_purchase_21015', '3', 0.5, {}, [
+            {'op': 'select', 'id': 'coupon'}, {'op': 'select', 'id': 'purchase'},
+        ]),
+        ('discount_low_limit_21015', '1', 10, {
+            'discountLowLimitIsOn': True, 'discountLowLimit': 3,
+        }, [
+            {'op': 'select', 'id': 'coupon'}, {'op': 'select', 'id': 'purchase'},
+        ]),
+        ('discount_point_filter_excludes_21015', '1', 2, {
+            'discountPointTypes': ['other'],
+        }, [
+            {'op': 'select', 'id': 'coupon'}, {'op': 'select', 'id': 'purchase'},
+        ]),
+        ('discount_fixed_override_21015', '5', 3, {}, [
+            {'op': 'select', 'id': 'purchase'}, {'op': 'select', 'id': 'coupon'},
+        ]),
+    )
+    for name, operator, value, extra, actions in operator_cases:
+        cases.append({
+            'name': name,
+            'check_action_trace': True,
+            'project': _project(
+                rows=[_row('r', [
+                    _choice('coupon', discountOther=True, isDisChoices=True,
+                            discountChoices=['purchase'], discountOperator=operator,
+                            discountValue=value, **extra),
+                    _choice('purchase', scores=[{
+                        'idx': 'discount-score', 'id': 'p', 'value': 9,
+                        'requireds': [], 'showScore': True,
+                    }]),
+                ])],
+                points=[_point('p', 20)],
+            ),
+            'actions': actions,
+        })
+
     return cases
 
 
