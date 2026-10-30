@@ -15,6 +15,7 @@
         selectedOneMore,
         selectedOneLess,
         cleanActivated,
+        loadActivated,
         getSelectedObjectId,
     } from '$lib/store/store.svelte';
 
@@ -81,6 +82,10 @@
         }
         if (action.op === 'reset') {
             await cleanActivated();
+            return;
+        }
+        if (action.op === 'load_build') {
+            await loadActivated(String(action.value));
             return;
         }
         const item = choiceMap.get(String(action.id));

@@ -796,6 +796,38 @@ def live_cases() -> list[dict[str, Any]]:
             ],
         })
 
+    # 2.10.16: loadActivated must NOT re-create a missing force-selected
+    # Choice when the source permits ordinary deselection.
+    for name, allow, actions, by_group in (
+        ('restore_allow_deselect_21016', True, [
+            {'op': 'select', 'id': 'source'}, {'op': 'deselect', 'id': 'target'},
+            {'op': 'load_build', 'value': 'source'},
+        ], False),
+        ('restore_protected_force_21016', False, [
+            {'op': 'select', 'id': 'source'}, {'op': 'load_build', 'value': 'source'},
+        ], False),
+        ('restore_allow_explicit_target_21016', True, [
+            {'op': 'load_build', 'value': 'source,target'},
+        ], False),
+        ('restore_allow_group_21016', True, [
+            {'op': 'load_build', 'value': 'source'},
+        ], True),
+    ):
+        cases.append({
+            'name': name, 'check_action_trace': True,
+            'project': _project(
+                rows=[_row('r', [
+                    _choice('source', activateOtherChoice=True,
+                            activateThisChoice='g' if by_group else 'target',
+                            isAllowDeselect=allow),
+                    _choice('target'),
+                ])],
+                groups=[{'id': 'g', 'name': 'g', 'category': -1,
+                         'elements': ['target'], 'rowElements': []}] if by_group else [],
+            ),
+            'actions': actions,
+        })
+
     return cases
 
 
@@ -946,6 +978,8 @@ def run_local_case_trace(case: dict[str, Any]) -> list[dict[str, Any]]:
             sim.state.points[str(action['id'])] = float(action['value'])
         elif op == 'reset':
             sim.reset()
+        elif op == 'load_build':
+            sim.load_build_string(str(action['value']))
         else:
             raise ValueError(f'unsupported live parity action: {op}')
         snapshots.append(_local_snapshot(sim, check))

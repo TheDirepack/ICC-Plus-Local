@@ -2,7 +2,7 @@
 
 **Version 0.10.0rc17**
 
-ICC Plus Local is a local command-line authoring and mechanical-testing tool for ICC Plus 2 projects. The current source in this repository is ICC Plus Local 0.10.0rc17, targeting ICC Plus 2.10.15 and pinned to upstream source commit `128c05799b6df2574fd870449d15a37e410fe3e6`.
+ICC Plus Local is a local command-line authoring and mechanical-testing tool for ICC Plus 2 projects. The current source in this repository is ICC Plus Local 0.10.0rc17, targeting ICC Plus 2.10.16 and pinned to upstream source commit `128c05799b6df2574fd870449d15a37e410fe3e6`.
 
 It is an independent local implementation. The official ICC Plus Creator and Viewer remain the authority for browser rendering and behavior outside the local tool's verified coverage.
 

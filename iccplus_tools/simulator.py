@@ -134,6 +134,7 @@ class Simulator:
         # one entry is being replayed and are never serialized as runtime state.
         self._score_value_overrides: dict[str, dict[int, float]] = {}
         self._random_activation_overrides: dict[str, list[str]] = {}
+        self._build_restore_mode = False
         points = {x.id: float(x.value.get('startingSum', 0) or 0) for x in self.index.by_kind.get('point', [])}
         variables = {x.id: x.value.get('isTrue') is True for x in self.index.by_kind.get('variable', [])}
         words = {x.id: str(x.value.get('replaceText', '')) for x in self.index.by_kind.get('word', [])}
@@ -276,6 +277,7 @@ class Simulator:
         self._random_activation_overrides = {
             entry.id: list(entry.random_activations) for entry in entries if entry.random_activations
         }
+        self._build_restore_mode = True
         try:
             for entry in entries:
                 if entry.is_row_button:
@@ -324,6 +326,7 @@ class Simulator:
         finally:
             self._score_value_overrides = {}
             self._random_activation_overrides = {}
+            self._build_restore_mode = False
         self.state.events.clear()
 
     def export_state(self, *, include_events: bool = False) -> dict[str, Any]:
@@ -2205,6 +2208,11 @@ class Simulator:
 
     def _force_activate_targets(self, ent: Entity, depth: int, dialogs: dict[str, dict[str, Any]] | None = None) -> None:
         if not ent.value.get('activateOtherChoice'):
+            return
+        # Viewer 2.10.16 selectObjectL() does not enqueue force targets
+        # absent from the saved Build Form if ordinary deselection is allowed.
+        # Explicit target entries are restored separately from the build list.
+        if self._build_restore_mode and ent.value.get('isAllowDeselect'):
             return
         if ent.value.get('isActivateRandom'):
             override = self._random_activation_overrides.get(ent.id)

@@ -102,7 +102,7 @@ def compare(upstream: dict) -> list[str]:
     if upstream.get('appVersion') != ICCPLUS_VERSION:
         errors.append(f"appVersion: upstream={upstream.get('appVersion')!r}, expected={ICCPLUS_VERSION!r}")
     if upstream.get('defaultExport') != default_export_text():
-        errors.append('default exported project bytes differ from ICC Plus 2.10.15 source runtime')
+        errors.append('default exported project bytes differ from ICC Plus 2.10.16 source runtime')
     if upstream.get('emptySelectedObjectId') != '':
         errors.append(f"empty getSelectedObjectId() returned {upstream.get('emptySelectedObjectId')!r}")
     local = local_results()
@@ -150,7 +150,7 @@ def compare(upstream: dict) -> list[str]:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description='Run live differential tests against pinned ICC Plus 2.10.15 source')
+    ap = argparse.ArgumentParser(description='Run live differential tests against pinned ICC Plus 2.10.16 source')
     ap.add_argument('--upstream-dir', type=Path, help='existing ICC-Plus-Svelte git checkout; avoids cloning from GitHub')
     ap.add_argument('--chromium', help='Chromium/Chrome executable')
     ap.add_argument('--keep-workdir', action='store_true')
@@ -167,7 +167,7 @@ def main() -> int:
 
         install = run(['npm', 'ci', '--no-audit', '--no-fund'], cwd=viewer, check=False, timeout=900)
         if install.returncode != 0:
-            # Official 2.10.15 Viewer lockfile is missing picomatch@4.0.7.
+            # Official 2.10.16 Viewer lockfile is missing picomatch@4.0.7.
             # Repair it only in this disposable checkout, never in the pinned source.
             if 'EUSAGE' not in install.stderr or 'Missing:' not in install.stderr:
                 raise RuntimeError('pinned Viewer npm ci failed: ' + install.stderr)

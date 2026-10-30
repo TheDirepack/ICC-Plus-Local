@@ -20,7 +20,7 @@ def project(*choices, points=None, groups=None, variables=None, words=None, glob
             'currentChoices': 0, 'requireds': [], 'objects': list(choices),
         }]
     return {
-        'version': '2.10.15', 'defaultChoiceMaxNum': 99,
+        'version': '2.10.16', 'defaultChoiceMaxNum': 99,
         'pointTypes': list(points or []), 'variables': list(variables or []),
         'words': list(words or []), 'groups': list(groups or []),
         'globalRequirements': list(global_requirements or []), 'rows': rows, 'backpack': [],
@@ -45,7 +45,7 @@ def point(ident: str, value: float, **extra):
 def test_new_project_is_exact_frozen_default_app():
     assert new_project() == default_project()
     p = new_project()
-    assert p['version'] == '2.10.15'
+    assert p['version'] == '2.10.16'
     assert p['backpack'][0]['id'] == 'default_backpack_row'
     # Preserve upstream spelling bugs because project JSON compatibility is literal.
     assert 'barBacktroundImage' in p['styling']
@@ -795,3 +795,19 @@ def test_quota_allocation_via_native_row_and_group_targets():
     for name, points in expected.items():
         trace = run_local_case_trace(cases[name])
         assert [step['points']['p'] for step in trace] == points, name
+
+
+def test_load_build_respects_force_allow_deselect_21016():
+    """When the build excludes an allowable force target, it stays deselected."""
+    from iccplus_tools.live_parity import live_cases, run_local_case_trace
+
+    cases = {case['name']: case for case in live_cases()}
+    expected = {
+        'restore_allow_deselect_21016': [False, True, False, False],
+        'restore_protected_force_21016': [False, True, True],
+        'restore_allow_explicit_target_21016': [False, True],
+        'restore_allow_group_21016': [False, False],
+    }
+    for name, state in expected.items():
+        snapshots = run_local_case_trace(cases[name])
+        assert [step['entities']['target']['active'] for step in snapshots] == state, name
