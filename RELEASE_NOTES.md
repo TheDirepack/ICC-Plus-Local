@@ -4,6 +4,9 @@
 
 - Source pin updated to official `2bba0cf9ebc2e54241c2390794e95e1c5091b293`.
 - Build Form loading now preserves deliberately deselected targets of `isAllowDeselect` force providers, matching the official 2.10.16 fix.
+- Expanded source-verified ordinary discount competition through three fixed nonnegative subtraction providers; reproduced the upstream strongest-third-provider removal/refund edge case with portable state tracking.
+- Verified 94 gameplay differential cases, 57 per-action traces and 12 full/sparse comparison cases directly in official Chromium Viewer 2.10.16; the independent Python/CLI regression suite also passes.
+- Quota providers with repeatable purchases, mixed-operator stacks and 4+ interacting sources remain out of scope; see issue #21.
 - Add native Chromium restoration fixtures and continue discount parity regression coverage; see PR #20 and issue #21.
 
 

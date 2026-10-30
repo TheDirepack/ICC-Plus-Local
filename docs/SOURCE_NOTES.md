@@ -7,6 +7,7 @@ ICC Plus Local **0.10.0rc17** targets ICC Plus **2.10.16**, source commit `2bba0
 - Current Python headless source parity tests: 35 runtime sequences in the official Chromium Viewer, plus exact blank default export and TypeScript schema/required-field comparisons.
 - The preceding 2.10.14 synchronization implemented protected Choices/selectable Addons and retained discount-refund Score state in sparse project saves.
 - The 2.10.16 update fixes Build Form restoration of an allowed-to-deselect forced Choice; the previous 2.10.15 update addressed Viewer hosting/packaging for Neocities.
+- Pinned Chromium parity: 94 gameplay cases, 57 action checkpoints, 12 sparse-equivalence cases with zero differences. The native discount subset includes one finite-use provider and up to three ordinary fixed nonnegative subtraction providers, with the source-verified stale full-price refund transition preserved through portable runtime state.
 
 The field catalog and type metadata are checked against the pinned `types.ts`. The Viewer store and related components are used to audit game-state behavior. Creator source remains authoritative for authoring/import/export functionality and Svelte user-interface interactions.
 
