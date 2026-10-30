@@ -655,3 +655,14 @@ def test_preapplied_fixed_discount_charges_and_refunds_exact_amount():
     assert refunded['points']['p'] == 20
     assert selected['entities']['purchase']['active']
     assert not refunded['entities']['purchase']['active']
+
+
+def test_empty_discount_refund_quirk_does_not_apply_to_nonempty_discount_lists():
+    from iccplus_tools.live_parity import live_cases, run_local_case
+    import copy
+
+    source = next(c for c in live_cases() if c['name'] == 'preapplied_discount_refund_21015')
+    active = copy.deepcopy(source)
+    score = active['project']['rows'][0]['objects'][0]['scores'][0]
+    score['discounts'] = [{'id': 'separate-source', 'state': 1}]
+    assert run_local_case(active)['points']['p'] == 20

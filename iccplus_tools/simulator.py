@@ -1584,6 +1584,36 @@ class Simulator:
         ledger = history.pop()
         for pid, value in ledger.items():
             if pid in self.state.points: self.state.points[pid] += value
+
+        # Pinned Viewer 2.10.15 quirk: selectUpdateScore() calls
+        # deleteDiscount() if a Score carries an *empty* discounts array.
+        # Its initial charge may have used discountScore, but the later
+        # deselectCalculateScore() sees no discount metadata and refunds
+        # the original value. Model this only for a single, deterministic
+        # non-repeatable Score with an explicit stale applied discount;
+        # full dynamic discount stacking is not emulated here.
+        scores = ent.value.get('scores', [])
+        if not ent.value.get('isSelectableMultiple') and isinstance(scores, list) and len(scores) == 1:
+            score = scores[0]
+            if (
+                isinstance(score, dict)
+                and score.get('discountIsOn') and score.get('appliedDiscount')
+                and score.get('discounts') == []
+                and score.get('discountScore') is not None
+                and not score.get('isRandom') and not score.get('useExpression')
+                and not score.get('multiplyByTimes')
+                and isinstance(score.get('value'), (int, float))
+                and not isinstance(score.get('value'), bool)
+            ):
+                pid = str(score.get('id', ''))
+                if pid in ledger and pid in self.state.points:
+                    point = self.index.one(pid, 'point')
+                    original = float(score['value'])
+                    if not (point and point.value.get('allowFloat')):
+                        original = float(math.floor(original))
+                    # The ledger already refunded the discounted charge.
+                    self.state.points[pid] += original - ledger[pid]
+
         if not history: self.state.score_ledger.pop(ent.id, None)
         random_history = self.state.random_score_ledger.get(ent.id, [])
         if random_history:
