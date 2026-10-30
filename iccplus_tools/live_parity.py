@@ -652,7 +652,7 @@ def live_cases() -> list[dict[str, Any]]:
     multi_scenarios = (
         ('multi_nonstack_stronger_21015', False, False, 2, 5, [
             'purchase', 'weak', 'strong']),
-        ('multi_nonstack_weaker_21015', False, False, 5, 2, [
+        ('multi_nonstack_weaker_21015', False, False, 2, 5, [
             'purchase', 'strong', 'weak']),
         ('multi_nonstack_remove_strong_21015', False, False, 2, 5, [
             'purchase', 'weak', 'strong', '-strong']),
