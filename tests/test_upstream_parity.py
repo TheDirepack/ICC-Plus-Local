@@ -643,3 +643,15 @@ def test_live_viewer_sparse_equivalence_inventory_is_valid_and_nontrivial():
         assert validate_complete(case['baseline'])['valid'], case['name']
         assert case['baseline'] != case['candidate'], case['name']
         assert case['baseline']['version'] == case['candidate']['version']
+
+
+def test_preapplied_fixed_discount_charges_and_refunds_exact_amount():
+    from iccplus_tools.live_parity import live_cases, run_local_case
+
+    cases = {c['name']: c for c in live_cases()}
+    selected = run_local_case(cases['preapplied_discount_charge_21015'])
+    refunded = run_local_case(cases['preapplied_discount_refund_21015'])
+    assert selected['points']['p'] == 18
+    assert refunded['points']['p'] == 20
+    assert selected['entities']['purchase']['active']
+    assert not refunded['entities']['purchase']['active']

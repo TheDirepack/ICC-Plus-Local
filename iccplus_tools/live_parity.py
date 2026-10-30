@@ -505,6 +505,31 @@ def live_cases() -> list[dict[str, Any]]:
         'check_requirements': ['sub'],
     })
 
+    # Discount values already applied on a Score are supported natively by
+    # Local. Verify charged and refunded points against the official Viewer;
+    # dynamic discount stacking and discount-source updates remain separate.
+    fixed_score = {
+        'idx': 'discount-score', 'id': 'p', 'value': 8,
+        'requireds': [], 'showScore': True,
+        'discountIsOn': True, 'appliedDiscount': True,
+        'discountScore': 2, 'discounts': [],
+    }
+    for name, actions in (
+        ('preapplied_discount_charge_21015', [{'op': 'select', 'id': 'purchase'}]),
+        ('preapplied_discount_refund_21015', [
+            {'op': 'select', 'id': 'purchase'},
+            {'op': 'deselect', 'id': 'purchase'},
+        ]),
+    ):
+        cases.append({
+            'name': name,
+            'project': _project(
+                rows=[_row('r', [_choice('purchase', scores=[copy.deepcopy(fixed_score)])])],
+                points=[_point('p', 20)],
+            ),
+            'actions': actions,
+        })
+
     return cases
 
 
