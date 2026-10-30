@@ -636,6 +636,7 @@ def test_live_viewer_sparse_equivalence_inventory_is_valid_and_nontrivial():
         'single_choice_selected', 'protected_choice_selected',
         'point_cost_selected', 'point_cost_refunded',
         'applied_discount_selected', 'applied_discount_refunded',
+        'dynamic_other_choice_discount_refund',
         'row_cap_replacement', 'multiple_choice_selected_twice',
         'requirement_activation_cleanup', 'selectable_addon_selected',
     }
@@ -943,3 +944,18 @@ def test_local_integer_point_fractional_discount_uses_floored_base():
     case['project']['pointTypes'][0]['allowFloat'] = False
     balances = [step['points']['p'] for step in run_local_case_trace(case)]
     assert balances == [50, 42, 42, 42, 42]
+
+
+def test_sparse_discount_scratch_fields_retained_and_other_choice_traced():
+    """Retain refund scratch fields and exercise a distinct discount source."""
+    from iccplus_tools.live_parity import sparse_equivalence_cases
+
+    case = next(c for c in sparse_equivalence_cases()
+                if c['name'] == 'dynamic_other_choice_discount_refund')
+    score = case['candidate']['rows'][0]['objects'][0]['scores'][0]
+    assert score['isChangeDiscount'] is True
+    assert score['tmpDisScore'] == 2
+    assert [a['id'] for a in case['actions']] == [
+        'probe-choice', 'probe-discount-source',
+        'probe-discount-source', 'probe-choice',
+    ]

@@ -1019,6 +1019,29 @@ def sparse_equivalence_cases() -> list[dict[str, Any]]:
         {'op': 'select', 'id': 'probe-choice'}, {'op': 'deselect', 'id': 'probe-choice'},
     ]))
 
+    # The pre-applied empty-discount test above checks the special refund
+    # path. This separate fixture exercises the *other-choice* branch inside
+    # selectUpdateScore(): a live coupon changes a previously selected target,
+    # creating isChangeDiscount/tmpDisScore before a different Choice triggers
+    # its reconciliation. Compare the complete and sparse versions after
+    # every activation and refund.
+    dynamic = copy.deepcopy(points)
+    dynamic['rows'][0]['objects'][0]['scores'][0].update({
+        'isChangeDiscount': True, 'tmpDisScore': 2,
+    })
+    dynamic['rows'][0]['objects'].append(make_entity(dynamic, 'choice', {
+        'id': 'probe-discount-source', 'title': 'Discount source', 'index': 1,
+        'discountOther': True, 'isDisChoices': True,
+        'discountChoices': ['probe-choice'],
+        'discountOperator': '1', 'discountValue': 2,
+    }))
+    originals.append(('dynamic_other_choice_discount_refund', dynamic, [
+        {'op': 'select', 'id': 'probe-choice'},
+        {'op': 'select', 'id': 'probe-discount-source'},
+        {'op': 'deselect', 'id': 'probe-discount-source'},
+        {'op': 'deselect', 'id': 'probe-choice'},
+    ]))
+
     limited = _base_project()
     limited['rows'][0]['allowedChoices'] = 1
     limited['rows'][0]['objects'].append(make_entity(limited, 'choice', {
