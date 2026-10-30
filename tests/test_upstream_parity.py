@@ -744,3 +744,17 @@ def test_multi_provider_discount_arbitration_and_removal_traces():
         snapshots = run_local_case_trace(cases[name])
         assert [snap['points']['p'] for snap in snapshots] == expected, name
     assert len(checkpoints) == 12
+
+
+def test_two_source_discount_does_not_guess_unverified_mixed_operators():
+    from iccplus_tools.live_parity import live_cases
+    import copy
+
+    source = next(c for c in live_cases() if c['name'] == 'multi_nonstack_stronger_21015')
+    modified = copy.deepcopy(source['project'])
+    modified['rows'][0]['objects'][0]['discountOperator'] = '3'
+    sim = Simulator(modified, clean=False)
+    purchase = sim.index.one('purchase', 'choice')
+    assert purchase is not None
+    score = purchase.value['scores'][0]
+    assert sim._direct_discount_value(purchase, score, 10.0) is None

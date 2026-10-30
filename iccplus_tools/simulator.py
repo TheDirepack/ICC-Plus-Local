@@ -1619,6 +1619,24 @@ class Simulator:
         if not sources or len(sources) > 2:
             return None
 
+        # The two-provider differential fixtures establish the upstream
+        # arbitration for fixed, non-negative subtraction discounts only.
+        # Do not extrapolate their stateful interactions to mixed operators,
+        # per-discount floors, or cost-increasing values without a new probe.
+        if len(sources) == 2:
+            for source in sources:
+                cfg = source.value
+                value = cfg.get('discountValue')
+                if (
+                    str(cfg.get('discountOperator', '')) != '1'
+                    or cfg.get('discountLowLimitIsOn')
+                    or isinstance(value, bool)
+                    or not isinstance(value, (int, float))
+                    or not math.isfinite(float(value))
+                    or value < 0
+                ):
+                    return None
+
         # A repeated or quota-limited source has its own per-discount allocation
         # state and cannot be represented by this deterministic fixed-cost path.
         for source in sources:
