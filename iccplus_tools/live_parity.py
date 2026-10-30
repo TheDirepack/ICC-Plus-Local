@@ -645,6 +645,66 @@ def live_cases() -> list[dict[str, Any]]:
             'actions': actions,
         })
 
+    # State-dependent multi-provider discount arbitration. Pin both orderings
+    # and each transition: two non-stackable providers, compatible stacks, and
+    # a stacked provider competing with a non-stackable alternative.
+    # Keep these as real Viewer action traces, not assumed formula outputs.
+    multi_scenarios = (
+        ('multi_nonstack_stronger_21015', False, False, 2, 5, [
+            'purchase', 'weak', 'strong']),
+        ('multi_nonstack_weaker_21015', False, False, 5, 2, [
+            'purchase', 'strong', 'weak']),
+        ('multi_nonstack_remove_strong_21015', False, False, 2, 5, [
+            'purchase', 'weak', 'strong', '-strong']),
+        ('multi_nonstack_remove_weak_21015', False, False, 2, 5, [
+            'purchase', 'weak', 'strong', '-weak']),
+        ('multi_nonstack_before_purchase_21015', False, False, 2, 5, [
+            'weak', 'strong', 'purchase']),
+        ('multi_stack_after_purchase_21015', True, True, 2, 3, [
+            'purchase', 'weak', 'strong']),
+        ('multi_stack_before_purchase_21015', True, True, 2, 3, [
+            'weak', 'strong', 'purchase']),
+        ('multi_stack_remove_first_21015', True, True, 2, 3, [
+            'purchase', 'weak', 'strong', '-weak']),
+        ('multi_stack_remove_last_21015', True, True, 2, 3, [
+            'purchase', 'weak', 'strong', '-strong']),
+        ('multi_mixed_stack_then_single_21015', True, False, 2, 6, [
+            'purchase', 'weak', 'strong']),
+        ('multi_mixed_single_then_stack_21015', False, True, 6, 2, [
+            'purchase', 'weak', 'strong']),
+        ('multi_mixed_replace_stack_21015', True, False, 2, 6, [
+            'purchase', 'weak', 'strong', '-strong']),
+    )
+    for name, first_stack, second_stack, first_value, second_value, sequence in multi_scenarios:
+        actions = [
+            {'op': 'deselect' if token.startswith('-') else 'select',
+             'id': token.removeprefix('-')}
+            for token in sequence
+        ]
+        sources = [
+            _choice('weak', discountOther=True, isDisChoices=True,
+                    discountChoices=['purchase'], discountOperator='1',
+                    discountValue=first_value, stackableDiscount=first_stack),
+            _choice('strong', discountOther=True, isDisChoices=True,
+                    discountChoices=['purchase'], discountOperator='1',
+                    discountValue=second_value, stackableDiscount=second_stack),
+        ]
+        cases.append({
+            'name': name,
+            'check_action_trace': True,
+            'project': _project(
+                rows=[_row('r', [
+                    *sources,
+                    _choice('purchase', scores=[{
+                        'idx': 'discount-score', 'id': 'p', 'value': 10,
+                        'requireds': [], 'showScore': True,
+                    }]),
+                ])],
+                points=[_point('p', 30)],
+            ),
+            'actions': actions,
+        })
+
     return cases
 
 
