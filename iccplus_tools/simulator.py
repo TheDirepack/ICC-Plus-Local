@@ -1825,35 +1825,77 @@ class Simulator:
 
 
     def _reprice_direct_discounts(self, *, removed_provider: str | None = None) -> None:
-        """Reconcile live fixed-cost ledgers when a direct discount toggles."""
+        """Reconcile fixed-Score charges after a provider toggles.
+
+        A Choice ledger combines all its Scores by Point ID. Recompute each
+        eligible fixed Score separately, then aggregate by Point ID before
+        applying the difference. This prevents an untargeted Score or a
+        second Score charging the same Point from being discarded. Random,
+        expression, conditional and repeated Scores need separate per-use
+        accounting and are intentionally excluded from this fixed-cost path.
+        """
         for ent in self.index.selectables():
             if not self._active(ent.id) or ent.value.get('isSelectableMultiple'):
                 continue
             scores = ent.value.get('scores')
-            if not isinstance(scores, list) or len(scores) != 1:
+            if not isinstance(scores, list) or not scores:
                 continue
-            score = scores[0]
-            if not isinstance(score, dict) or score.get('isRandom') or score.get('useExpression'):
-                continue
-            if score.get('multiplyByTimes'):
-                continue
-            pid = str(score.get('id', ''))
             history = self.state.score_ledger.get(ent.id, [])
-            if pid not in self.state.points or len(history) != 1 or pid not in history[0]:
+            if len(history) != 1:
                 continue
-            raw = score.get('value', 0)
-            if isinstance(raw, bool) or not isinstance(raw, (int, float)):
+            if any(
+                not isinstance(score, dict)
+                or score.get('isRandom') or score.get('useExpression')
+                or score.get('multiplyByTimes') or score.get('requireds')
+                for score in scores
+            ):
                 continue
-            target_value = self._direct_discount_value(ent, score, float(raw), removed_provider=removed_provider, persist=True)
-            if target_value is None:
+
+            total: dict[str, float] = {}
+            direct_found = False
+            valid = True
+            for score in scores:
+                pid = str(score.get('id', ''))
+                point = self.index.one(pid, 'point')
+                raw = score.get('value', 0)
+                if (
+                    pid not in self.state.points or point is None
+                    or isinstance(raw, bool) or not isinstance(raw, (int, float))
+                    or not math.isfinite(float(raw))
+                ):
+                    valid = False
+                    break
+
+                # setScoreValue floors *before* discounts on integer Points.
+                allow_float = bool(point.value.get('allowFloat'))
+                base = float(raw) if allow_float else float(math.floor(raw))
+                discounted = self._direct_discount_value(
+                    ent, score, base,
+                    removed_provider=removed_provider, persist=True,
+                )
+                if discounted is not None:
+                    charge = discounted
+                    direct_found = True
+                elif score.get('discountIsOn') and score.get('appliedDiscount') and score.get('discountScore') is not None:
+                    # Static, pre-applied discounts are not eligible for direct
+                    # providers but still contribute to the Choice's charge.
+                    charge = float(score['discountScore'])
+                else:
+                    charge = base
+                if not math.isfinite(charge):
+                    valid = False
+                    break
+                if not allow_float:
+                    charge = float(math.floor(charge))
+                total[pid] = total.get(pid, 0.0) + charge
+
+            if not valid or not direct_found or set(total) != set(history[0]):
                 continue
-            point = self.index.one(pid, 'point')
-            if not (point and point.value.get('allowFloat')):
-                target_value = float(math.floor(target_value))
-            previous = history[0][pid]
-            if previous != target_value:
-                self.state.points[pid] += previous - target_value
-                history[0][pid] = target_value
+            for pid, next_charge in total.items():
+                previous = history[0][pid]
+                if previous != next_charge:
+                    self.state.points[pid] += previous - next_charge
+                    history[0][pid] = next_charge
 
     def _apply_scores(self, ent: Entity) -> None:
         hypothetical = self.state.clone()

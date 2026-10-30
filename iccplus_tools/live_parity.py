@@ -920,6 +920,56 @@ def live_cases() -> list[dict[str, Any]]:
             ],
         })
 
+    # PR review regression: fixed multi-Score purchases aggregate charges by
+    # Point ID. A provider can target only one Score, or two Scores can charge
+    # the same Point. A fractional raw Score must be floored *before* discount
+    # arithmetic when its Point Type does not allow floats.
+    accounting_cases = (
+        ('review_two_score_point_filter_21016', [
+            {'idx': 'sp', 'id': 'p', 'value': 8, 'requireds': [], 'showScore': True},
+            {'idx': 'sq', 'id': 'q', 'value': 4, 'requireds': [], 'showScore': True},
+        ], ['p'], '1', 2, False, ['purchase', 'coupon', '-coupon']),
+        ('review_two_score_before_purchase_21016', [
+            {'idx': 'sp', 'id': 'p', 'value': 8, 'requireds': [], 'showScore': True},
+            {'idx': 'sq', 'id': 'q', 'value': 4, 'requireds': [], 'showScore': True},
+        ], ['p'], '1', 2, False, ['coupon', 'purchase']),
+        ('review_two_score_same_point_21016', [
+            {'idx': 'sp1', 'id': 'p', 'value': 8, 'requireds': [], 'showScore': True},
+            {'idx': 'sp2', 'id': 'p', 'value': 6, 'requireds': [], 'showScore': True},
+        ], ['p'], '1', 2, False, ['purchase', 'coupon', '-coupon']),
+        ('review_two_score_not_discountable_21016', [
+            {'idx': 'sp', 'id': 'p', 'value': 8, 'requireds': [], 'showScore': True},
+            {'idx': 'sq', 'id': 'q', 'value': 4, 'requireds': [], 'showScore': True,
+             'isNotDiscountable': True},
+        ], ['p', 'q'], '1', 2, False, ['purchase', 'coupon', '-coupon']),
+        ('review_fractional_integer_point_21016', [
+            {'idx': 'sp', 'id': 'p', 'value': 8.9, 'requireds': [], 'showScore': True},
+        ], ['p'], '2', 0.5, False, ['purchase', 'coupon', 'neutral', '-coupon']),
+        ('review_fractional_float_point_21016', [
+            {'idx': 'sp', 'id': 'p', 'value': 8.9, 'requireds': [], 'showScore': True},
+        ], ['p'], '2', 0.5, True, ['purchase', 'coupon', 'neutral', '-coupon']),
+    )
+    for name, scores, point_ids, operator, value, allow_float, sequence in accounting_cases:
+        purchase = _choice('purchase', scores=scores)
+        coupon = _choice(
+            'coupon', discountOther=True, isDisChoices=True,
+            discountChoices=['purchase'], discountOperator=operator,
+            discountValue=value, discountPointTypes=point_ids,
+        )
+        cases.append({
+            'name': name,
+            'check_action_trace': True,
+            'project': _project(
+                rows=[_row('r', [purchase, coupon, _choice('neutral')])],
+                points=[_point('p', 50, allowFloat=allow_float),
+                        _point('q', 25, allowFloat=False)],
+            ),
+            'actions': [
+                {'op': 'deselect' if token.startswith('-') else 'select',
+                 'id': token.removeprefix('-')} for token in sequence
+            ],
+        })
+
     return cases
 
 

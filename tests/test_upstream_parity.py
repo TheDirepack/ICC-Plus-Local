@@ -887,3 +887,44 @@ def test_three_nonstack_stale_refund_persists_and_roundtrips_21016():
     assert restored.deselect('b').ok
     assert restored.state.points['p'] == 28
     assert not restored.state.discount_stale_nonstack
+
+
+def test_review_discount_reprice_uses_integer_base_and_multi_score_totals():
+    """Protect point filtering, shared Point IDs and fractional repricing."""
+    import pytest
+    from iccplus_tools.live_parity import live_cases, run_local_case_trace
+
+    cases = {case['name']: case for case in live_cases()}
+    expected = {
+        'review_two_score_point_filter_21016': [
+            (50, 25), (42, 21), (44, 21), (42, 21),
+        ],
+        'review_two_score_before_purchase_21016': [
+            (50, 25), (50, 25), (44, 21),
+        ],
+        'review_two_score_same_point_21016': [
+            (50, 25), (36, 25), (40, 25), (36, 25),
+        ],
+        'review_two_score_not_discountable_21016': [
+            (50, 25), (42, 21), (44, 21), (42, 21),
+        ],
+        'review_fractional_integer_point_21016': [
+            (50, 25), (42, 25), (42, 25), (42, 25), (42, 25),
+        ],
+        'review_fractional_float_point_21016': [
+            (50, 25), (41.1, 25), (40.6, 25), (40.6, 25), (41.1, 25),
+        ],
+    }
+    for name, balances in expected.items():
+        traces = run_local_case_trace(cases[name])
+        assert len(traces) == len(balances), name
+        for step, (snapshot, expected_balances) in enumerate(zip(traces, balances)):
+            assert snapshot['points']['p'] == pytest.approx(expected_balances[0]), (name, step)
+            assert snapshot['points']['q'] == pytest.approx(expected_balances[1]), (name, step)
+
+    flag_case = cases['review_two_score_point_filter_21016']['project']
+    flag_sim = Simulator(flag_case, clean=False)
+    target = flag_sim.index.one('purchase', 'choice')
+    assert target is not None
+    protected_score = dict(target.value['scores'][0], discountIsOn=True)
+    assert flag_sim._direct_discount_value(target, protected_score, 8) is None
