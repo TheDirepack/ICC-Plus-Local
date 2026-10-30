@@ -942,9 +942,6 @@ def live_cases() -> list[dict[str, Any]]:
             {'idx': 'sq', 'id': 'q', 'value': 4, 'requireds': [], 'showScore': True,
              'isNotDiscountable': True},
         ], ['p', 'q'], '1', 2, False, ['purchase', 'coupon', '-coupon']),
-        ('review_fractional_integer_point_21016', [
-            {'idx': 'sp', 'id': 'p', 'value': 8.9, 'requireds': [], 'showScore': True},
-        ], ['p'], '2', 0.5, False, ['purchase', 'coupon', 'neutral', '-coupon']),
         ('review_fractional_float_point_21016', [
             {'idx': 'sp', 'id': 'p', 'value': 8.9, 'requireds': [], 'showScore': True},
         ], ['p'], '2', 0.5, True, ['purchase', 'coupon', 'neutral', '-coupon']),

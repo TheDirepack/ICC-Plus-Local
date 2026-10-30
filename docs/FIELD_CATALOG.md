@@ -1,6 +1,6 @@
 # Native field catalog
 
-`iccplus-local reference fields` exposes native field names from the pinned ICC Plus 2.10.15 TypeScript model. Use it when a feature is known conceptually but its exact JSON property name or type is uncertain.
+`iccplus-local reference fields` exposes native field names from the pinned ICC Plus 2.10.16 TypeScript model. Use it when a feature is known conceptually but its exact JSON property name or type is uncertain.
 
 ```bash
 iccplus-local reference fields project --contains customCSS --compact

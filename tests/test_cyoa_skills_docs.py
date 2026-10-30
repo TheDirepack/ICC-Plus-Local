@@ -5,7 +5,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / "skills"
 CURRENT_TOOL_VERSION = "0.10.0rc17"
-CURRENT_ICCPLUS_VERSION = "2.10.15"
+CURRENT_ICCPLUS_VERSION = "2.10.16"
 
 RETAINED = {
     "iccplus-local",

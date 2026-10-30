@@ -908,9 +908,6 @@ def test_review_discount_reprice_uses_integer_base_and_multi_score_totals():
         'review_two_score_not_discountable_21016': [
             (50, 25), (42, 21), (44, 21), (42, 21),
         ],
-        'review_fractional_integer_point_21016': [
-            (50, 25), (42, 25), (42, 25), (42, 25), (42, 25),
-        ],
         'review_fractional_float_point_21016': [
             (50, 25), (41.1, 25), (40.6, 25), (40.6, 25), (41.1, 25),
         ],
@@ -928,3 +925,21 @@ def test_review_discount_reprice_uses_integer_base_and_multi_score_totals():
     assert target is not None
     protected_score = dict(target.value['scores'][0], discountIsOn=True)
     assert flag_sim._direct_discount_value(target, protected_score, 8) is None
+
+
+def test_local_integer_point_fractional_discount_uses_floored_base():
+    """Exercise local rounding without claiming upstream fractional parity.
+
+    In pinned Viewer 2.10.16 the first dynamic update uses the raw 8.9 as
+    its old discount score despite an initial Point charge of 8; that produces
+    drifting fractional Point balances (41.9, then 42.9). This is explicitly
+    outside the deterministic fixed-cost compatibility subset in Local.
+    """
+    import copy
+    from iccplus_tools.live_parity import live_cases, run_local_case_trace
+
+    case = copy.deepcopy(next(x for x in live_cases()
+                              if x['name'] == 'review_fractional_float_point_21016'))
+    case['project']['pointTypes'][0]['allowFloat'] = False
+    balances = [step['points']['p'] for step in run_local_case_trace(case)]
+    assert balances == [50, 42, 42, 42, 42]
