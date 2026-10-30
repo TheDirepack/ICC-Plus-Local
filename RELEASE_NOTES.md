@@ -1,5 +1,12 @@
 # ICC Plus Local release notes
 
+## 0.10.0rc17 — ICC Plus 2.10.16 source sync (October 30, 2026)
+
+- Source pin updated to official `2bba0cf9ebc2e54241c2390794e95e1c5091b293`.
+- Build Form loading now preserves deliberately deselected targets of `isAllowDeselect` force providers, matching the official 2.10.16 fix.
+- Add native Chromium restoration fixtures and continue discount parity regression coverage; see PR #20 and issue #21.
+
+
 ## 0.10.0rc17 — ICC Plus 2.10.15 compatibility candidate
 
 - Pinned to official ICC Plus 2.10.15 at source commit `128c05799b6df2574fd870449d15a37e410fe3e6`, released October 29, 2026, with the independent Python authoring and simulator capabilities preserved.

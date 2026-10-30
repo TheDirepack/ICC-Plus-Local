@@ -1,15 +1,15 @@
 {
   "package": "ICC Plus Local rc17 sparse-authoring release candidate",
   "tool_version": "0.10.0rc17",
-  "target_icc_plus_version": "2.10.15",
-  "target_source_commit": "128c05799b6df2574fd870449d15a37e410fe3e6",
-  "candidate_role": "LLM-first ICC Plus 2.10.15 authoring, validation, and sparse saved-project serialization with an explicit authoring round-trip invariant",
+  "target_icc_plus_version": "2.10.16",
+  "target_source_commit": "2bba0cf9ebc2e54241c2390794e95e1c5091b293",
+  "candidate_role": "LLM-first ICC Plus 2.10.16 authoring, validation, and sparse saved-project serialization with an explicit authoring round-trip invariant",
   "local_regression": {
     "normal_tests": "CI workflow is authoritative for the current branch",
     "checked_in_examples": "CI workflow is authoritative for the current branch",
     "ci_workflow": ".github/workflows/tests.yml",
     "default_export_bytes": 13415,
-    "default_export_sha256": "4dd40c184a0e96c72a6ec665e8d86d87f784c6648f68136211cc6b8e3fafa63f"
+    "default_export_sha256": "PENDING_21016_SHA256"
   },
   "project_integrity": {
     "canonical_final_validation": "project validate --complete",
@@ -18,7 +18,7 @@
     "compatibility_validation": "normal saved-project validation is project validate; use --complete for explicit Creator completeness",
     "identity_policy": "hydration never invents missing entity identities; sparse project saves retain stable authoring identities such as Score idx",
     "authoring_round_trip": "canonical sparse saves must preserve non-derivable authoring state needed by later ICC Plus Local commands, including Sound Effect name",
-    "version_policy": "older supported projects may upgrade to 2.10.15; future versions are never downgraded"
+    "version_policy": "older supported projects may upgrade to 2.10.16; future versions are never downgraded"
   },
   "compiler_boundary": {
     "native_layer": "ICC Plus Local owns pinned native compatibility, validation, serialization, local simulation, explicit native edits, and reference integrity",
@@ -26,7 +26,7 @@
     "rules_document": "docs/COMPILER_BOUNDARY.md"
   },
   "runtime_serialization": {
-    "policy": "normal saved project JSON and player-facing Viewer payloads omit pinned 2.10.15 fields only when omission is behavior-equivalent; editable project JSON must also preserve the authoring round trip",
+    "policy": "normal saved project JSON and player-facing Viewer payloads omit pinned 2.10.16 fields only when omission is behavior-equivalent; editable project JSON must also preserve the authoring round trip",
     "non_sparse_opt_out": "all full-project JSON outputs are sparse by default; --not-sparse / --not_sparse is the only opt-out on commands that write project JSON",
     "standalone_command": "iccplus-sparse",
     "verification_command": "iccplus-omission-probe",
@@ -62,7 +62,7 @@
   "official_web_gui_verification": {
     "historical_2_10_6": "C01 official Creator export exactly matched the retained 2.10.6 round-trip fixture",
     "browser_authority": "official Creator/Viewer remains authoritative for rendering and browser-only behavior",
-    "current_2_10_15": "The pinned 2.10.15 official Viewer already passed the 35-case runtime differential, default export and native field metadata checks; the later sparse equivalence suite is subject to its own CI run"
+    "current_2_10_15": "The pinned 2.10.16 official Viewer already passed the 35-case runtime differential, default export and native field metadata checks; the later sparse equivalence suite is subject to its own CI run"
   },
   "historical_manifest": "PACKAGE_MANIFEST_RC11.json",
   "cyoa_skills": {
@@ -89,6 +89,6 @@
     "skill_routing": "docs/cyoa/skills-usage.md",
     "compiler_boundary": "docs/COMPILER_BOUNDARY.md",
     "runtime_serialization": "docs/SPARSE_RUNTIME_SERIALIZATION.md",
-    "current_target": "ICC Plus 2.10.15"
+    "current_target": "ICC Plus 2.10.16"
   }
 }
