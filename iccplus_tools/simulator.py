@@ -86,6 +86,10 @@ class RuntimeState:
     forced_by: dict[str, set[str]] = field(default_factory=dict)
     activated_by: dict[str, set[str]] = field(default_factory=dict)
     score_ledger: dict[str, list[dict[str, float]]] = field(default_factory=dict)
+    # Native Viewer 2.10.16 can preserve a stale full-price outcome after
+    # removing the strongest of three nonstackable discounts. Track the
+    # remaining ACTIVE provider so later unrelated actions do not erase it.
+    discount_stale_nonstack: dict[str, str] = field(default_factory=dict)
     # Per-selection random Score values use the upstream Score-array index as the key.
     # ICC Plus stores these in its native Build Form string as /RS#index:value.
     random_score_ledger: dict[str, list[dict[int, float]]] = field(default_factory=dict)
@@ -345,6 +349,7 @@ class Simulator:
             'forced_by': {k: sorted(v) for k, v in self.state.forced_by.items()},
             'activated_by': {k: sorted(v) for k, v in self.state.activated_by.items()},
             'score_ledger': copy.deepcopy(self.state.score_ledger),
+            'discount_stale_nonstack': dict(self.state.discount_stale_nonstack),
             'random_score_ledger': {
                 owner: [{str(index): value for index, value in entry.items()} for entry in entries]
                 for owner, entries in self.state.random_score_ledger.items()
@@ -464,6 +469,12 @@ class Simulator:
             unknown = sorted(x for x in providers if x not in selectable_ids)
             if unknown:
                 issues.append(f'activated_by target {target!r} has unknown providers: {unknown}')
+
+        for owner, anchor in value.discount_stale_nonstack.items():
+            if owner not in active_selectables:
+                issues.append(f'discount_stale_nonstack contains inactive/unknown purchase {owner!r}')
+            if anchor not in active_selectables:
+                issues.append(f'discount_stale_nonstack purchase {owner!r} has inactive/unknown provider {anchor!r}')
 
         for owner, entries in value.score_ledger.items():
             if owner not in selectable_ids:
@@ -661,6 +672,7 @@ class Simulator:
         forced_raw = runtime.get('forced_by', {})
         activated_raw = runtime.get('activated_by', forced_raw)
         score_ledger_raw = runtime.get('score_ledger', {})
+        discount_stale_raw = runtime.get('discount_stale_nonstack', {})
         random_score_raw = runtime.get('random_score_ledger', {})
         random_activation_raw = runtime.get('random_activation_ledger', {})
         custom_words_raw = runtime.get('custom_words', {})
@@ -668,7 +680,7 @@ class Simulator:
         row_button_raw = runtime.get('row_button_random_points', {})
         point_ledger_raw = runtime.get('point_effect_ledger', {})
         hidden_raw = runtime.get('hidden_content', {})
-        if not all(isinstance(x, dict) for x in (forced_raw, activated_raw, score_ledger_raw, random_score_raw, random_activation_raw, custom_words_raw, uploaded_images_raw, row_button_raw, point_ledger_raw, hidden_raw)):
+        if not all(isinstance(x, dict) for x in (forced_raw, activated_raw, score_ledger_raw, random_score_raw, random_activation_raw, custom_words_raw, uploaded_images_raw, row_button_raw, point_ledger_raw, hidden_raw, discount_stale_raw)):
             raise ValueError('runtime ledgers must be objects')
 
         def string_set_map(name: str, raw: dict[str, Any]) -> dict[str, set[str]]:
@@ -759,6 +771,7 @@ class Simulator:
             forced_by=string_set_map('forced_by', forced_raw),
             activated_by=string_set_map('activated_by', activated_raw),
             score_ledger=score_ledger(),
+            discount_stale_nonstack=string_map('discount_stale_nonstack', discount_stale_raw),
             random_score_ledger=random_score_ledger(),
             random_activation_ledger=random_activation_ledger(),
             custom_words=string_map('custom_words', custom_words_raw),
@@ -1579,7 +1592,7 @@ class Simulator:
             elif ident in before and ident not in after:
                 self._build_order_remove(ident)
 
-    def _direct_discount_value(self, ent: Entity, score: dict[str, Any], base: float, *, removed_provider: str | None = None) -> float | None:
+    def _direct_discount_value(self, ent: Entity, score: dict[str, Any], base: float, *, removed_provider: str | None = None, persist: bool = False) -> float | None:
         """Reproduce the verified fixed-source Viewer discount-arbitration path.
 
         The official Viewer keeps discount state per Score. For ordinary fixed
@@ -1729,36 +1742,47 @@ class Simulator:
             return amount if math.isfinite(amount) else None
 
         active = {source.id: source for source in sources if self._active(source.id)}
+        stale_provider = self.state.discount_stale_nonstack.get(ent.id)
+        if stale_provider is not None:
+            stale_source = active.get(stale_provider)
+            # A stronger provider becoming active or removing the previously
+            # ACTIVE middle offer ends the stale-price state. Removing the
+            # weaker inactive offer leaves it unchanged in native Viewer.
+            preserve = bool(
+                stale_source
+                and len(sources) == 3
+                and all(not source.value.get('stackableDiscount') for source in sources)
+                and all(
+                    float(source.value['discountValue']) <= float(stale_source.value['discountValue'])
+                    for source in active.values()
+                )
+            )
+            if preserve:
+                return base
+            if persist:
+                self.state.discount_stale_nonstack.pop(ent.id, None)
+
         if not active:
             return base
 
-        # Official Viewer 2.10.16 quirk: with three *nonstackable* fixed
-        # subtraction providers, selectDiscount() can leave the middle
-        # provider marked ACTIVE when the strongest is selected. Removing
-        # that strongest provider then calls deselectDiscount(), whose
-        # active/nonstackable branch retains the original Score value rather
-        # than promoting the middle offer. The browser differential confirms
-        # both the resulting refund and the underlying discount states.
-        # Preserve that outcome in the existing Score ledger until another
-        # provider changes. This does not affect preview before a purchase.
+        # Native 2.10.16 source-state trace: selecting a third, stronger
+        # nonstackable offer can leave the middle provider ACTIVE. Removing
+        # the third restores the original cost, rather than promoting the
+        # remaining middle provider. Anchor that full-price state to the
+        # surviving middle provider until an activation change resolves it.
         if len(sources) == 3 and len(active) == 2 and all(
             not source.value.get('stackableDiscount') for source in sources
         ):
             inactive = next((source for source in sources if source.id not in active), None)
-            if inactive is not None:
-                removed_amount = float(inactive.value['discountValue'])
-                stronger_than_remaining = all(
-                    removed_amount > float(source.value['discountValue'])
+            if inactive is not None and removed_provider == inactive.id:
+                if all(
+                    float(inactive.value['discountValue']) > float(source.value['discountValue'])
                     for source in active.values()
-                )
-                if stronger_than_remaining:
-                    ledger = self.state.score_ledger.get(ent.id, [])
-                    prior_full_price = (
-                        len(ledger) == 1
-                        and float(ledger[0].get(str(score.get('id')), float('nan'))) == base
-                    )
-                    if removed_provider == inactive.id or prior_full_price:
-                        return base
+                ):
+                    middle = max(active.values(), key=lambda x: float(x.value['discountValue']))
+                    if persist:
+                        self.state.discount_stale_nonstack[ent.id] = middle.id
+                    return base
 
         if len(sources) == 1 and sources[0].value.get('useDiscountCount'):
             provider = sources[0].value
@@ -1820,7 +1844,7 @@ class Simulator:
             raw = score.get('value', 0)
             if isinstance(raw, bool) or not isinstance(raw, (int, float)):
                 continue
-            target_value = self._direct_discount_value(ent, score, float(raw), removed_provider=removed_provider)
+            target_value = self._direct_discount_value(ent, score, float(raw), removed_provider=removed_provider, persist=True)
             if target_value is None:
                 continue
             point = self.index.one(pid, 'point')
@@ -3582,6 +3606,7 @@ class Simulator:
         # Ordinary (non-multiple) deselection.
         self._undo_activation_step(ent, _depth)
         self._undo_scores(ent)
+        self.state.discount_stale_nonstack.pop(ent.id, None)
         self.state.activations.pop(ent.id, None)
         self._reprice_direct_discounts(removed_provider=ent.id)
         if self._counts_for_row(ent):

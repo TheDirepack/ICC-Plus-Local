@@ -853,3 +853,37 @@ def test_three_provider_arbitration_boundary_abstains_on_fourth_source():
     target = sim.index.one('purchase', 'choice')
     assert target is not None
     assert sim._direct_discount_value(target, target.value['scores'][0], 12.0) is None
+
+
+def test_three_nonstack_stale_refund_persists_and_roundtrips_21016():
+    from iccplus_tools.live_parity import live_cases, run_local_case_trace
+
+    cases = {case['name']: case for case in live_cases()}
+    expectations = {
+        'triple_nonstack_stale_neutral_21016': [40, 28, 29, 31, 33, 28, 28],
+        'triple_nonstack_stale_remove_middle_21016': [40, 28, 29, 31, 33, 28, 29],
+        'triple_nonstack_stale_remove_weak_21016': [40, 28, 29, 31, 33, 28, 28],
+        'triple_nonstack_stale_reselect_best_21016': [40, 28, 29, 31, 33, 28, 33],
+        'triple_nonstack_stale_refund_21016': [40, 28, 29, 31, 33, 28, 40],
+    }
+    for name, values in expectations.items():
+        states = run_local_case_trace(cases[name])
+        assert [step['points']['p'] for step in states] == values, name
+
+    source = cases['triple_nonstack_stale_remove_weak_21016']['project']
+    sim = Simulator(source, clean=False)
+    for ident in ('purchase', 'a', 'b', 'c'):
+        assert sim.select(ident).ok
+    assert sim.deselect('c').ok
+    assert sim.state.points['p'] == 28
+    assert sim.state.discount_stale_nonstack == {'purchase': 'b'}
+    saved = sim.export_state()
+    assert saved['runtime']['discount_stale_nonstack'] == {'purchase': 'b'}
+    restored = Simulator(source, clean=False)
+    restored.import_state(saved)
+    assert restored.deselect('a').ok
+    assert restored.state.points['p'] == 28
+    assert restored.state.discount_stale_nonstack == {'purchase': 'b'}
+    assert restored.deselect('b').ok
+    assert restored.state.points['p'] == 28
+    assert not restored.state.discount_stale_nonstack
