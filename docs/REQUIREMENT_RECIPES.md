@@ -38,7 +38,7 @@ For a multiple-selection count, use the ICC Plus `/ON#N` suffix:
 
 The local generator's `requires` and `excludes` shortcuts create simple ID Requirements.
 
-ICC Plus parses the numeric part of `/ON#N` with JavaScript `parseInt` behavior. A prefix such as `/ON#2junk` therefore reads as 2. Negative forced activation counts are effectively a no-op in the pinned 2.10.7 behavior. Preserve these quirks when reproducing source behavior.
+ICC Plus parses the numeric part of `/ON#N` with JavaScript `parseInt` behavior. A prefix such as `/ON#2junk` therefore reads as 2. Negative forced activation counts are effectively a no-op in the source-verified 2.10.16 behavior. Preserve these quirks when reproducing source behavior.
 
 ## Point Requirement
 

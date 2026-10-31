@@ -8,7 +8,7 @@ ICC Plus Local starts from the blank Creator project and edits it in phases. The
 iccplus-local generate -o project.json
 ```
 
-This starts from the exact ICC Plus 2.10.7 blank Creator project, verifies complete-project validity in memory, and writes the normal sparse saved-project form.
+This starts from the exact ICC Plus 2.10.16 blank Creator project, verifies complete-project validity in memory, and writes the normal sparse saved-project form.
 
 ## Add sections and content
 

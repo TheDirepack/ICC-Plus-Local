@@ -1,11 +1,13 @@
-# Source notes
+# Historical source notes — rc13 / Viewer 2.10.7
 
-ICC Plus Local 0.10.0rc13 targets ICC Plus 2.10.7.
+> Archived provenance from September 2026, **not** the current target. For the active rc17 / Viewer 2.10.16 source pin and test results, read [`docs/SOURCE_NOTES.md`](docs/SOURCE_NOTES.md) and `PACKAGE_MANIFEST.json`.
+
+ICC Plus Local 0.10.0rc13 targeted ICC Plus 2.10.7.
 
 - Distribution repository: `wahaha303/ICCPlus`.
 - Creator and Viewer source: `wahaha303/ICC-Plus-Svelte`.
 - Pinned source commit: `1ea9db888cde2286d18d0d5de50933cb8773b739`.
-- Current audit date: 2026-09-25.
+- Historical audit date: 2026-09-25.
 
 The field catalog and generated type metadata are checked against the pinned `types.ts`. Runtime behavior is checked against the Viewer store and related Viewer components. Creator source is used for factory defaults, copy/clone behavior, style/design import rules, categories, Build Form serialization, Row buttons, project export, and other authoring actions.
 

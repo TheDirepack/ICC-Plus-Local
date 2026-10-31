@@ -37,7 +37,7 @@ Do not put the same field both inline and in `values`.
 
 ```json
 {"op":"assert","ref":"row_perks","kind":"row"}
-{"op":"assert","pointer":"/version","equals":"2.10.7"}
+{"op":"assert","pointer":"/version","equals":"2.10.16"}
 ```
 
 Use assertions before edits whose correctness depends on the project revision.
