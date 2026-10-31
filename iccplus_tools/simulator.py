@@ -2341,9 +2341,8 @@ class Simulator:
         # Viewer 2.10.16 selectObjectL() does not enqueue force targets
         # absent from the saved Build Form if ordinary deselection is allowed.
         # Explicit target entries are restored separately from the build list.
-        if self._build_restore_mode and ent.value.get('isAllowDeselect'):
-            if not (ent.value.get('isActivateRandom') and ent.id in self._random_activation_overrides):
-                return
+        if self._build_restore_mode and ent.value.get('isAllowDeselect') and not ent.value.get('isActivateRandom'):
+            return
         if ent.value.get('isActivateRandom'):
             override = self._random_activation_overrides.get(ent.id)
             result: list[str] = []
@@ -2351,7 +2350,7 @@ class Simulator:
                 candidates: list[tuple[str, int]] = []
                 for token in override:
                     ident = token.split('/ON#', 1)[0]
-                    if (self._build_restore_mode and ent.value.get('isAllowDeselect')
+                    if (self._build_restore_mode
                             and ident not in self._build_restore_explicit_ids):
                         continue
                     if '/ON#' in token:
@@ -2362,15 +2361,24 @@ class Simulator:
                         candidates.append((token, 0))
                 desired = len(candidates)
             else:
-                candidates = self._random_activation_candidates(ent)
-                # Exact Fisher-Yates shape from ICC Plus. Python's RNG is seeded
-                # for deterministic local tests; the original browser uses
-                # Math.random(), so build strings store the chosen result.
-                shuffled = list(candidates)
-                for i in range(len(shuffled) - 1, 0, -1):
-                    j = self.rng.randrange(i + 1)
-                    shuffled[i], shuffled[j] = shuffled[j], shuffled[i]
-                candidates = shuffled
+                if self._build_restore_mode:
+                    # Upstream loadActivated uses activatedIds rather than
+                    # drawing a new random sample during saved-build replay.
+                    # Include already-active entries: build order may put the
+                    # explicit target before the random source.
+                    candidates = [
+                        (ident, 0 if count is None else count)
+                        for ident, count in self._targets(ent.value.get('activateThisChoice'))
+                        if ident in self._build_restore_explicit_ids
+                    ]
+                else:
+                    candidates = self._random_activation_candidates(ent)
+                    # Exact Fisher-Yates shape from normal ICC Plus selection.
+                    shuffled = list(candidates)
+                    for i in range(len(shuffled) - 1, 0, -1):
+                        j = self.rng.randrange(i + 1)
+                        shuffled[i], shuffled[j] = shuffled[j], shuffled[i]
+                    candidates = shuffled
                 try:
                     requested = int(ent.value.get('numActivateRandom', 0) or 0)
                 except (TypeError, ValueError):
@@ -2381,7 +2389,7 @@ class Simulator:
             while i < len(candidates) and len(result) < desired:
                 ident, num = candidates[i]
                 registered, changed = self._force_activate_one(ent, ident, num, depth, dialogs)
-                if registered and (changed or override is not None):
+                if registered and (changed or override is not None or self._build_restore_mode):
                     # Keep a saved /RND target even if it was selected earlier.
                     result.append(f'{ident}/ON#{num}' if num > 0 else ident)
                 i += 1

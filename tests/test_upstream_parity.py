@@ -889,12 +889,23 @@ def test_random_allow_deselect_restore_requires_explicit_saved_target():
     reversed_order.load_build_string('target,source/RND#target')
     assert reversed_order._active('target')
     assert reversed_order.export_build_string() == 'target,source/RND#target'
+    # Upstream filters /RND targets against the explicit build-entry set for
+    # protected random providers too; it must not invent an omitted target.
     protected = project(choice('source', activateOtherChoice=True,
                                activateThisChoice='target', isActivateRandom=True,
                                numActivateRandom=1), choice('target'))
     forced = Simulator(protected, clean=False)
     forced.load_build_string('source/RND#target')
+    assert not forced._active('target')
+    forced.load_build_string('source/RND#target,target')
     assert forced._active('target')
+    assert forced.state.forced_by['target'] == {'source'}
+    # A build without /RND uses explicit entries, not a fresh random draw.
+    missing.load_build_string('source')
+    assert missing._active('source') and not missing._active('target')
+    missing.load_build_string('source,target')
+    assert missing._active('target')
+    assert missing.export_build_string() == 'source/RND#target,target'
 
 
 def test_three_provider_discount_native_arbitration_21016():
