@@ -11,7 +11,7 @@ This is the minimal Viewer/runtime-testing distribution of ICC Plus Local. It is
 - Run deterministic scenario tests.
 - Check Row visibility directly for fast gating tests.
 
-The official ICC Plus Viewer remains the authority for browser-only rendering, CSS, animation, media playback, dialogs, and other behavior outside the documented headless runtime boundary.
+The official ICC Plus Viewer remains the authority for browser-only rendering, CSS, animation, media playback, dialogs, and other behavior outside the documented headless runtime boundary. The pinned target and source evidence are recorded in `SOURCE_NOTES.md`.
 
 ## Command
 

@@ -15,6 +15,7 @@ This distribution is intentionally **not** an authoring environment. Do not use 
 
 ## Relevant references
 
+- `../../SOURCE_NOTES.md`
 - `../../COVERAGE.md`
 - `../../docs/GAMEPLAY_RUNNER.md`
 - `../../docs/PLAY_STRUCTURE.md`

@@ -26,7 +26,7 @@
 - Added regression tests for the new field, requirement protection, row-cap replacement, and newly runtime-sensitive sparse fields.
 - Maintained the Python CLI and native authoring skill API. Official Svelte UI, delay cancellation, CSS and browser runtime remain outside this headless port. GitHub Actions core/CLI/example tests and the official pinned-source Chromium differential (35/35 gameplay cases plus TypeScript required-field checks) passed. The headless port still does not claim full visual, animation, media, or untested sparse-omission parity.
 
-## Unreleased
+## Included in rc17 — CI, release tooling and runtime performance
 
 - Unified normal CI and manual-release test dependencies through the `test` optional dependency set so image and schema tests cannot be skipped by one workflow. This fixes manual-release failures caused by Pillow not being installed.
 
