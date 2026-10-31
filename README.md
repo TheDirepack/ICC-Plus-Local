@@ -2,7 +2,7 @@
 
 **Version 0.10.0rc17**
 
-ICC Plus Local is a local command-line authoring and mechanical-testing tool for ICC Plus 2 projects. The current source in this repository is ICC Plus Local 0.10.0rc17, targeting ICC Plus 2.10.16 and pinned to upstream source commit `128c05799b6df2574fd870449d15a37e410fe3e6`.
+ICC Plus Local is a local command-line authoring and mechanical-testing tool for ICC Plus 2 projects. The current source in this repository is ICC Plus Local 0.10.0rc17, targeting ICC Plus 2.10.16 and pinned to upstream source commit `2bba0cf9ebc2e54241c2390794e95e1c5091b293`.
 
 It is an independent local implementation. The official ICC Plus Creator and Viewer remain the authority for browser rendering and behavior outside the local tool's verified coverage.
 
@@ -41,7 +41,7 @@ python -m iccplus_tools style project.json @style.json
 python -m iccplus_tools play project.json
 ```
 
-`generate`, `build`, `structure`, `rules`, `style`, `apply`, and ordinary direct edits use the normal sparse saved-project form. Before every valid write, ICC Plus Local hydrates a complete in-memory project and requires complete-project validation. It then omits only fields that are safe under the pinned 2.10.15 Viewer rules and the authoring-round-trip contract. Stable identities and non-derivable authoring values remain serialized when later commands need them. In particular, canonical sparse saves retain Score `idx` and Sound Effect `name`.
+`generate`, `build`, `structure`, `rules`, `style`, `apply`, and ordinary direct edits use the normal sparse saved-project form. Before every valid write, ICC Plus Local hydrates a complete in-memory project and requires complete-project validation. It then omits only fields that are safe under the pinned 2.10.16 Viewer rules and the authoring-round-trip contract. Stable identities and non-derivable authoring values remain serialized when later commands need them. In particular, canonical sparse saves retain Score `idx` and Sound Effect `name`.
 
 `project validate` checks the normal sparse/compatible form, while `project validate --complete` checks a materialized full shape. Every full-project JSON write remains sparse unless that specific command is given `--not-sparse` (the alias `--not_sparse` is also accepted). For styling, prefer project-wide native styling and official Row/Choice Design Groups; private per-entity styling is for genuine one-off exceptions. Image compression is automatic when local or embedded images are assigned through the current media/style workflow.
 

@@ -873,6 +873,30 @@ def test_load_build_respects_force_allow_deselect_21016():
         assert [step['entities']['target']['active'] for step in snapshots] == state, name
 
 
+def test_random_allow_deselect_restore_requires_explicit_saved_target():
+    p = project(choice('source', activateOtherChoice=True,
+                       activateThisChoice='target', isActivateRandom=True,
+                       numActivateRandom=1, isAllowDeselect=True), choice('target'))
+    missing = Simulator(p, clean=False)
+    missing.load_build_string('source/RND#target')
+    assert missing._active('source') and not missing._active('target')
+    assert missing.export_build_string() == 'source'
+    explicit = Simulator(p, clean=False)
+    explicit.load_build_string('source/RND#target,target')
+    assert explicit._active('target')
+    assert explicit.export_build_string() == 'source/RND#target,target'
+    reversed_order = Simulator(p, clean=False)
+    reversed_order.load_build_string('target,source/RND#target')
+    assert reversed_order._active('target')
+    assert reversed_order.export_build_string() == 'target,source/RND#target'
+    protected = project(choice('source', activateOtherChoice=True,
+                               activateThisChoice='target', isActivateRandom=True,
+                               numActivateRandom=1), choice('target'))
+    forced = Simulator(protected, clean=False)
+    forced.load_build_string('source/RND#target')
+    assert forced._active('target')
+
+
 def test_three_provider_discount_native_arbitration_21016():
     """Chromium-confirmed three-source fixed subtraction states and refunds."""
     from iccplus_tools.live_parity import live_cases, run_local_case_trace

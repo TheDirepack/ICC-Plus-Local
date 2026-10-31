@@ -1,6 +1,6 @@
 # ICC Plus Local documentation
 
-The active package is ICC Plus Local 0.10.0rc17 targeting ICC Plus 2.10.15.
+The active package is ICC Plus Local 0.10.0rc17 targeting ICC Plus 2.10.16.
 
 For native ICC Plus 2 project operations, start with `../skills/iccplus-local/SKILL.md`. It routes to focused function guides under `../skills/iccplus-local/functions/`.
 

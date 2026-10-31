@@ -143,6 +143,7 @@ class Simulator:
         self._score_value_overrides: dict[str, dict[int, float]] = {}
         self._random_activation_overrides: dict[str, list[str]] = {}
         self._build_restore_mode = False
+        self._build_restore_explicit_ids: set[str] = set()
         points = {x.id: float(x.value.get('startingSum', 0) or 0) for x in self.index.by_kind.get('point', [])}
         variables = {x.id: x.value.get('isTrue') is True for x in self.index.by_kind.get('variable', [])}
         words = {x.id: str(x.value.get('replaceText', '')) for x in self.index.by_kind.get('word', [])}
@@ -276,6 +277,8 @@ class Simulator:
         """
         entries = parse_build_string(value)
         self.reset()
+        # Allow-deselect force targets are restored only when saved explicitly.
+        self._build_restore_explicit_ids = {entry.id for entry in entries if not entry.is_row_button}
         self.state.events.clear()
         # Install every random override before replay. A source choice can force a
         # later entry active before that entry is reached in the comma list.
@@ -335,6 +338,7 @@ class Simulator:
             self._score_value_overrides = {}
             self._random_activation_overrides = {}
             self._build_restore_mode = False
+            self._build_restore_explicit_ids.clear()
         self.state.events.clear()
 
     def export_state(self, *, include_events: bool = False) -> dict[str, Any]:
@@ -2338,13 +2342,18 @@ class Simulator:
         # absent from the saved Build Form if ordinary deselection is allowed.
         # Explicit target entries are restored separately from the build list.
         if self._build_restore_mode and ent.value.get('isAllowDeselect'):
-            return
+            if not (ent.value.get('isActivateRandom') and ent.id in self._random_activation_overrides):
+                return
         if ent.value.get('isActivateRandom'):
             override = self._random_activation_overrides.get(ent.id)
             result: list[str] = []
             if override is not None:
                 candidates: list[tuple[str, int]] = []
                 for token in override:
+                    ident = token.split('/ON#', 1)[0]
+                    if (self._build_restore_mode and ent.value.get('isAllowDeselect')
+                            and ident not in self._build_restore_explicit_ids):
+                        continue
                     if '/ON#' in token:
                         ident, raw_n = token.split('/ON#', 1)
                         parsed = parse_int(raw_n)
@@ -2372,7 +2381,8 @@ class Simulator:
             while i < len(candidates) and len(result) < desired:
                 ident, num = candidates[i]
                 registered, changed = self._force_activate_one(ent, ident, num, depth, dialogs)
-                if registered and changed:
+                if registered and (changed or override is not None):
+                    # Keep a saved /RND target even if it was selected earlier.
                     result.append(f'{ident}/ON#{num}' if num > 0 else ident)
                 i += 1
             self.state.random_activation_ledger.setdefault(ent.id, []).append(result)

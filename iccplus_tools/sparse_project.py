@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Behavior-preserving sparse project serialization for pinned ICC Plus 2.10.14.
+"""Behavior-preserving sparse project serialization for the pinned ICC Plus Viewer.
 
 Creator construction defaults and Viewer omission semantics are different
 contracts. This module removes only values whose absence is proven equivalent
@@ -667,7 +667,7 @@ def _load_project(path: str) -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog='iccplus-sparse',
-        description='Write the default behavior-preserving ICC Plus 2.10.14 sparse project without modifying the source project.',
+        description=f'Write the default behavior-preserving ICC Plus {ICCPLUS_VERSION} sparse project without modifying the source project.',
     )
     parser.add_argument('project')
     parser.add_argument('-o', '--output', required=True)

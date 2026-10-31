@@ -17,6 +17,9 @@ def test_release_version_is_consistent_across_package_metadata_and_docs():
     pyproject = tomllib.loads((ROOT / 'pyproject.toml').read_text())
     assert pyproject['project']['version'] == __version__
     assert capabilities()['tool_version'] == __version__
+    assert capabilities()['target']['icc_plus_version'] == ICCPLUS_VERSION
+    assert capabilities()['target']['source_commit'] == ICCPLUS_COMMIT
+    assert ICCPLUS_VERSION in capabilities()['build_system']['blank_source']
 
 
 def test_manifest_tracks_pinned_source_and_exact_default_export():

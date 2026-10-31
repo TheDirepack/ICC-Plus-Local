@@ -4,7 +4,7 @@ The canonical ICC Plus Local 0.10.0rc17 surface has 11 top-level commands.
 
 ## `generate`
 
-Create the blank ICC Plus 2.10.15 project, complete-validate it in memory, and save it in the normal sparse form.
+Create the blank ICC Plus 2.10.16 project, complete-validate it in memory, and save it in the normal sparse form.
 
 ```bash
 iccplus-local generate -o project.json
