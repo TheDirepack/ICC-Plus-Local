@@ -62,7 +62,7 @@
   "official_web_gui_verification": {
     "historical_2_10_6": "C01 official Creator export exactly matched the retained 2.10.6 round-trip fixture",
     "browser_authority": "official Creator/Viewer remains authoritative for rendering and browser-only behavior",
-    "current_2_10_16": "Official Chromium Viewer 2.10.16 differential passed 94 gameplay cases, 57 action traces, 12 full-vs-sparse project comparisons and exact blank export/schema verification at commit 803cfbcd, without errors. Headless simulator does not replace Viewer UI or all advanced native discount state."
+    "current_2_10_16": "Official Chromium Viewer 2.10.16 differential passed 99 gameplay cases, 62 action traces, 13 full-vs-sparse project comparisons and exact blank export/schema verification at commit 630185fa, without errors. Headless simulator does not replace Viewer UI or all advanced native discount state."
   },
   "historical_manifest": "PACKAGE_MANIFEST_RC11.json",
   "cyoa_skills": {
