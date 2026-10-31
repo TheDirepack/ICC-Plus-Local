@@ -10,7 +10,7 @@ from .model import ProjectIndex
 from .operations import apply_operation_script, load_operation_script
 from .phase_ops import PHASE_FORMATS, apply_phase_script, load_phase_script
 from .simulator import project_fingerprint
-from .upstream_2106 import default_export_project
+from .upstream_2106 import default_export_project, ICCPLUS_VERSION, ICCPLUS_COMMIT
 from .validation import validate_complete
 from .project_integrity import hydrate_project
 from .version import __version__
@@ -18,8 +18,8 @@ from .visuals import apply_visual_manifest
 
 BUILD_FORMAT = 'iccplus-build'
 BUILD_FORMAT_VERSION = 2
-TARGET_VERSION = '2.10.7'
-TARGET_COMMIT = '1ea9db888cde2286d18d0d5de50933cb8773b739'
+TARGET_VERSION = ICCPLUS_VERSION
+TARGET_COMMIT = ICCPLUS_COMMIT
 BUILD_PHASES = {'structure', 'rules', 'style', 'raw'}
 
 

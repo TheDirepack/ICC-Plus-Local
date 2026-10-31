@@ -22,6 +22,21 @@ def test_release_version_is_consistent_across_package_metadata_and_docs():
     assert ICCPLUS_VERSION in capabilities()['build_system']['blank_source']
 
 
+
+def test_all_live_discovery_and_build_targets_match_upstream_pin():
+    from iccplus_tools.build_pipeline import TARGET_VERSION, TARGET_COMMIT
+    from iccplus_tools.gui_parity import gui_parity_report
+    from iccplus_tools.guides import guide
+
+    assert (TARGET_VERSION, TARGET_COMMIT) == (ICCPLUS_VERSION, ICCPLUS_COMMIT)
+    report = gui_parity_report()
+    assert report['target'] == {'icc_plus_version': ICCPLUS_VERSION, 'source_commit': ICCPLUS_COMMIT}
+    assert report['source_audit']['baseline_version'] == '2.10.7'
+    assert report['source_audit']['baseline_source_commit'] != ICCPLUS_COMMIT
+    assert ICCPLUS_VERSION in guide('typed-authoring')['goal']
+    assert ICCPLUS_COMMIT in ' '.join(guide('parity')['rules'])
+
+
 def test_manifest_tracks_pinned_source_and_exact_default_export():
     manifest = json.loads((ROOT / 'PACKAGE_MANIFEST.json').read_text())
     exported = default_export_text().encode('utf-8')

@@ -4,8 +4,9 @@ from typing import Any
 
 from .field_catalog import catalog_kinds
 from .version import __version__
+from .upstream_2106 import ICCPLUS_VERSION, ICCPLUS_COMMIT
 
-SOURCE_COMMIT = '1ea9db888cde2286d18d0d5de50933cb8773b739'
+SOURCE_AUDIT_BASELINE_COMMIT = '1ea9db888cde2286d18d0d5de50933cb8773b739'
 
 # This inventory describes authoring outcomes and Creator actions. Browser-only
 # presentation controls that do not change project data are called out rather
@@ -83,12 +84,15 @@ def gui_parity_report() -> dict[str, Any]:
     return {
         'format': 'iccplus-gui-parity',
         'tool_version': __version__,
-        'target': {'icc_plus_version':'2.10.7','source_commit':SOURCE_COMMIT},
+        'target': {'icc_plus_version': ICCPLUS_VERSION, 'source_commit': ICCPLUS_COMMIT},
         'scope': 'Creator authoring outcomes and export actions',
         'source_audit': {
             'creator_components_audited': 57,
+            'baseline_version': '2.10.7',
+            'baseline_source_commit': SOURCE_AUDIT_BASELINE_COMMIT,
+            'scope_note': 'Historical Creator action inventory; the current Viewer runtime pin does not establish full Creator GUI revalidation.',
             'root': 'ICCPlus/src/lib/creator',
-            'method': 'function/GUI-action inventory at the pinned commit plus store behavior checks for shared actions',
+            'method': 'function/GUI-action inventory at the historical baseline commit plus store behavior checks for shared actions',
         },
         'typed_kinds': catalog_kinds(),
         'summary': {

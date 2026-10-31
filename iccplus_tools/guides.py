@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from .upstream_2106 import ICCPLUS_VERSION, ICCPLUS_COMMIT
+
 _GUIDES: dict[str, dict[str, Any]] = {
     'automation': {
         'goal': 'Use the smallest stable JSON-first interface for an LLM or automation agent.',
@@ -30,7 +32,7 @@ _GUIDES: dict[str, dict[str, Any]] = {
         ],
     },
     'typed-authoring': {
-        'goal': 'Use pinned 2.10.7 field names and value types.',
+        'goal': f'Use pinned ICC Plus {ICCPLUS_VERSION} field names and value types.',
         'commands': [
             'reference fields KIND --details', 'reference schema KIND',
             'reference types --format typescript|python', 'template entity KIND',
@@ -104,7 +106,7 @@ _GUIDES: dict[str, dict[str, Any]] = {
         'goal': 'Check what is source-pinned and what still needs browser verification.',
         'commands': ['reference parity', 'run-upstream-parity-tests'],
         'rules': [
-            'The local runtime is pinned to source commit 1ea9db888cde2286d18d0d5de50933cb8773b739.',
+            f'The local runtime targets ICC Plus {ICCPLUS_VERSION} at source commit {ICCPLUS_COMMIT}.',
             'A real Chromium differential remains the final runtime parity check.',
         ],
     },

@@ -510,7 +510,7 @@ def build_viewer_package(project: dict[str, Any], template_zip: str | Path, outp
         'runtime_sparse': not not_sparse,
         'runtime_omissions': runtime_serialization['removed_count'],
         'runtime_bytes_removed': runtime_serialization['bytes_removed'],
-        'content_parity': '2.10.7 exportWithViewer project/image/local-embed logic plus pinned behavior-preserving runtime omissions',
+        'content_parity': f'Original 2.10.7 exportWithViewer project/image/local-embed logic; ICC Plus {ICCPLUS_VERSION} pinned sparse runtime omissions (browser rendering parity not claimed)',
         'html_byte_parity': False,
         'html_note': 'HTML keeps template formatting; loading sanitization is conservative rather than DOMPurify byte parity.',
     }
