@@ -779,6 +779,33 @@ def test_direct_discount_rejects_unrepriceable_costs_in_both_orders():
         }, 8.0) == (None if purchase_fields else 8.0), name
 
 
+def test_discount_provider_lookup_reuses_and_invalidates_on_import():
+    """Cached routing must not retain Entity objects from a replaced index."""
+    from iccplus_tools.live_parity import live_cases
+
+    case = next(c for c in live_cases()
+                if c['name'] == 'dynamic_discount_before_purchase_21015')
+    sim = Simulator(case['project'], clean=False)
+    assert sim.select('coupon').ok
+    target = sim.index.one('purchase', 'choice')
+    assert target is not None
+    score = target.value['scores'][0]
+
+    assert sim._direct_discount_value(target, score, 8.0) == 6.0
+    original_index = sim.index
+    assert sim._discount_sources_index is original_index
+    assert sim._direct_discount_value(target, score, 8.0) == 6.0
+    assert sim._discount_sources_index is original_index
+
+    exported = sim.export_state()
+    sim.import_state(exported)
+    assert sim.index is not original_index
+    next_target = sim.index.one('purchase', 'choice')
+    assert next_target is not None
+    assert sim._direct_discount_value(next_target, next_target.value['scores'][0], 8.0) == 6.0
+    assert sim._discount_sources_index is sim.index
+
+
 def test_two_source_discount_does_not_guess_unverified_mixed_operators():
     from iccplus_tools.live_parity import live_cases
     import copy
