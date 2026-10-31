@@ -11,12 +11,12 @@ Use these for ICC Plus 2 behavior.
 - Official ICC Plus 2 web Creator: https://hikawasisters.neocities.org/ICCPlus2/
 - Official ICC Plus 2.0.0 release post: https://www.reddit.com/r/InteractiveCYOA/comments/1luqv2k/
 - Official ICC Plus 2.10.6 update post: https://www.reddit.com/r/InteractiveCYOA/comments/1vp0avg/
-- Current pinned ICC Plus 2.10.7 source commit: `1ea9db888cde2286d18d0d5de50933cb8773b739`.
+- Current pinned ICC Plus 2.10.16 source commit: `2bba0cf9ebc2e54241c2390794e95e1c5091b293` (ICC Plus Local `0.10.0rc17`).
 - Local `../../../SOURCE_NOTES.md` and field reference for the pinned command-line snapshot.
 
 The official deployment repository records the ICC Plus 2 save system, custom CSS, responsive controls, Point Type changes, Requirement changes, Backpack changes, and Viewer changes.
 
-Do not assume any recorded release remains the newest v2 release. Check the target version and pinned source before relying on a feature or bug fix. The 2.10.6 release post remains useful historical evidence, while the current local tool targets 2.10.7 from the official source repository.
+Do not assume any recorded release remains the newest v2 release. Check the target version and pinned source before relying on a feature or bug fix. The 2.10.6 release post remains useful historical evidence, while the current local tool targets ICC Plus 2.10.16 at the pinned official source commit.
 
 ## CYOA design and player-experience references
 
