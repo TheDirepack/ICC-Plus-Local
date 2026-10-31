@@ -747,6 +747,38 @@ def test_multi_provider_discount_arbitration_and_removal_traces():
     assert len(checkpoints) == 12
 
 
+def test_direct_discount_rejects_unrepriceable_costs_in_both_orders():
+    """Only fixed nonrepeatable unconditional Scores get ordinary discounts."""
+    import copy
+    from iccplus_tools.live_parity import live_cases
+
+    case = next(c for c in live_cases()
+                if c['name'] == 'dynamic_discount_before_purchase_21015')
+    variants = (
+        ('repeatable', {'isSelectableMultiple': True}, {}),
+        ('random', {}, {'isRandom': True}),
+        ('expression', {}, {'useExpression': True}),
+        ('multiply', {}, {'multiplyByTimes': True}),
+        ('conditional', {}, {'requireds': [{'type': 'id', 'reqId': 'coupon'}]}),
+    )
+    for name, purchase_fields, score_fields in variants:
+        p = copy.deepcopy(case['project'])
+        target = p['rows'][0]['objects'][1]
+        target.update(purchase_fields)
+        target['scores'][0].update(score_fields)
+        sim = Simulator(p, clean=False)
+        purchase = sim.index.one('purchase', 'choice')
+        assert purchase is not None, name
+        score = purchase.value['scores'][0]
+        assert sim._direct_discount_value(purchase, score, 8.0) is None, name
+        # The provider is genuinely present and ordinary fixed Scores are
+        # still eligible, so None is not caused by a missing provider.
+        assert sim._direct_discount_value(purchase, {
+            **score, 'isRandom': False, 'useExpression': False,
+            'multiplyByTimes': False, 'requireds': [],
+        }, 8.0) == (None if purchase_fields else 8.0), name
+
+
 def test_two_source_discount_does_not_guess_unverified_mixed_operators():
     from iccplus_tools.live_parity import live_cases
     import copy
