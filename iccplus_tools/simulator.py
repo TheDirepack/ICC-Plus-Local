@@ -1604,6 +1604,15 @@ class Simulator:
         """
         if score.get('isNotDiscountable') or score.get('discountIsOn'):
             return None
+        # Repricing cannot reconcile dynamic or per-use Score charges. Apply
+        # the same eligibility boundary at selection time to avoid a discount
+        # appearing only when a provider is chosen before its target.
+        if (
+            ent.value.get('isSelectableMultiple')
+            or score.get('isRandom') or score.get('useExpression')
+            or score.get('multiplyByTimes') or score.get('requireds')
+        ):
+            return None
         sources: list[Entity] = []
         for source in self.index.selectables():
             cfg = source.value
