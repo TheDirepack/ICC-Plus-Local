@@ -86,6 +86,10 @@ class RuntimeState:
     forced_by: dict[str, set[str]] = field(default_factory=dict)
     activated_by: dict[str, set[str]] = field(default_factory=dict)
     score_ledger: dict[str, list[dict[str, float]]] = field(default_factory=dict)
+    # Native Viewer 2.10.16 can preserve a stale full-price outcome after
+    # removing the strongest of three nonstackable discounts. Track the
+    # remaining ACTIVE provider so later unrelated actions do not erase it.
+    discount_stale_nonstack: dict[str, str] = field(default_factory=dict)
     # Per-selection random Score values use the upstream Score-array index as the key.
     # ICC Plus stores these in its native Build Form string as /RS#index:value.
     random_score_ledger: dict[str, list[dict[int, float]]] = field(default_factory=dict)
@@ -128,12 +132,18 @@ class Simulator:
         self.project = copy.deepcopy(self._base_project)
         self.index = ProjectIndex(self.project)
         self.req = RequirementEngine(self.index)
+        # Provider-to-target routing is structural, unlike provider activation.
+        # Rebuild lazily whenever importing or cloning changes the index.
+        self._discount_sources_index: ProjectIndex | None = None
+        self._discount_sources_by_target: dict[str, list[Entity]] = {}
         self.rng = random.Random(seed)
         self.seed = seed
         # Temporary native-build restore overrides. They are consumed only while
         # one entry is being replayed and are never serialized as runtime state.
         self._score_value_overrides: dict[str, dict[int, float]] = {}
         self._random_activation_overrides: dict[str, list[str]] = {}
+        self._build_restore_mode = False
+        self._build_restore_explicit_ids: set[str] = set()
         points = {x.id: float(x.value.get('startingSum', 0) or 0) for x in self.index.by_kind.get('point', [])}
         variables = {x.id: x.value.get('isTrue') is True for x in self.index.by_kind.get('variable', [])}
         words = {x.id: str(x.value.get('replaceText', '')) for x in self.index.by_kind.get('word', [])}
@@ -212,7 +222,7 @@ class Simulator:
         self.rng.setstate(fresh.rng.getstate())
 
     def export_build_string(self) -> str:
-        """Return ICC Plus 2.10.7's native Build Form string for this state."""
+        """Return ICC Plus 2.10.14's native Build Form string for this state."""
         entries: list[NativeBuildEntry] = []
         selectable_ids = {x.id for x in self.index.selectables()}
         variable_ids = {x.id for x in self.index.by_kind.get('variable', [])}
@@ -258,7 +268,7 @@ class Simulator:
         return serialize_build_entries(entries)
 
     def load_build_string(self, value: str) -> None:
-        """Load an ICC Plus 2.10.7 Build Form string into the local runtime.
+        """Load an ICC Plus 2.10.14 Build Form string into the local runtime.
 
         The replay uses the native random Score and random-activation payloads as
         deterministic overrides. This makes a browser-produced build reproducible
@@ -267,6 +277,8 @@ class Simulator:
         """
         entries = parse_build_string(value)
         self.reset()
+        # Allow-deselect force targets are restored only when saved explicitly.
+        self._build_restore_explicit_ids = {entry.id for entry in entries if not entry.is_row_button}
         self.state.events.clear()
         # Install every random override before replay. A source choice can force a
         # later entry active before that entry is reached in the comma list.
@@ -276,6 +288,7 @@ class Simulator:
         self._random_activation_overrides = {
             entry.id: list(entry.random_activations) for entry in entries if entry.random_activations
         }
+        self._build_restore_mode = True
         try:
             for entry in entries:
                 if entry.is_row_button:
@@ -324,6 +337,8 @@ class Simulator:
         finally:
             self._score_value_overrides = {}
             self._random_activation_overrides = {}
+            self._build_restore_mode = False
+            self._build_restore_explicit_ids.clear()
         self.state.events.clear()
 
     def export_state(self, *, include_events: bool = False) -> dict[str, Any]:
@@ -342,6 +357,7 @@ class Simulator:
             'forced_by': {k: sorted(v) for k, v in self.state.forced_by.items()},
             'activated_by': {k: sorted(v) for k, v in self.state.activated_by.items()},
             'score_ledger': copy.deepcopy(self.state.score_ledger),
+            'discount_stale_nonstack': dict(self.state.discount_stale_nonstack),
             'random_score_ledger': {
                 owner: [{str(index): value for index, value in entry.items()} for entry in entries]
                 for owner, entries in self.state.random_score_ledger.items()
@@ -461,6 +477,12 @@ class Simulator:
             unknown = sorted(x for x in providers if x not in selectable_ids)
             if unknown:
                 issues.append(f'activated_by target {target!r} has unknown providers: {unknown}')
+
+        for owner, anchor in value.discount_stale_nonstack.items():
+            if owner not in active_selectables:
+                issues.append(f'discount_stale_nonstack contains inactive/unknown purchase {owner!r}')
+            if anchor not in active_selectables:
+                issues.append(f'discount_stale_nonstack purchase {owner!r} has inactive/unknown provider {anchor!r}')
 
         for owner, entries in value.score_ledger.items():
             if owner not in selectable_ids:
@@ -658,6 +680,7 @@ class Simulator:
         forced_raw = runtime.get('forced_by', {})
         activated_raw = runtime.get('activated_by', forced_raw)
         score_ledger_raw = runtime.get('score_ledger', {})
+        discount_stale_raw = runtime.get('discount_stale_nonstack', {})
         random_score_raw = runtime.get('random_score_ledger', {})
         random_activation_raw = runtime.get('random_activation_ledger', {})
         custom_words_raw = runtime.get('custom_words', {})
@@ -665,7 +688,7 @@ class Simulator:
         row_button_raw = runtime.get('row_button_random_points', {})
         point_ledger_raw = runtime.get('point_effect_ledger', {})
         hidden_raw = runtime.get('hidden_content', {})
-        if not all(isinstance(x, dict) for x in (forced_raw, activated_raw, score_ledger_raw, random_score_raw, random_activation_raw, custom_words_raw, uploaded_images_raw, row_button_raw, point_ledger_raw, hidden_raw)):
+        if not all(isinstance(x, dict) for x in (forced_raw, activated_raw, score_ledger_raw, random_score_raw, random_activation_raw, custom_words_raw, uploaded_images_raw, row_button_raw, point_ledger_raw, hidden_raw, discount_stale_raw)):
             raise ValueError('runtime ledgers must be objects')
 
         def string_set_map(name: str, raw: dict[str, Any]) -> dict[str, set[str]]:
@@ -756,6 +779,7 @@ class Simulator:
             forced_by=string_set_map('forced_by', forced_raw),
             activated_by=string_set_map('activated_by', activated_raw),
             score_ledger=score_ledger(),
+            discount_stale_nonstack=string_map('discount_stale_nonstack', discount_stale_raw),
             random_score_ledger=random_score_ledger(),
             random_activation_ledger=random_activation_ledger(),
             custom_words=string_map('custom_words', custom_words_raw),
@@ -1150,13 +1174,16 @@ class Simulator:
         parent = self.index.parent_choice(ent)
         if not row or not parent or not self._choice_visible(parent):
             return False
-        addon_met, _ = self._requirements_met(ent.value.get('requireds', []), ent.path + '/requireds')
+        addon_req_met, _ = self._requirements_met(ent.value.get('requireds', []), ent.path + '/requireds')
+        addon_met = self._active(ent.id) or addon_req_met
         show_all = self.state.show_all_addons > 0
         parent_active = self._active(parent.id)
         ordinary_gate = show_all or ((not ent.value.get('hideAddon') or parent_active) and (ent.value.get('showAddon') or addon_met))
         if not ordinary_gate:
             return False
         if ent.kind == 'selectable_addon':
+            if row.value.get('isResultRow') and ent.value.get('isNotResult'):
+                return False
             if self._row_flag(row, 'unselAddonRemoved') and not self._active(ent.id):
                 return False
             if row.value.get('isResultRow') and not self._active(ent.id):
@@ -1339,6 +1366,12 @@ class Simulator:
             value = float(score['discountScore'])
             if not allow_float:
                 value = float(math.floor(value))
+        else:
+            direct_discount = self._direct_discount_value(ent, score, value)
+            if direct_discount is not None:
+                value = direct_discount
+                if not allow_float:
+                    value = float(math.floor(value))
         if score.get('multiplyByTimes'):
             ordinal = repeat_ordinal if repeat_ordinal is not None else abs(self._count(ent.id)) + 1
             value *= max(1, int(ordinal))
@@ -1413,7 +1446,7 @@ class Simulator:
                 continue
             if not self._counts_for_row(other):
                 continue
-            if other.value.get('selectOnce') or self.state.forced_by.get(other.id):
+            if other.value.get('selectOnce') or other.value.get('notDeselectedByReq') or self.state.forced_by.get(other.id):
                 continue
             # ICC Plus row-cap replacement handles multiple choices by calling
             # selectedOneLess once for each *positive* current repeat. A zero or
@@ -1567,6 +1600,338 @@ class Simulator:
             elif ident in before and ident not in after:
                 self._build_order_remove(ident)
 
+    def _discount_provider_sources(self, ent: Entity) -> list[Entity]:
+        """Cache structural provider/target routing for fixed-cost discounts.
+
+        Provider activation and selected_order remain live runtime state. The
+        cached Entity references are safe only for the current ProjectIndex;
+        import_state and dynamic Row cloning replace that index.
+        """
+        if self._discount_sources_index is not self.index:
+            selectables = list(self.index.selectables())
+            groups = self.project.get('groups', [])
+            lookup: dict[str, list[Entity]] = {}
+            for source in selectables:
+                cfg = source.value
+                if not cfg.get('discountOther'):
+                    continue
+                if cfg.get('isDisChoices'):
+                    choices = cfg.get('discountChoices', [])
+                    rows = cfg.get('discountRows', [])
+                    for target in selectables:
+                        if (
+                            isinstance(choices, list) and target.id in choices
+                            or isinstance(rows, list) and target.row_id in rows
+                        ):
+                            lookup.setdefault(target.id, []).append(source)
+                else:
+                    group_ids = cfg.get('discountGroups', [])
+                    if not isinstance(group_ids, list) or not isinstance(groups, list):
+                        continue
+                    members = [
+                        group.get('elements', [])
+                        for group in groups if isinstance(group, dict)
+                        and group.get('id') in group_ids
+                    ]
+                    for target in selectables:
+                        if any(target.id in elements for elements in members):
+                            lookup.setdefault(target.id, []).append(source)
+            self._discount_sources_by_target = lookup
+            self._discount_sources_index = self.index
+        return self._discount_sources_by_target.get(ent.id, [])
+
+    def _direct_discount_value(self, ent: Entity, score: dict[str, Any], base: float, *, removed_provider: str | None = None, persist: bool = False) -> float | None:
+        """Reproduce the verified fixed-source Viewer discount-arbitration path.
+
+        The official Viewer keeps discount state per Score. For ordinary fixed
+        Scores with up to three providers, the native
+        selection sequence reduces to: accumulate compatible stackable offers,
+        but compare an incompatible offer against the currently winning total.
+        The source's selection order matters. Return None for features whose
+        state machine is not yet modeled, instead of making up a charge.
+        """
+        if score.get('isNotDiscountable') or score.get('discountIsOn'):
+            return None
+        # Repricing cannot reconcile dynamic or per-use Score charges. Apply
+        # the same eligibility boundary at selection time to avoid a discount
+        # appearing only when a provider is chosen before its target.
+        if (
+            ent.value.get('isSelectableMultiple')
+            or score.get('isRandom') or score.get('useExpression')
+            or score.get('multiplyByTimes') or score.get('requireds')
+        ):
+            return None
+        sources = [
+            source for source in self._discount_provider_sources(ent)
+            if not isinstance(source.value.get('discountPointTypes'), list)
+            or not source.value['discountPointTypes']
+            or str(score.get('id', '')) in source.value['discountPointTypes']
+        ]
+        if not sources or len(sources) > 3:
+            return None
+
+        # The two- and three-provider differential fixtures establish the upstream
+        # arbitration for fixed, non-negative subtraction discounts only.
+        # Do not extrapolate their stateful interactions to mixed operators,
+        # per-discount floors, or cost-increasing values without a new probe.
+        if len(sources) >= 2:
+            for source in sources:
+                cfg = source.value
+                value = cfg.get('discountValue')
+                if (
+                    str(cfg.get('discountOperator', '')) != '1'
+                    or cfg.get('discountLowLimitIsOn')
+                    or isinstance(value, bool)
+                    or not isinstance(value, (int, float))
+                    or not math.isfinite(float(value))
+                    or value < 0
+                ):
+                    return None
+
+        # Finite-use allocation is supported only for one ordinary provider
+        # discounting independent fixed-cost purchases. Pinned Viewer's
+        # addCount()/removeCount() reassigns freed coupons to the earliest
+        # remaining eligible purchase; selected_order reproduces this path.
+        quota_eligible_ids: set[str] = set()
+        for source in sources:
+            cfg = source.value
+            if cfg.get('isSelectableMultiple') or cfg.get('countPerSelection'):
+                return None
+            if not cfg.get('useDiscountCount'):
+                continue
+            if len(sources) != 1 or cfg.get('stackableDiscount'):
+                return None
+            limit = cfg.get('discountCount')
+            if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1:
+                return None
+
+            target_ids: set[str] = set()
+            if cfg.get('isDisChoices'):
+                choices = cfg.get('discountChoices', [])
+                rows = cfg.get('discountRows', [])
+                if not isinstance(choices, list) or not isinstance(rows, list):
+                    return None
+                target_ids.update(str(x) for x in choices)
+                for row_id in rows:
+                    row = self.index.one(str(row_id), 'row')
+                    if row is None:
+                        continue
+                    target_ids.update(str(x.get('id')) for x in row.value.get('objects', []) if isinstance(x, dict))
+            else:
+                groups = cfg.get('discountGroups', [])
+                if not isinstance(groups, list):
+                    return None
+                for group in self.project.get('groups', []):
+                    if isinstance(group, dict) and group.get('id') in groups:
+                        target_ids.update(str(x) for x in group.get('elements', []))
+
+            # Multiple Scores, repeats, random/expression values, and
+            # conditional costs require the general Viewer allocation state.
+            for choice_id in target_ids:
+                target = self.index.one(choice_id, 'choice')
+                if target is None:
+                    continue
+                scores = target.value.get('scores')
+                if target.value.get('isSelectableMultiple') or not isinstance(scores, list):
+                    return None
+                if not scores:
+                    continue  # display-only Choice cannot consume a coupon
+                if len(scores) != 1:
+                    return None
+                sc = scores[0]
+                if (not isinstance(sc, dict) or sc.get('isRandom')
+                        or sc.get('useExpression') or sc.get('multiplyByTimes')
+                        or sc.get('requireds')):
+                    return None
+                if sc.get('isNotDiscountable'):
+                    continue
+                point_filter = cfg.get('discountPointTypes', [])
+                if isinstance(point_filter, list) and point_filter and str(sc.get('id')) not in point_filter:
+                    continue
+                quota_eligible_ids.add(choice_id)
+
+        def apply_offer(amount: float, cfg: dict[str, Any]) -> float | None:
+            raw_value = cfg.get('discountValue')
+            if isinstance(raw_value, bool) or not isinstance(raw_value, (int, float)):
+                return None
+            value = float(raw_value)
+            operator = str(cfg.get('discountOperator', ''))
+            if operator == '1':
+                amount -= value
+            elif operator == '2':
+                amount += value
+            elif operator == '3':
+                amount *= value
+            elif operator == '4':
+                if value == 0:
+                    return None
+                amount /= value
+            elif operator == '5':
+                amount = value
+            else:
+                return None
+            if cfg.get('discountLowLimitIsOn'):
+                low = cfg.get('discountLowLimit')
+                if isinstance(low, (int, float)) and not isinstance(low, bool):
+                    amount = max(amount, float(low))
+            return amount if math.isfinite(amount) else None
+
+        active = {source.id: source for source in sources if self._active(source.id)}
+        stale_provider = self.state.discount_stale_nonstack.get(ent.id)
+        if stale_provider is not None:
+            stale_source = active.get(stale_provider)
+            # A stronger provider becoming active or removing the previously
+            # ACTIVE middle offer ends the stale-price state. Removing the
+            # weaker inactive offer leaves it unchanged in native Viewer.
+            preserve = bool(
+                stale_source
+                and len(sources) == 3
+                and all(not source.value.get('stackableDiscount') for source in sources)
+                and all(
+                    float(source.value['discountValue']) <= float(stale_source.value['discountValue'])
+                    for source in active.values()
+                )
+            )
+            if preserve:
+                return base
+            if persist:
+                self.state.discount_stale_nonstack.pop(ent.id, None)
+
+        if not active:
+            return base
+
+        # Native 2.10.16 source-state trace: selecting a third, stronger
+        # nonstackable offer can leave the middle provider ACTIVE. Removing
+        # the third restores the original cost, rather than promoting the
+        # remaining middle provider. Anchor that full-price state to the
+        # surviving middle provider until an activation change resolves it.
+        if len(sources) == 3 and len(active) == 2 and all(
+            not source.value.get('stackableDiscount') for source in sources
+        ):
+            inactive = next((source for source in sources if source.id not in active), None)
+            if inactive is not None and removed_provider == inactive.id:
+                if all(
+                    float(inactive.value['discountValue']) > float(source.value['discountValue'])
+                    for source in active.values()
+                ):
+                    middle = max(active.values(), key=lambda x: float(x.value['discountValue']))
+                    if persist:
+                        self.state.discount_stale_nonstack[ent.id] = middle.id
+                    return base
+
+        if len(sources) == 1 and sources[0].value.get('useDiscountCount'):
+            provider = sources[0].value
+            eligible_ids = quota_eligible_ids
+            # A not-yet-selected Choice being previewed is last in line.
+            allocation_order = [
+                ident for ident in self.state.selected_order
+                if ident in eligible_ids and self._active(ident)
+            ]
+            if ent.id in eligible_ids and ent.id not in allocation_order:
+                allocation_order.append(ent.id)
+            if ent.id not in allocation_order[:provider['discountCount']]:
+                return base
+
+        ordered = [active[ident] for ident in self.state.selected_order if ident in active]
+        # Imported states may have active IDs but no selected-order metadata.
+        for source in sources:
+            if source.id in active and source not in ordered:
+                ordered.append(source)
+
+        winner: float | None = None
+        winner_stackable = False
+        for source in ordered:
+            cfg = source.value
+            stackable = bool(cfg.get('stackableDiscount'))
+            candidate = apply_offer(
+                winner if winner is not None and winner_stackable and stackable else base,
+                cfg,
+            )
+            if candidate is None:
+                return None
+            if winner is None or candidate < winner:
+                winner = candidate
+                winner_stackable = stackable
+            elif winner_stackable and stackable:
+                # Same compatibility path: even a non-improving stacked offer
+                # is applied by Viewer selectDiscount() when both are active.
+                winner = candidate
+        return winner if winner is not None else base
+
+
+    def _reprice_direct_discounts(self, *, removed_provider: str | None = None) -> None:
+        """Reconcile fixed-Score charges after a provider toggles.
+
+        A Choice ledger combines all its Scores by Point ID. Recompute each
+        eligible fixed Score separately, then aggregate by Point ID before
+        applying the difference. This prevents an untargeted Score or a
+        second Score charging the same Point from being discarded. Random,
+        expression, conditional and repeated Scores need separate per-use
+        accounting and are intentionally excluded from this fixed-cost path.
+        """
+        for ent in self.index.selectables():
+            if not self._active(ent.id) or ent.value.get('isSelectableMultiple'):
+                continue
+            scores = ent.value.get('scores')
+            if not isinstance(scores, list) or not scores:
+                continue
+            history = self.state.score_ledger.get(ent.id, [])
+            if len(history) != 1:
+                continue
+            if any(
+                not isinstance(score, dict)
+                or score.get('isRandom') or score.get('useExpression')
+                or score.get('multiplyByTimes') or score.get('requireds')
+                for score in scores
+            ):
+                continue
+
+            total: dict[str, float] = {}
+            direct_found = False
+            valid = True
+            for score in scores:
+                pid = str(score.get('id', ''))
+                point = self.index.one(pid, 'point')
+                raw = score.get('value', 0)
+                if (
+                    pid not in self.state.points or point is None
+                    or isinstance(raw, bool) or not isinstance(raw, (int, float))
+                    or not math.isfinite(float(raw))
+                ):
+                    valid = False
+                    break
+
+                # setScoreValue floors *before* discounts on integer Points.
+                allow_float = bool(point.value.get('allowFloat'))
+                base = float(raw) if allow_float else float(math.floor(raw))
+                discounted = self._direct_discount_value(
+                    ent, score, base,
+                    removed_provider=removed_provider, persist=True,
+                )
+                if discounted is not None:
+                    charge = discounted
+                    direct_found = True
+                elif score.get('discountIsOn') and score.get('appliedDiscount') and score.get('discountScore') is not None:
+                    # Static, pre-applied discounts are not eligible for direct
+                    # providers but still contribute to the Choice's charge.
+                    charge = float(score['discountScore'])
+                else:
+                    charge = base
+                if not math.isfinite(charge):
+                    valid = False
+                    break
+                if not allow_float:
+                    charge = float(math.floor(charge))
+                total[pid] = total.get(pid, 0.0) + charge
+
+            if not valid or not direct_found or set(total) != set(history[0]):
+                continue
+            for pid, next_charge in total.items():
+                previous = history[0][pid]
+                if previous != next_charge:
+                    self.state.points[pid] += previous - next_charge
+                    history[0][pid] = next_charge
+
     def _apply_scores(self, ent: Entity) -> None:
         hypothetical = self.state.clone()
         ordinal = abs(self._count(ent.id)) if ent.value.get('isSelectableMultiple') else 1
@@ -1581,6 +1946,36 @@ class Simulator:
         ledger = history.pop()
         for pid, value in ledger.items():
             if pid in self.state.points: self.state.points[pid] += value
+
+        # Pinned Viewer 2.10.15 quirk: selectUpdateScore() calls
+        # deleteDiscount() if a Score carries an *empty* discounts array.
+        # Its initial charge may have used discountScore, but the later
+        # deselectCalculateScore() sees no discount metadata and refunds
+        # the original value. Model this only for a single, deterministic
+        # non-repeatable Score with an explicit stale applied discount;
+        # full dynamic discount stacking is not emulated here.
+        scores = ent.value.get('scores', [])
+        if not ent.value.get('isSelectableMultiple') and isinstance(scores, list) and len(scores) == 1:
+            score = scores[0]
+            if (
+                isinstance(score, dict)
+                and score.get('discountIsOn') and score.get('appliedDiscount')
+                and score.get('discounts') == []
+                and score.get('discountScore') is not None
+                and not score.get('isRandom') and not score.get('useExpression')
+                and not score.get('multiplyByTimes')
+                and isinstance(score.get('value'), (int, float))
+                and not isinstance(score.get('value'), bool)
+            ):
+                pid = str(score.get('id', ''))
+                if pid in ledger and pid in self.state.points:
+                    point = self.index.one(pid, 'point')
+                    original = float(score['value'])
+                    if not (point and point.value.get('allowFloat')):
+                        original = float(math.floor(original))
+                    # The ledger already refunded the discounted charge.
+                    self.state.points[pid] += original - ledger[pid]
+
         if not history: self.state.score_ledger.pop(ent.id, None)
         random_history = self.state.random_score_ledger.get(ent.id, [])
         if random_history:
@@ -1595,7 +1990,7 @@ class Simulator:
         return base + ('/ON#' + parts[1] if len(parts) > 1 else '')
 
     def _duplicate_row_requirements(self, value: Any, suffix: str) -> None:
-        """Apply the 2.10.7 duplicateRow ID suffix rule to native Requirement data."""
+        """Apply the 2.10.14 duplicateRow ID suffix rule to native Requirement data."""
         if not isinstance(value, list):
             return
         for req in value:
@@ -1608,7 +2003,7 @@ class Simulator:
                 for item in req['orRequired']:
                     if isinstance(item, dict) and isinstance(item.get('req'), str):
                         item['req'] = self._dup_suffix_ref(item['req'], suffix)
-            # The pinned 2.10.7 source does not successfully descend into nested
+            # The pinned 2.10.14 source does not successfully descend into nested
             # requirements here. Keep that behavior instead of repairing it.
 
     def _duplicate_row_functions(self, choice: dict[str, Any], suffix: str) -> None:
@@ -1641,7 +2036,7 @@ class Simulator:
         return candidate
 
     def _duplicate_row_effect(self, ent: Entity) -> str | None:
-        """Mirror ICC Plus 2.10.7 ``duplicateRow()`` for a selected entity."""
+        """Mirror ICC Plus 2.10.14 ``duplicateRow()`` for a selected entity."""
         choice = ent.value
         if not choice.get('duplicateRow'):
             return None
@@ -1878,7 +2273,7 @@ class Simulator:
         before_count = self._count(target)
         registered = False
         if target_ent.value.get('isSelectableMultiple'):
-            # Preserve the 2.10.7 source behavior. A bare multiple target has a
+            # Preserve the 2.10.14 source behavior. A bare multiple target has a
             # force count of zero and the negative loop is unreachable.
             if n is not None and n > 0:
                 for _ in range(n):
@@ -1943,12 +2338,21 @@ class Simulator:
     def _force_activate_targets(self, ent: Entity, depth: int, dialogs: dict[str, dict[str, Any]] | None = None) -> None:
         if not ent.value.get('activateOtherChoice'):
             return
+        # Viewer 2.10.16 selectObjectL() does not enqueue force targets
+        # absent from the saved Build Form if ordinary deselection is allowed.
+        # Explicit target entries are restored separately from the build list.
+        if self._build_restore_mode and ent.value.get('isAllowDeselect') and not ent.value.get('isActivateRandom'):
+            return
         if ent.value.get('isActivateRandom'):
             override = self._random_activation_overrides.get(ent.id)
             result: list[str] = []
             if override is not None:
                 candidates: list[tuple[str, int]] = []
                 for token in override:
+                    ident = token.split('/ON#', 1)[0]
+                    if (self._build_restore_mode
+                            and ident not in self._build_restore_explicit_ids):
+                        continue
                     if '/ON#' in token:
                         ident, raw_n = token.split('/ON#', 1)
                         parsed = parse_int(raw_n)
@@ -1957,15 +2361,24 @@ class Simulator:
                         candidates.append((token, 0))
                 desired = len(candidates)
             else:
-                candidates = self._random_activation_candidates(ent)
-                # Exact Fisher-Yates shape from ICC Plus. Python's RNG is seeded
-                # for deterministic local tests; the original browser uses
-                # Math.random(), so build strings store the chosen result.
-                shuffled = list(candidates)
-                for i in range(len(shuffled) - 1, 0, -1):
-                    j = self.rng.randrange(i + 1)
-                    shuffled[i], shuffled[j] = shuffled[j], shuffled[i]
-                candidates = shuffled
+                if self._build_restore_mode:
+                    # Upstream loadActivated uses activatedIds rather than
+                    # drawing a new random sample during saved-build replay.
+                    # Include already-active entries: build order may put the
+                    # explicit target before the random source.
+                    candidates = [
+                        (ident, 0 if count is None else count)
+                        for ident, count in self._targets(ent.value.get('activateThisChoice'))
+                        if ident in self._build_restore_explicit_ids
+                    ]
+                else:
+                    candidates = self._random_activation_candidates(ent)
+                    # Exact Fisher-Yates shape from normal ICC Plus selection.
+                    shuffled = list(candidates)
+                    for i in range(len(shuffled) - 1, 0, -1):
+                        j = self.rng.randrange(i + 1)
+                        shuffled[i], shuffled[j] = shuffled[j], shuffled[i]
+                    candidates = shuffled
                 try:
                     requested = int(ent.value.get('numActivateRandom', 0) or 0)
                 except (TypeError, ValueError):
@@ -1976,7 +2389,8 @@ class Simulator:
             while i < len(candidates) and len(result) < desired:
                 ident, num = candidates[i]
                 registered, changed = self._force_activate_one(ent, ident, num, depth, dialogs)
-                if registered and changed:
+                if registered and (changed or override is not None or self._build_restore_mode):
+                    # Keep a saved /RND target even if it was selected earlier.
                     result.append(f'{ident}/ON#{num}' if num > 0 else ident)
                 i += 1
             self.state.random_activation_ledger.setdefault(ent.id, []).append(result)
@@ -2018,7 +2432,7 @@ class Simulator:
         for ident in list(self.state.selected_order):
             if ident == changed_id or not self._active(ident): continue
             ent = self._entity(ident)
-            if not ent: continue
+            if not ent or ent.value.get('notDeselectedByReq'): continue
             met, _ = self.req.evaluate(ent.value.get('requireds', []), self.state, ent.path + '/requireds')
             if not met:
                 self.deselect(ident, reason=f'requirements became unmet after {changed_id}', _depth=depth + 1, force_cleanup=True, _internal=True)
@@ -2650,7 +3064,7 @@ class Simulator:
         return self.select(choice.id, _internal=True, _dialogs=dialogs)
 
     def press_row_button(self, row_id: str, *, dialogs: dict[str, dict[str, Any]] | None = None) -> Event:
-        """Press an ICC Plus Row button using Viewer 2.10.7 buttonActivate rules."""
+        """Press an ICC Plus Row button using Viewer 2.10.14 buttonActivate rules."""
         before = self.state.clone()
         rng_before = self.rng.getstate()
         row = self.index.one(row_id, 'row') or self.index.one(row_id, 'backpack_row')
@@ -2938,6 +3352,7 @@ class Simulator:
 
             self._set_variables(ent, True, first=not was_active and is_active)
             self._apply_scores(ent)
+            self._reprice_direct_discounts()
             duplicated_row = None
             if mode is None or current >= 0:
                 duplicated_row = self._duplicate_row_effect(ent)
@@ -3282,7 +3697,9 @@ class Simulator:
         # Ordinary (non-multiple) deselection.
         self._undo_activation_step(ent, _depth)
         self._undo_scores(ent)
+        self.state.discount_stale_nonstack.pop(ent.id, None)
         self.state.activations.pop(ent.id, None)
+        self._reprice_direct_discounts(removed_provider=ent.id)
         if self._counts_for_row(ent):
             self.state.row_counts[ent.row_id or ''] = max(0, self.state.row_counts.get(ent.row_id or '', 0) - 1)
         self.state.selected_order = [x for x in self.state.selected_order if x != ent.id]

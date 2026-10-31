@@ -20,7 +20,7 @@ def project(*choices, points=None, groups=None, variables=None, words=None, glob
             'currentChoices': 0, 'requireds': [], 'objects': list(choices),
         }]
     return {
-        'version': '2.10.7', 'defaultChoiceMaxNum': 99,
+        'version': '2.10.16', 'defaultChoiceMaxNum': 99,
         'pointTypes': list(points or []), 'variables': list(variables or []),
         'words': list(words or []), 'groups': list(groups or []),
         'globalRequirements': list(global_requirements or []), 'rows': rows, 'backpack': [],
@@ -45,7 +45,7 @@ def point(ident: str, value: float, **extra):
 def test_new_project_is_exact_frozen_default_app():
     assert new_project() == default_project()
     p = new_project()
-    assert p['version'] == '2.10.7'
+    assert p['version'] == '2.10.16'
     assert p['backpack'][0]['id'] == 'default_backpack_row'
     # Preserve upstream spelling bugs because project JSON compatibility is literal.
     assert 'barBacktroundImage' in p['styling']
@@ -588,3 +588,468 @@ def test_generated_choice_types_are_self_contained(tmp_path: Path):
         text=True, capture_output=True,
     )
     assert result.returncode == 0, result.stderr or result.stdout
+
+
+def test_21014_requirement_cleanup_preserves_protected_choice_and_selectable_addon():
+    require_gate = {'required': True, 'type': 'id', 'reqId': 'gate'}
+    parent = choice('parent', addons=[{
+        'id': 'sub', 'title': 'Sub', 'text': '', 'isSelectable': True,
+        'parentId': 'parent', 'template': 1, 'addonWidth': 'col-12',
+        'requireds': [require_gate], 'scores': [], 'groups': [],
+        'notDeselectedByReq': True,
+    }])
+    sim = Simulator(project(
+        choice('gate'), parent,
+        choice('protected', requireds=[require_gate], notDeselectedByReq=True),
+        choice('ordinary', requireds=[require_gate]),
+    ))
+    assert sim.select('gate').ok
+    assert sim.select('parent').ok
+    assert sim.select('sub').ok
+    assert sim.select('protected').ok
+    assert sim.select('ordinary').ok
+    assert sim.deselect('gate').ok
+    assert sim._active('protected')
+    assert sim._active('sub')
+    assert not sim._active('ordinary')
+
+
+def test_21014_protected_choice_cannot_be_row_capacity_replacement():
+    sim = Simulator(project(rows=[{
+        'id': 'r', 'index': 0, 'title': 'R', 'titleText': '',
+        'allowedChoices': 1, 'currentChoices': 0, 'requireds': [],
+        'objects': [choice('protected', notDeselectedByReq=True), choice('next')],
+    }]))
+    assert sim.select('protected').ok
+    assert not sim.choice_status('next').selectable
+    assert not sim.select('next').ok
+    assert sim._active('protected')
+
+
+def test_live_viewer_sparse_equivalence_inventory_is_valid_and_nontrivial():
+    from iccplus_tools.live_parity import sparse_equivalence_cases
+    from iccplus_tools.validation import validate_complete
+
+    cases = sparse_equivalence_cases()
+    assert {case['name'] for case in cases} == {
+        'empty_default', 'single_choice_unselected',
+        'single_choice_selected', 'protected_choice_selected',
+        'point_cost_selected', 'point_cost_refunded',
+        'applied_discount_selected', 'applied_discount_refunded',
+        'dynamic_other_choice_discount_refund',
+        'row_cap_replacement', 'multiple_choice_selected_twice',
+        'requirement_activation_cleanup', 'selectable_addon_selected',
+    }
+    for case in cases:
+        assert validate_complete(case['baseline'])['valid'], case['name']
+        assert case['baseline'] != case['candidate'], case['name']
+        assert case['baseline']['version'] == case['candidate']['version']
+
+
+def test_preapplied_fixed_discount_charges_and_refunds_exact_amount():
+    from iccplus_tools.live_parity import live_cases, run_local_case
+
+    cases = {c['name']: c for c in live_cases()}
+    selected = run_local_case(cases['preapplied_discount_charge_21015'])
+    refunded = run_local_case(cases['preapplied_discount_refund_21015'])
+    assert selected['points']['p'] == 18
+    # The pinned Viewer deletes discount metadata after selection when the
+    # discounts list is empty, so it charges 2 and refunds the base cost of 8.
+    assert refunded['points']['p'] == 26
+    assert selected['entities']['purchase']['active']
+    assert not refunded['entities']['purchase']['active']
+
+
+def test_empty_discount_refund_quirk_does_not_apply_to_nonempty_discount_lists():
+    from iccplus_tools.live_parity import live_cases, run_local_case
+    import copy
+
+    source = next(c for c in live_cases() if c['name'] == 'preapplied_discount_refund_21015')
+    active = copy.deepcopy(source)
+    score = active['project']['rows'][0]['objects'][0]['scores'][0]
+    score['discounts'] = [{'id': 'separate-source', 'state': 1}]
+    assert run_local_case(active)['points']['p'] == 20
+
+
+def test_single_direct_coupon_reprices_purchase_and_undo_ledger():
+    from iccplus_tools.live_parity import live_cases, run_local_case_trace
+
+    cases = {case['name']: case for case in live_cases()}
+    expectations = {
+        'dynamic_discount_before_purchase_21015': [20, 20, 14],
+        'dynamic_discount_after_purchase_21015': [20, 12, 14],
+        'dynamic_discount_remove_source_21015': [20, 12, 14, 12],
+        'dynamic_discount_refund_after_source_21015': [20, 20, 14, 20],
+    }
+    for name, expected in expectations.items():
+        case = cases[name]
+        assert case['check_action_trace'] is True
+        trace = run_local_case_trace(case)
+        assert [state['points']['p'] for state in trace] == expected, name
+    assert len(expectations) == 4
+
+
+def test_single_provider_discount_operators_low_limit_and_point_filter():
+    from iccplus_tools.live_parity import live_cases, run_local_case_trace
+
+    cases = {case['name']: case for case in live_cases()}
+    expected = {
+        'discount_half_after_purchase_21015': [20, 11, 16],
+        'discount_half_before_purchase_21015': [20, 20, 16],
+        'discount_low_limit_21015': [20, 20, 17],
+        'discount_point_filter_excludes_21015': [20, 20, 11],
+        'discount_fixed_override_21015': [20, 11, 17],
+    }
+    for name, values in expected.items():
+        case = cases[name]
+        assert case['check_action_trace'] is True
+        trace = run_local_case_trace(case)
+        assert [step['points']['p'] for step in trace] == values, name
+
+
+def test_direct_discount_row_and_group_routes():
+    from iccplus_tools.live_parity import live_cases, run_local_case_trace
+
+    cases = {case['name']: case for case in live_cases()}
+    expected = {
+        'dynamic_discount_row_target_21015': [20, 12, 14],
+        'dynamic_discount_group_target_21015': [20, 20, 14],
+        'dynamic_discount_group_remove_21015': [20, 12, 14, 12],
+    }
+    for name, values in expected.items():
+        trace = run_local_case_trace(cases[name])
+        assert [step['points']['p'] for step in trace] == values, name
+
+
+def test_multi_provider_discount_arbitration_and_removal_traces():
+    """Pinned Viewer 2.10.15 fixed-cost two-provider observations."""
+    from iccplus_tools.live_parity import live_cases, run_local_case_trace
+
+    cases = {case['name']: case for case in live_cases()}
+    checkpoints = {
+        'multi_nonstack_stronger_21015': [30, 20, 22, 25],
+        'multi_nonstack_weaker_21015': [30, 20, 25, 25],
+        'multi_nonstack_remove_strong_21015': [30, 20, 22, 25, 22],
+        'multi_nonstack_remove_weak_21015': [30, 20, 22, 25, 25],
+        'multi_nonstack_before_purchase_21015': [30, 30, 30, 25],
+        'multi_stack_after_purchase_21015': [30, 20, 22, 25],
+        'multi_stack_before_purchase_21015': [30, 30, 30, 25],
+        'multi_stack_remove_first_21015': [30, 20, 22, 25, 23],
+        'multi_stack_remove_last_21015': [30, 20, 22, 25, 22],
+        'multi_mixed_stack_then_single_21015': [30, 20, 22, 26],
+        'multi_mixed_single_then_stack_21015': [30, 20, 26, 26],
+        'multi_mixed_replace_stack_21015': [30, 20, 22, 26, 22],
+    }
+    for name, expected in checkpoints.items():
+        assert cases[name]['check_action_trace'] is True
+        snapshots = run_local_case_trace(cases[name])
+        assert [snap['points']['p'] for snap in snapshots] == expected, name
+    assert len(checkpoints) == 12
+
+
+def test_direct_discount_rejects_unrepriceable_costs_in_both_orders():
+    """Only fixed nonrepeatable unconditional Scores get ordinary discounts."""
+    import copy
+    from iccplus_tools.live_parity import live_cases
+
+    case = next(c for c in live_cases()
+                if c['name'] == 'dynamic_discount_before_purchase_21015')
+    variants = (
+        ('repeatable', {'isSelectableMultiple': True}, {}),
+        ('random', {}, {'isRandom': True}),
+        ('expression', {}, {'useExpression': True}),
+        ('multiply', {}, {'multiplyByTimes': True}),
+        ('conditional', {}, {'requireds': [{'type': 'id', 'reqId': 'coupon'}]}),
+    )
+    for name, purchase_fields, score_fields in variants:
+        p = copy.deepcopy(case['project'])
+        target = p['rows'][0]['objects'][1]
+        target.update(purchase_fields)
+        target['scores'][0].update(score_fields)
+        sim = Simulator(p, clean=False)
+        purchase = sim.index.one('purchase', 'choice')
+        assert purchase is not None, name
+        score = purchase.value['scores'][0]
+        assert sim._direct_discount_value(purchase, score, 8.0) is None, name
+        # The provider is genuinely present and ordinary fixed Scores are
+        # still eligible, so None is not caused by a missing provider.
+        assert sim._direct_discount_value(purchase, {
+            **score, 'isRandom': False, 'useExpression': False,
+            'multiplyByTimes': False, 'requireds': [],
+        }, 8.0) == (None if purchase_fields else 8.0), name
+
+
+def test_discount_provider_lookup_reuses_and_invalidates_on_import():
+    """Cached routing must not retain Entity objects from a replaced index."""
+    from iccplus_tools.live_parity import live_cases
+
+    case = next(c for c in live_cases()
+                if c['name'] == 'dynamic_discount_before_purchase_21015')
+    sim = Simulator(case['project'], clean=False)
+    assert sim.select('coupon').ok
+    target = sim.index.one('purchase', 'choice')
+    assert target is not None
+    score = target.value['scores'][0]
+
+    assert sim._direct_discount_value(target, score, 8.0) == 6.0
+    original_index = sim.index
+    assert sim._discount_sources_index is original_index
+    assert sim._direct_discount_value(target, score, 8.0) == 6.0
+    assert sim._discount_sources_index is original_index
+
+    exported = sim.export_state()
+    sim.import_state(exported)
+    assert sim.index is not original_index
+    next_target = sim.index.one('purchase', 'choice')
+    assert next_target is not None
+    assert sim._direct_discount_value(next_target, next_target.value['scores'][0], 8.0) == 6.0
+    assert sim._discount_sources_index is sim.index
+
+
+def test_two_source_discount_does_not_guess_unverified_mixed_operators():
+    from iccplus_tools.live_parity import live_cases
+    import copy
+
+    source = next(c for c in live_cases() if c['name'] == 'multi_nonstack_stronger_21015')
+    modified = copy.deepcopy(source['project'])
+    modified['rows'][0]['objects'][0]['discountOperator'] = '3'
+    sim = Simulator(modified, clean=False)
+    purchase = sim.index.one('purchase', 'choice')
+    assert purchase is not None
+    score = purchase.value['scores'][0]
+    assert sim._direct_discount_value(purchase, score, 10.0) is None
+
+
+def test_single_provider_discount_quota_allocation_and_reuse():
+    """Pinned official Viewer 2.10.15 action-by-action quota observations."""
+    from iccplus_tools.live_parity import live_cases, run_local_case_trace
+
+    cases = {case['name']: case for case in live_cases()}
+    expected = {
+        'quota_one_two_purchases_21015': [50, 50, 45, 37],
+        'quota_one_after_two_purchases_21015': [50, 42, 34, 37],
+        'quota_one_remove_first_21015': [50, 50, 45, 37, 45],
+        'quota_one_remove_first_then_reselect_21015': [50, 50, 45, 37, 45, 37],
+        'quota_one_remove_source_21015': [50, 50, 45, 37, 34],
+        'quota_two_three_purchases_21015': [50, 50, 45, 40, 32],
+        'quota_two_remove_middle_21015': [50, 50, 45, 40, 32, 40],
+        'quota_one_purchase_refund_21015': [50, 50, 45, 50, 45],
+    }
+    for name, values in expected.items():
+        assert cases[name]['check_action_trace'] is True
+        trace = run_local_case_trace(cases[name])
+        assert [step['points']['p'] for step in trace] == values, name
+    assert len(expected) == 8
+
+
+def test_quota_allocation_via_native_row_and_group_targets():
+    from iccplus_tools.live_parity import live_cases, run_local_case_trace
+
+    cases = {case['name']: case for case in live_cases()}
+    expected = {
+        'quota_row_two_purchases_21015': [50, 50, 45, 37],
+        'quota_row_reallocate_21015': [50, 50, 45, 37, 45],
+        'quota_group_two_purchases_21015': [50, 42, 34, 37],
+        'quota_group_reallocate_21015': [50, 50, 45, 37, 45],
+    }
+    for name, points in expected.items():
+        trace = run_local_case_trace(cases[name])
+        assert [step['points']['p'] for step in trace] == points, name
+
+
+def test_load_build_respects_force_allow_deselect_21016():
+    """When the build excludes an allowable force target, it stays deselected."""
+    from iccplus_tools.live_parity import live_cases, run_local_case_trace
+
+    cases = {case['name']: case for case in live_cases()}
+    expected = {
+        'restore_allow_deselect_21016': [False, True, False, False],
+        'restore_protected_force_21016': [False, True, True],
+        'restore_allow_explicit_target_21016': [False, True],
+        'restore_allow_group_21016': [False, False],
+    }
+    for name, state in expected.items():
+        snapshots = run_local_case_trace(cases[name])
+        assert [step['entities']['target']['active'] for step in snapshots] == state, name
+
+
+def test_random_allow_deselect_restore_requires_explicit_saved_target():
+    p = project(choice('source', activateOtherChoice=True,
+                       activateThisChoice='target', isActivateRandom=True,
+                       numActivateRandom=1, isAllowDeselect=True), choice('target'))
+    missing = Simulator(p, clean=False)
+    missing.load_build_string('source/RND#target')
+    assert missing._active('source') and not missing._active('target')
+    assert missing.export_build_string() == 'source'
+    explicit = Simulator(p, clean=False)
+    explicit.load_build_string('source/RND#target,target')
+    assert explicit._active('target')
+    assert explicit.export_build_string() == 'source/RND#target,target'
+    reversed_order = Simulator(p, clean=False)
+    reversed_order.load_build_string('target,source/RND#target')
+    assert reversed_order._active('target')
+    assert reversed_order.export_build_string() == 'target,source/RND#target'
+    # Upstream filters /RND targets against the explicit build-entry set for
+    # protected random providers too; it must not invent an omitted target.
+    protected = project(choice('source', activateOtherChoice=True,
+                               activateThisChoice='target', isActivateRandom=True,
+                               numActivateRandom=1), choice('target'))
+    forced = Simulator(protected, clean=False)
+    forced.load_build_string('source/RND#target')
+    assert not forced._active('target')
+    forced.load_build_string('source/RND#target,target')
+    assert forced._active('target')
+    assert forced.state.forced_by['target'] == {'source'}
+    # A build without /RND uses explicit entries, not a fresh random draw.
+    missing.load_build_string('source')
+    assert missing._active('source') and not missing._active('target')
+    missing.load_build_string('source,target')
+    assert missing._active('target')
+    assert missing.export_build_string() == 'source/RND#target,target'
+
+
+def test_three_provider_discount_native_arbitration_21016():
+    """Chromium-confirmed three-source fixed subtraction states and refunds."""
+    from iccplus_tools.live_parity import live_cases, run_local_case_trace
+
+    cases = {case['name']: case for case in live_cases()}
+    checkpoints = {
+        'triple_nonstack_increasing_21016': [40, 28, 29, 31, 33],
+        'triple_nonstack_decreasing_21016': [40, 28, 33, 33, 33],
+        'triple_nonstack_before_purchase_21016': [40, 40, 40, 40, 33],
+        'triple_nonstack_remove_best_21016': [40, 28, 29, 31, 33, 28],
+        'triple_nonstack_remove_weakest_21016': [40, 28, 29, 31, 33, 33],
+        'triple_stack_all_21016': [40, 28, 29, 32, 37],
+        'triple_stack_before_21016': [40, 40, 40, 40, 37],
+        'triple_stack_remove_middle_21016': [40, 28, 29, 32, 37, 34],
+        'triple_stack_remove_first_21016': [40, 28, 29, 32, 37, 36],
+        'triple_mixed_single_wins_21016': [40, 28, 29, 35, 35],
+        'triple_mixed_stack_wins_21016': [40, 28, 31, 31, 35],
+        'triple_mixed_remove_single_21016': [40, 28, 29, 35, 35, 32],
+    }
+    for name, values in checkpoints.items():
+        assert cases[name]['check_action_trace'] is True
+        trace = run_local_case_trace(cases[name])
+        assert [checkpoint['points']['p'] for checkpoint in trace] == values, name
+    assert len(checkpoints) == 12
+
+
+def test_three_provider_arbitration_boundary_abstains_on_fourth_source():
+    from iccplus_tools.live_parity import live_cases
+    import copy
+
+    case = copy.deepcopy(next(case for case in live_cases()
+                              if case['name'] == 'triple_nonstack_increasing_21016'))
+    project = case['project']
+    extra = copy.deepcopy(project['rows'][0]['objects'][0])
+    extra['id'] = 'fourth'
+    project['rows'][0]['objects'].append(extra)
+    sim = Simulator(project, clean=False)
+    target = sim.index.one('purchase', 'choice')
+    assert target is not None
+    assert sim._direct_discount_value(target, target.value['scores'][0], 12.0) is None
+
+
+def test_three_nonstack_stale_refund_persists_and_roundtrips_21016():
+    from iccplus_tools.live_parity import live_cases, run_local_case_trace
+
+    cases = {case['name']: case for case in live_cases()}
+    expectations = {
+        'triple_nonstack_stale_neutral_21016': [40, 28, 29, 31, 33, 28, 28],
+        'triple_nonstack_stale_remove_middle_21016': [40, 28, 29, 31, 33, 28, 29],
+        'triple_nonstack_stale_remove_weak_21016': [40, 28, 29, 31, 33, 28, 28],
+        'triple_nonstack_stale_reselect_best_21016': [40, 28, 29, 31, 33, 28, 33],
+        'triple_nonstack_stale_refund_21016': [40, 28, 29, 31, 33, 28, 40],
+    }
+    for name, values in expectations.items():
+        states = run_local_case_trace(cases[name])
+        assert [step['points']['p'] for step in states] == values, name
+
+    source = cases['triple_nonstack_stale_remove_weak_21016']['project']
+    sim = Simulator(source, clean=False)
+    for ident in ('purchase', 'a', 'b', 'c'):
+        assert sim.select(ident).ok
+    assert sim.deselect('c').ok
+    assert sim.state.points['p'] == 28
+    assert sim.state.discount_stale_nonstack == {'purchase': 'b'}
+    saved = sim.export_state()
+    assert saved['runtime']['discount_stale_nonstack'] == {'purchase': 'b'}
+    restored = Simulator(source, clean=False)
+    restored.import_state(saved)
+    assert restored.deselect('a').ok
+    assert restored.state.points['p'] == 28
+    assert restored.state.discount_stale_nonstack == {'purchase': 'b'}
+    assert restored.deselect('b').ok
+    assert restored.state.points['p'] == 28
+    assert not restored.state.discount_stale_nonstack
+
+
+def test_review_discount_reprice_uses_integer_base_and_multi_score_totals():
+    """Protect point filtering, shared Point IDs and fractional repricing."""
+    import pytest
+    from iccplus_tools.live_parity import live_cases, run_local_case_trace
+
+    cases = {case['name']: case for case in live_cases()}
+    expected = {
+        'review_two_score_point_filter_21016': [
+            (50, 25), (42, 21), (44, 21), (42, 21),
+        ],
+        'review_two_score_before_purchase_21016': [
+            (50, 25), (50, 25), (44, 21),
+        ],
+        'review_two_score_same_point_21016': [
+            (50, 25), (36, 25), (40, 25), (36, 25),
+        ],
+        'review_two_score_not_discountable_21016': [
+            (50, 25), (42, 21), (44, 21), (42, 21),
+        ],
+        'review_fractional_float_point_21016': [
+            (50, 25), (41.1, 25), (40.6, 25), (40.6, 25), (41.1, 25),
+        ],
+    }
+    for name, balances in expected.items():
+        traces = run_local_case_trace(cases[name])
+        assert len(traces) == len(balances), name
+        for step, (snapshot, expected_balances) in enumerate(zip(traces, balances)):
+            assert snapshot['points']['p'] == pytest.approx(expected_balances[0]), (name, step)
+            assert snapshot['points']['q'] == pytest.approx(expected_balances[1]), (name, step)
+
+    flag_case = cases['review_two_score_point_filter_21016']['project']
+    flag_sim = Simulator(flag_case, clean=False)
+    target = flag_sim.index.one('purchase', 'choice')
+    assert target is not None
+    protected_score = dict(target.value['scores'][0], discountIsOn=True)
+    assert flag_sim._direct_discount_value(target, protected_score, 8) is None
+
+
+def test_local_integer_point_fractional_discount_uses_floored_base():
+    """Exercise local rounding without claiming upstream fractional parity.
+
+    In pinned Viewer 2.10.16 the first dynamic update uses the raw 8.9 as
+    its old discount score despite an initial Point charge of 8; that produces
+    drifting fractional Point balances (41.9, then 42.9). This is explicitly
+    outside the deterministic fixed-cost compatibility subset in Local.
+    """
+    import copy
+    from iccplus_tools.live_parity import live_cases, run_local_case_trace
+
+    case = copy.deepcopy(next(x for x in live_cases()
+                              if x['name'] == 'review_fractional_float_point_21016'))
+    case['project']['pointTypes'][0]['allowFloat'] = False
+    balances = [step['points']['p'] for step in run_local_case_trace(case)]
+    assert balances == [50, 42, 42, 42, 42]
+
+
+def test_sparse_discount_scratch_fields_retained_and_other_choice_traced():
+    """Retain refund scratch fields and exercise a distinct discount source."""
+    from iccplus_tools.live_parity import sparse_equivalence_cases
+
+    case = next(c for c in sparse_equivalence_cases()
+                if c['name'] == 'dynamic_other_choice_discount_refund')
+    score = case['candidate']['rows'][0]['objects'][0]['scores'][0]
+    assert score['isChangeDiscount'] is True
+    assert score['tmpDisScore'] == 2
+    assert [a['id'] for a in case['actions']] == [
+        'probe-choice', 'probe-discount-source',
+        'probe-discount-source', 'probe-choice',
+    ]

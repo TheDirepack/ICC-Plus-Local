@@ -241,7 +241,9 @@ def _merge_runtime_cases() -> tuple[dict[str, Any], list[dict[str, Any]], dict[s
     tests: list[dict[str, Any]] = []
     isolated: dict[str, dict[str, Any]] = {}
 
-    for n, case in enumerate(live_cases(), 1):
+    # The external GUI-verification kit freezes R01-R32 as historical fixture IDs.
+    # New differential-only cases must not renumber or silently expand that kit.
+    for n, case in enumerate(live_cases()[:32], 1):
         ident = f'R{n:02d}'
         prefix = f't{n:02d}'
         p, mapping = _namespace_project(case['project'], prefix)

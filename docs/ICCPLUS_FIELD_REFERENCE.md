@@ -1,6 +1,6 @@
 # ICC Plus field reference for scripted work
 
-This is a compact field catalog for the ICC Plus 2.10.7 source snapshot used by this release. It is not a replacement for the official Viewer source. It exists so a generator can find the native field names without opening the Creator UI.
+This compact field catalog targets official ICC Plus 2.10.16. The field inventory was originally transcribed from the 2.10.14 `types.ts` snapshot; the unchanged field definitions have been checked against the pinned 2.10.16 source. It is not a replacement for the official Viewer source. It exists so a generator can find the native field names without opening the Creator UI.
 
 ## Requirement
 
@@ -87,6 +87,7 @@ numMultipleTimesMinus
 numMultipleTimesPluss
 isNotSelectable
 selectOnce
+notDeselectedByReq
 notDeselectedByClean
 isNotResult
 cleanACtivatedOnSelect
@@ -98,7 +99,7 @@ isCountDisabled
 deselectWhenNoAddon
 ```
 
-`isSelectableMultiple` only enables the repeatable UI path. A working counter also needs a mode. `isMultipleUseVariable: true` uses the signed `multipleUseVariable` count. `multipleScoreId` uses a Point Type-backed count. If neither mode is present, ICC Plus 2.10.7 leaves the counter inert.
+`isSelectableMultiple` only enables the repeatable UI path. A working counter also needs a mode. `isMultipleUseVariable: true` uses the signed `multipleUseVariable` count. `multipleScoreId` uses a Point Type-backed count. If neither mode is present, ICC Plus 2.10.15 leaves the counter inert.
 
 Activation:
 

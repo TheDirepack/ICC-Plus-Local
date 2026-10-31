@@ -7,8 +7,8 @@ description: Use when working with native ICC Plus 2 projects.
 
 Use this as the one general ICC Plus Local skill. Do not treat the files under `functions/` as separate installed skills. They are focused operating guides that this skill routes to when a task needs that function.
 
-Current tool version: `0.10.0rc15`.
-Target ICC Plus version: `2.10.7`.
+Current tool version: `0.10.0rc17`.
+Target ICC Plus version: `2.10.16`.
 
 ## How to use this skill
 

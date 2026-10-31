@@ -4,6 +4,7 @@ from typing import Any
 
 from .version import __version__
 from .field_catalog import catalog_kinds
+from .upstream_2106 import ICCPLUS_VERSION, ICCPLUS_COMMIT
 
 COMMAND_KINDS = [
     'reference', 'template', 'media', 'project',
@@ -50,9 +51,9 @@ def capabilities() -> dict[str, Any]:
         'tool': 'iccplus-local',
         'tool_version': __version__,
         'target': {
-            'icc_plus_version': '2.10.7',
+            'icc_plus_version': ICCPLUS_VERSION,
             'source_repository': 'wahaha303/ICC-Plus-Svelte',
-            'source_commit': '1ea9db888cde2286d18d0d5de50933cb8773b739',
+            'source_commit': ICCPLUS_COMMIT,
         },
         'interface': 'command-line',
         'output': {
@@ -161,7 +162,7 @@ def capabilities() -> dict[str, Any]:
         },
         'build_system': {
             'blank_command': 'iccplus-local generate -o project.json',
-            'blank_source': 'exact ICC Plus 2.10.7 Creator default export',
+            'blank_source': f'exact ICC Plus {ICCPLUS_VERSION} Creator default export',
             'mutation_commands': ['iccplus-local structure PROJECT SCRIPT', 'iccplus-local rules PROJECT SCRIPT', 'iccplus-local style PROJECT MANIFEST'],
             'repeatable_build_command': 'iccplus-local build BUILD.json -o project.json',
             'build_manifest_schema': 'iccplus-local reference schema build-manifest',
