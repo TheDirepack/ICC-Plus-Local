@@ -23,9 +23,26 @@ def test_release_archives_keep_full_docs_and_skills_but_drop_tests(tmp_path: Pat
     assert not any(name.startswith("compression_tests/") for name in names)
     assert not any(name.startswith("online_tests/") for name in names)
     assert not any(name.startswith(".github/") for name in names)
+    assert not any(name.startswith("release-dist/") for name in names)
     assert "run-tests" not in names
     assert "run-compression-tests" not in names
     assert "run-upstream-parity-tests" not in names
+
+
+def test_full_archive_excludes_preexisting_generated_release_dist(tmp_path: Path, monkeypatch):
+    fake_root = tmp_path / 'workspace'
+    fake_root.mkdir()
+    (fake_root / 'VERSION').write_text('0.10.0rc17\n')
+    (fake_root / 'README.md').write_text('valid source')
+    generated = fake_root / 'release-dist'
+    generated.mkdir()
+    (generated / 'previous-release.zip').write_bytes(b'not source')
+    monkeypatch.setattr(release, 'ROOT', fake_root)
+    output = tmp_path / 'out'
+    output.mkdir()
+    names = _relative_names(release.build_full(output, 'test-ref'))
+    assert 'README.md' in names
+    assert not any(name.startswith('release-dist/') for name in names)
 
 
 def test_viewer_archive_contains_runtime_skill_docs_and_no_authoring(tmp_path: Path):
