@@ -132,6 +132,10 @@ class Simulator:
         self.project = copy.deepcopy(self._base_project)
         self.index = ProjectIndex(self.project)
         self.req = RequirementEngine(self.index)
+        # Provider-to-target routing is structural, unlike provider activation.
+        # Rebuild lazily whenever importing or cloning changes the index.
+        self._discount_sources_index: ProjectIndex | None = None
+        self._discount_sources_by_target: dict[str, list[Entity]] = {}
         self.rng = random.Random(seed)
         self.seed = seed
         # Temporary native-build restore overrides. They are consumed only while
@@ -1592,6 +1596,46 @@ class Simulator:
             elif ident in before and ident not in after:
                 self._build_order_remove(ident)
 
+    def _discount_provider_sources(self, ent: Entity) -> list[Entity]:
+        """Cache structural provider/target routing for fixed-cost discounts.
+
+        Provider activation and selected_order remain live runtime state. The
+        cached Entity references are safe only for the current ProjectIndex;
+        import_state and dynamic Row cloning replace that index.
+        """
+        if self._discount_sources_index is not self.index:
+            selectables = list(self.index.selectables())
+            groups = self.project.get('groups', [])
+            lookup: dict[str, list[Entity]] = {}
+            for source in selectables:
+                cfg = source.value
+                if not cfg.get('discountOther'):
+                    continue
+                if cfg.get('isDisChoices'):
+                    choices = cfg.get('discountChoices', [])
+                    rows = cfg.get('discountRows', [])
+                    for target in selectables:
+                        if (
+                            isinstance(choices, list) and target.id in choices
+                            or isinstance(rows, list) and target.row_id in rows
+                        ):
+                            lookup.setdefault(target.id, []).append(source)
+                else:
+                    group_ids = cfg.get('discountGroups', [])
+                    if not isinstance(group_ids, list) or not isinstance(groups, list):
+                        continue
+                    members = [
+                        group.get('elements', [])
+                        for group in groups if isinstance(group, dict)
+                        and group.get('id') in group_ids
+                    ]
+                    for target in selectables:
+                        if any(target.id in elements for elements in members):
+                            lookup.setdefault(target.id, []).append(source)
+            self._discount_sources_by_target = lookup
+            self._discount_sources_index = self.index
+        return self._discount_sources_by_target.get(ent.id, [])
+
     def _direct_discount_value(self, ent: Entity, score: dict[str, Any], base: float, *, removed_provider: str | None = None, persist: bool = False) -> float | None:
         """Reproduce the verified fixed-source Viewer discount-arbitration path.
 
@@ -1613,34 +1657,12 @@ class Simulator:
             or score.get('multiplyByTimes') or score.get('requireds')
         ):
             return None
-        sources: list[Entity] = []
-        for source in self.index.selectables():
-            cfg = source.value
-            if not cfg.get('discountOther'):
-                continue
-            if cfg.get('isDisChoices'):
-                choices = cfg.get('discountChoices', [])
-                rows = cfg.get('discountRows', [])
-                matched = (
-                    isinstance(choices, list) and ent.id in choices
-                    or isinstance(rows, list) and ent.row_id in rows
-                )
-            else:
-                group_ids = cfg.get('discountGroups', [])
-                matched = (
-                    isinstance(group_ids, list)
-                    and any(
-                        isinstance(group, dict)
-                        and group.get('id') in group_ids
-                        and ent.id in group.get('elements', [])
-                        for group in self.project.get('groups', [])
-                    )
-                )
-            if matched:
-                point_filter = cfg.get('discountPointTypes', [])
-                if isinstance(point_filter, list) and point_filter and str(score.get('id', '')) not in point_filter:
-                    continue
-                sources.append(source)
+        sources = [
+            source for source in self._discount_provider_sources(ent)
+            if not isinstance(source.value.get('discountPointTypes'), list)
+            or not source.value['discountPointTypes']
+            or str(score.get('id', '')) in source.value['discountPointTypes']
+        ]
         if not sources or len(sources) > 3:
             return None
 
