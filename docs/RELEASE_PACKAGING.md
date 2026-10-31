@@ -22,6 +22,8 @@ The full archive explicitly marks `iccplus-local`, `cyoa-compress`, and `install
 
 Tests remain in the Git repository and run before a manual release is created; they are simply not shipped in the end-user release ZIP.
 
+The historic rc11 checksum ledger is retained as `verification/historical_rc11_SHA256SUMS.txt`. The top-level `SHA256SUMS.txt` distributed alongside newly built release ZIPs is generated from those ZIPs; never use the rc11 ledger to verify rc17 assets.
+
 ## Viewer/test distribution
 
 `iccplus-viewer-test-VERSION.zip` is a deliberately smaller player/runtime-testing environment. It contains only the runtime dependency closure required to evaluate an existing ICC Plus project plus the documentation and skill needed for Viewer-side testing.

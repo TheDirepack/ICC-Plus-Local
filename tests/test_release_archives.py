@@ -27,6 +27,8 @@ def test_release_archives_keep_full_docs_and_skills_but_drop_tests(tmp_path: Pat
     assert "run-tests" not in names
     assert "run-compression-tests" not in names
     assert "run-upstream-parity-tests" not in names
+    assert "SHA256SUMS.txt" not in names
+    assert "verification/historical_rc11_SHA256SUMS.txt" in names
 
 
 def test_full_archive_excludes_preexisting_generated_release_dist(tmp_path: Path, monkeypatch):
