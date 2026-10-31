@@ -25,7 +25,7 @@ Do not promote one of these into proof of the others. A clean local result canno
 
 ICC Plus 2 supports author-side project saving through IndexedDB, including manual save slots and autosave. File-based project workflows remain useful for versioning, scripted command-line generation, backup, and release packaging.
 
-ICC Plus Local normally writes a sparse `project.json`: it hydrates a Creator-complete project in memory, validates that complete form, then omits only values covered by the pinned 2.10.7 sparse rules. The saved file is still an authoring artifact, so omissions must preserve later editing as well as Viewer behavior. Stable Score `idx` values and non-derivable Sound Effect names remain serialized for that reason.
+ICC Plus Local normally writes a sparse `project.json`: it hydrates a Creator-complete project in memory, validates that complete form, then omits only values covered by the pinned 2.10.16 sparse rules. The saved file is still an authoring artifact, so omissions must preserve later editing as well as Viewer behavior. Stable Score `idx` values and non-derivable Sound Effect names remain serialized for that reason.
 
 Use `project validate` for a normal sparse file. Use `project validate --complete` when you intentionally materialize the complete Creator shape, and use `--not-sparse` only when that full on-disk representation is actually needed.
 

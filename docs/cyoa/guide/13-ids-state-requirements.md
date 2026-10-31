@@ -4,7 +4,7 @@
 
 IDs are references. Treat them as part of the project's data contract.
 
-Not every field named `id` is a project identity. In the ICC Plus 2.10.7 Creator, ordinary Requirements and non-selectable Addons use structural `id: ""` values. Scores use `idx` as identity while Score `id` points to a Point Type. Do not manufacture global IDs for structural blank records.
+Not every field named `id` is a project identity. In the pinned ICC Plus 2.10.16 Creator, ordinary Requirements and non-selectable Addons use structural `id: ""` values. Scores use `idx` as identity while Score `id` points to a Point Type. Do not manufacture global IDs for structural blank records.
 
 Generated IDs are valid. Semantic IDs are easier to audit in large projects and easier to use in migration or debugging.
 

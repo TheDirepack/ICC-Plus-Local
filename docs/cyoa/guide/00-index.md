@@ -49,7 +49,7 @@ If the local model and target Viewer disagree, keep the project native to the Vi
 18. `18-continuing-playtests.md` — private continuation state and multi-call playtesting.
 19. `19-publishing-and-release.md` — package construction and release QA.
 20. `20-troubleshooting.md` — symptom-first diagnosis and current recovery rules.
-21. `21-large-project-normalization.md` — generic styling, deepest-row gates, Row limits, one-card Row merging, runtime Group pruning, deterministic runtime-ID compaction, and known 2.10.7 caveats.
+21. `21-large-project-normalization.md` — generic styling, deepest-row gates, Row limits, one-card Row merging, runtime Group pruning, deterministic runtime-ID compaction, and historically source-verified Viewer caveats.
 
 `SOURCES.md` records the source material behind the guide. `REVISION-NOTES.md` is historical change provenance, not active workflow guidance.
 

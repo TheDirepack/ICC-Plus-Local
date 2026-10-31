@@ -4,7 +4,7 @@ Use these prompts after skill changes. The expected result is the primary skill 
 
 `iccplus-local` is the single implementation skill for native ICC Plus 2 work. Do not route creation, editing, visual work, or mechanical playtesting to separate wrapper skills.
 
-Current bundled implementation: ICC Plus Local 0.10.0rc13 targeting ICC Plus 2.10.7.
+Current bundled implementation: ICC Plus Local 0.10.0rc17 targeting ICC Plus 2.10.16.
 
 `unslop` resolves from the single global copy at the external Unslop skill.
 

@@ -2,7 +2,7 @@
 
 Use the smallest skill set that adds distinct reasoning. ICC Plus Local is the single implementation skill for native ICC Plus 2 work.
 
-Current bundled implementation: **ICC Plus Local 0.10.0rc13**, targeting **ICC Plus 2.10.7**.
+Current bundled implementation: **ICC Plus Local 0.10.0rc17**, targeting **ICC Plus 2.10.16**.
 
 ## Active skills
 
