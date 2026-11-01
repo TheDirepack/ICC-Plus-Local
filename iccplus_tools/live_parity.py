@@ -753,6 +753,42 @@ def live_cases() -> list[dict[str, Any]]:
             ],
         })
 
+    # One finite-use coupon targeting precisely one Score on each multi-Score
+    # Choice. The remaining Score is unrelated, either due to the Point Type
+    # filter or explicit isNotDiscountable; test native per-Score allocation.
+    multi_score_quota_cases = (
+        ('quota_multi_score_filtered_21016', False,
+         ['coupon', 'a', 'b', '-a', 'a']),
+        ('quota_multi_score_selected_first_21016', False,
+         ['a', 'b', 'coupon', '-a']),
+        ('quota_multi_score_same_point_21016', True,
+         ['coupon', 'a', 'b', '-a']),
+    )
+    for name, same_point, sequence in multi_score_quota_cases:
+        purchases = [
+            _choice(ident, scores=[
+                {'idx': f'{ident}-main', 'id': 'p', 'value': 8,
+                 'requireds': [], 'showScore': True},
+                {'idx': f'{ident}-other', 'id': 'p' if same_point else 'q',
+                 'value': 4, 'requireds': [], 'showScore': True,
+                 **({'isNotDiscountable': True} if same_point else {})},
+            ]) for ident in ('a', 'b')
+        ]
+        coupon = _choice('coupon', discountOther=True, isDisChoices=True,
+                         discountChoices=['a', 'b'], discountOperator='1',
+                         discountValue=3, discountPointTypes=['p'],
+                         useDiscountCount=True, discountCount=1)
+        cases.append({
+            'name': name, 'check_action_trace': True,
+            'project': _project(rows=[_row('r', [coupon, *purchases])],
+                                points=[_point('p', 50), _point('q', 25)]),
+            'actions': [
+                {'op': 'deselect' if token.startswith('-') else 'select',
+                 'id': token.removeprefix('-')}
+                for token in sequence
+            ],
+        })
+
     # Quota allocation routed via native Rows and Groups: same finite coupon
     # accounting, different source targeting in selectDiscountOther/addCount.
     routed_quota = (
