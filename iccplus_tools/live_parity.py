@@ -753,6 +753,46 @@ def live_cases() -> list[dict[str, Any]]:
             ],
         })
 
+    # Two independent limited-use providers target different Point Types on
+    # the *same* multi-Score purchases, exercising concurrent quota accounting
+    # without two coupons competing for the same native Score.
+    separate_point_quotas = (
+        ('dual_independent_quota_coupon_first_21016',
+         ['coupon_p', 'coupon_q', 'a', 'b', '-a', 'a']),
+        ('dual_independent_quota_purchase_first_21016',
+         ['a', 'b', 'coupon_p', 'coupon_q', '-a']),
+        ('dual_independent_quota_source_removal_21016',
+         ['coupon_q', 'coupon_p', 'a', 'b', '-coupon_p', '-coupon_q', '-a', 'a']),
+    )
+    for name, sequence in separate_point_quotas:
+        purchases = [_choice(ident, scores=[
+            {'idx': f'{ident}-p', 'id': 'p', 'value': 10,
+             'requireds': [], 'showScore': True},
+            {'idx': f'{ident}-q', 'id': 'q', 'value': 7,
+             'requireds': [], 'showScore': True},
+        ]) for ident in ('a', 'b')]
+        coupons = [
+            _choice('coupon_p', discountOther=True, isDisChoices=True,
+                    discountChoices=['a', 'b'], discountOperator='1',
+                    discountValue=3, discountPointTypes=['p'],
+                    useDiscountCount=True, discountCount=1),
+            _choice('coupon_q', discountOther=True, isDisChoices=True,
+                    discountChoices=['a', 'b'], discountOperator='1',
+                    discountValue=2, discountPointTypes=['q'],
+                    useDiscountCount=True, discountCount=1),
+        ]
+        cases.append({
+            'name': name, 'check_action_trace': True,
+            'project': _project(
+                rows=[_row('r', [*coupons, *purchases])],
+                points=[_point('p', 50), _point('q', 50)]),
+            'actions': [
+                {'op': 'deselect' if token.startswith('-') else 'select',
+                 'id': token.removeprefix('-')}
+                for token in sequence
+            ],
+        })
+
     # One finite-use coupon targeting precisely one Score on each multi-Score
     # Choice. The remaining Score is unrelated, either due to the Point Type
     # filter or explicit isNotDiscountable; test native per-Score allocation.

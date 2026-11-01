@@ -1765,6 +1765,47 @@ class Simulator:
                 reasons.add('discount:dynamic_score_or_repeat')
         return sorted(reasons)
 
+    def _fixed_quota_target_ids(self, source: Entity) -> set[str] | None:
+        """Resolve one coupon's fixed, single-eligible-Score purchases.
+
+        Keep routing/validation independent from allocation priority, so the
+        same eligibility contract can later back explicit per-provider state.
+        None signals unsupported configurations rather than an empty quota.
+        """
+        cfg = source.value
+        target_ids: set[str] = set()
+        if cfg.get('isDisChoices'):
+            choices = cfg.get('discountChoices', [])
+            rows = cfg.get('discountRows', [])
+            if not isinstance(choices, list) or not isinstance(rows, list):
+                return None
+            target_ids.update(str(x) for x in choices)
+            for row_id in rows:
+                row = self.index.one(str(row_id), 'row')
+                if row is None:
+                    continue
+                target_ids.update(str(x.get('id')) for x in row.value.get('objects', [])
+                                  if isinstance(x, dict))
+        else:
+            groups = cfg.get('discountGroups', [])
+            if not isinstance(groups, list):
+                return None
+            for group in self.project.get('groups', []):
+                if isinstance(group, dict) and group.get('id') in groups:
+                    target_ids.update(str(x) for x in group.get('elements', []))
+
+        eligible_ids: set[str] = set()
+        for choice_id in target_ids:
+            target = self.index.one(choice_id, 'choice')
+            if target is None:
+                continue
+            eligible = self._quota_eligible_score_count(target, source)
+            if eligible is None or eligible > 1:
+                return None
+            if eligible == 1:
+                eligible_ids.add(choice_id)
+        return eligible_ids
+
     def _direct_discount_value(self, ent: Entity, score: dict[str, Any], base: float, *, removed_provider: str | None = None, persist: bool = False) -> float | None:
         """Reproduce the verified fixed-source Viewer discount-arbitration path.
 
@@ -1830,37 +1871,10 @@ class Simulator:
             if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1:
                 return None
 
-            target_ids: set[str] = set()
-            if cfg.get('isDisChoices'):
-                choices = cfg.get('discountChoices', [])
-                rows = cfg.get('discountRows', [])
-                if not isinstance(choices, list) or not isinstance(rows, list):
-                    return None
-                target_ids.update(str(x) for x in choices)
-                for row_id in rows:
-                    row = self.index.one(str(row_id), 'row')
-                    if row is None:
-                        continue
-                    target_ids.update(str(x.get('id')) for x in row.value.get('objects', []) if isinstance(x, dict))
-            else:
-                groups = cfg.get('discountGroups', [])
-                if not isinstance(groups, list):
-                    return None
-                for group in self.project.get('groups', []):
-                    if isinstance(group, dict) and group.get('id') in groups:
-                        target_ids.update(str(x) for x in group.get('elements', []))
-
-            # Multiple Scores, repeats, random/expression values, and
-            # conditional costs require the general Viewer allocation state.
-            for choice_id in target_ids:
-                target = self.index.one(choice_id, 'choice')
-                if target is None:
-                    continue
-                eligible = self._quota_eligible_score_count(target, source)
-                if eligible is None or eligible > 1:
-                    return None
-                if eligible == 1:
-                    quota_eligible_ids.add(choice_id)
+            eligible_ids = self._fixed_quota_target_ids(source)
+            if eligible_ids is None:
+                return None
+            quota_eligible_ids.update(eligible_ids)
 
         def apply_offer(amount: float, cfg: dict[str, Any]) -> float | None:
             raw_value = cfg.get('discountValue')
