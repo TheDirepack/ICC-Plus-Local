@@ -753,6 +753,38 @@ def live_cases() -> list[dict[str, Any]]:
             ],
         })
 
+    # Two separately allocated finite coupons, sometimes competing for
+    # the same deterministic fixed Score. Every mutation is checked against
+    # the pinned Chromium Viewer rather than assuming global best-price math.
+    competing_quotas = (
+        ('two_quotas_identical_targets', ['a', 'b', 'c'], ['a', 'b', 'c'],
+         ['weak', 'strong', 'a', 'b', 'c', '-a', '-strong', 'a', '-weak']),
+        ('two_quotas_overlapping_targets', ['a', 'b'], ['b', 'c'],
+         ['weak', 'strong', 'a', 'b', 'c', '-a', '-b', '-strong', 'a']),
+        ('two_quotas_purchases_first', ['a', 'b', 'c'], ['b', 'c'],
+         ['a', 'b', 'c', 'weak', 'strong', '-a', 'a']),
+    )
+    for name, weak_targets, strong_targets, sequence in competing_quotas:
+        coupons = [
+            _choice(ident, discountOther=True, isDisChoices=True,
+                    discountChoices=targets, discountOperator='1',
+                    discountValue=discount, useDiscountCount=True,
+                    discountCount=1)
+            for ident, targets, discount in (
+                ('weak', weak_targets, 2), ('strong', strong_targets, 4))
+        ]
+        choices = [_choice(ident, scores=[{
+            'idx': f's-{ident}', 'id': 'p', 'value': 10,
+            'requireds': [], 'showScore': True,
+        }]) for ident in ('a', 'b', 'c')]
+        cases.append({
+            'name': name, 'check_action_trace': True,
+            'project': _project(rows=[_row('r', [*coupons, *choices])],
+                                points=[_point('p', 100)]),
+            'actions': [{'op': 'deselect' if t.startswith('-') else 'select',
+                         'id': t.removeprefix('-')} for t in sequence],
+        })
+
     # One finite-use coupon targeting precisely one Score on each multi-Score
     # Choice. The remaining Score is unrelated, either due to the Point Type
     # filter or explicit isNotDiscountable; test native per-Score allocation.

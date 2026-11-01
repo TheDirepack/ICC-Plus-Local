@@ -1818,13 +1818,24 @@ class Simulator:
         # addCount()/removeCount() reassigns freed coupons to the earliest
         # remaining eligible purchase; selected_order reproduces this path.
         quota_eligible_ids: set[str] = set()
+        quota_allocations: dict[str, set[str]] = {}
+        # Two independent finite coupons may target the same fixed Score.
+        # Restrict this expansion to nonstackable, nonnegative subtraction
+        # offers; allocation follows each provider's own purchase order.
+        paired_quota = len(sources) == 2 and all(
+            src.value.get('useDiscountCount')
+            and not src.value.get('stackableDiscount')
+            and str(src.value.get('discountOperator', '')) == '1'
+            and not src.value.get('discountLowLimitIsOn')
+            for src in sources
+        )
         for source in sources:
             cfg = source.value
             if cfg.get('isSelectableMultiple') or cfg.get('countPerSelection'):
                 return None
             if not cfg.get('useDiscountCount'):
                 continue
-            if len(sources) != 1 or cfg.get('stackableDiscount'):
+            if (len(sources) != 1 and not paired_quota) or cfg.get('stackableDiscount'):
                 return None
             limit = cfg.get('discountCount')
             if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1:
@@ -1861,6 +1872,19 @@ class Simulator:
                     return None
                 if eligible == 1:
                     quota_eligible_ids.add(choice_id)
+            # Keep distinct limits and purchase allocations for each coupon.
+            eligible_ids = {
+                ident for ident in target_ids
+                if (target := self.index.one(ident, 'choice')) is not None
+                and self._quota_eligible_score_count(target, source) == 1
+            }
+            allocation_order = [
+                ident for ident in self.state.selected_order
+                if ident in eligible_ids and self._active(ident)
+            ]
+            if ent.id in eligible_ids and ent.id not in allocation_order:
+                allocation_order.append(ent.id)
+            quota_allocations[source.id] = set(allocation_order[:limit])
 
         def apply_offer(amount: float, cfg: dict[str, Any]) -> float | None:
             raw_value = cfg.get('discountValue')
@@ -1954,6 +1978,8 @@ class Simulator:
         winner_stackable = False
         for source in ordered:
             cfg = source.value
+            if cfg.get('useDiscountCount') and ent.id not in quota_allocations.get(source.id, set()):
+                continue
             stackable = bool(cfg.get('stackableDiscount'))
             candidate = apply_offer(
                 winner if winner is not None and winner_stackable and stackable else base,
