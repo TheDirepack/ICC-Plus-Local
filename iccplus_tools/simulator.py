@@ -1755,9 +1755,8 @@ class Simulator:
                 reasons.add('discount:repeatable_or_per_selection_quota')
             if quota_sources and (
                 ent.value.get('isSelectableMultiple')
-                or len(relevant) != 1
-                or len(quota_sources) != 1
-                or self._quota_eligible_score_count(ent, quota_sources[0]) != 1
+                or any(self._quota_eligible_score_count(ent, source) != 1
+                       for source in quota_sources)
             ):
                 reasons.add('discount:quota_on_repeat_or_multi_score_target')
             if (ent.value.get('isSelectableMultiple') or score.get('isRandom')
