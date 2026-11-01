@@ -1479,7 +1479,10 @@ class Simulator:
 
             reasons: list[str] = []
             semantic: list[dict[str, Any]] = []
-            unsupported = sorted(k for k in self.ADVANCED if ent.value.get(k))
+            unsupported = sorted(
+                {k for k in self.ADVANCED if ent.value.get(k)}
+                | set(self._unsupported_discount_cases(ent))
+            )
             row = self._row(ent)
             visible = True if internal else self.entity_visible(ent.id)
 
@@ -1639,6 +1642,57 @@ class Simulator:
             self._discount_sources_by_target = lookup
             self._discount_sources_index = self.index
         return self._discount_sources_by_target.get(ent.id, [])
+
+    def _unsupported_discount_cases(self, ent: Entity) -> list[str]:
+        """Report structural discount parity gaps, without changing prices.
+
+        Complex discount states are still governed by the official Viewer.
+        Diagnostics are for developer status inspection only; they are not
+        exposed by the player-safe view or used to block selections.
+        """
+        scores = ent.value.get('scores')
+        if not isinstance(scores, list) or not scores:
+            return []
+        sources = self._discount_provider_sources(ent)
+        if not sources:
+            return []
+        reasons: set[str] = set()
+        for score in scores:
+            if not isinstance(score, dict) or score.get('isNotDiscountable'):
+                continue
+            relevant = [
+                source for source in sources
+                if not isinstance(source.value.get('discountPointTypes'), list)
+                or not source.value['discountPointTypes']
+                or str(score.get('id', '')) in source.value['discountPointTypes']
+            ]
+            if not relevant:
+                continue
+            if len(relevant) > 3:
+                reasons.add('discount:four_or_more_providers')
+            if len(relevant) > 1 and any(
+                str(source.value.get('discountOperator', '')) != '1'
+                or source.value.get('discountLowLimitIsOn')
+                or isinstance(source.value.get('discountValue'), bool)
+                or not isinstance(source.value.get('discountValue'), (int, float))
+                or (isinstance(source.value.get('discountValue'), float)
+                    and not math.isfinite(source.value['discountValue']))
+                or source.value['discountValue'] < 0
+                for source in relevant
+            ):
+                reasons.add('discount:multi_provider_nonstandard_offer')
+            quota_sources = [source for source in relevant if source.value.get('useDiscountCount')]
+            if quota_sources and len(relevant) > 1:
+                reasons.add('discount:competing_quota_or_provider')
+            if any(source.value.get('isSelectableMultiple') or source.value.get('countPerSelection') for source in relevant):
+                reasons.add('discount:repeatable_or_per_selection_quota')
+            if quota_sources and (ent.value.get('isSelectableMultiple') or len(scores) != 1):
+                reasons.add('discount:quota_on_repeat_or_multi_score_target')
+            if (ent.value.get('isSelectableMultiple') or score.get('isRandom')
+                    or score.get('useExpression') or score.get('multiplyByTimes')
+                    or score.get('requireds')):
+                reasons.add('discount:dynamic_score_or_repeat')
+        return sorted(reasons)
 
     def _direct_discount_value(self, ent: Entity, score: dict[str, Any], base: float, *, removed_provider: str | None = None, persist: bool = False) -> float | None:
         """Reproduce the verified fixed-source Viewer discount-arbitration path.
