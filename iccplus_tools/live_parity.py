@@ -880,6 +880,38 @@ def live_cases() -> list[dict[str, Any]]:
             ],
         })
 
+    # Four and five compatible stackable fixed-cost sources. These must be
+    # compared per action to pinned Chromium, not inferred solely from sums.
+    extended_stack_scenarios = (
+        ('quad_stack_after_purchase_21016', 'abcd', [1, 2, 3, 4],
+         ['purchase', 'a', 'b', 'c', 'd', '-b', '-d', 'b', '-purchase']),
+        ('quad_stack_before_purchase_21016', 'abcd', [1, 2, 3, 4],
+         ['a', 'b', 'c', 'd', 'purchase', '-c', '-purchase']),
+        ('five_stack_refund_reselect_21016', 'abcde', [1, 2, 3, 4, 5],
+         ['purchase', 'a', 'b', 'c', 'd', 'e', '-e', '-a', 'e', '-purchase']),
+    )
+    for name, ids, values, sequence in extended_stack_scenarios:
+        coupons = [
+            _choice(ident, discountOther=True, isDisChoices=True,
+                    discountChoices=['purchase'], discountOperator='1',
+                    discountValue=value, stackableDiscount=True)
+            for ident, value in zip(ids, values)
+        ]
+        purchase = _choice('purchase', scores=[{
+            'idx': 'purchase-score', 'id': 'p', 'value': 20,
+            'requireds': [], 'showScore': True,
+        }])
+        cases.append({
+            'name': name, 'check_action_trace': True,
+            'project': _project(rows=[_row('r', [*coupons, purchase])],
+                                points=[_point('p', 60)]),
+            'actions': [
+                {'op': 'deselect' if token.startswith('-') else 'select',
+                 'id': token.removeprefix('-')}
+                for token in sequence
+            ],
+        })
+
     # Follow-up transitions after the official 2.10.16 three-nonstackable
     # strongest-provider-removal quirk. Verify whether its full-price state
     # persists through unrelated actions, refund, and provider changes.

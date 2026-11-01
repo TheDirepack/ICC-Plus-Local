@@ -1643,6 +1643,30 @@ class Simulator:
             self._discount_sources_index = self.index
         return self._discount_sources_by_target.get(ent.id, [])
 
+    @staticmethod
+    def _extended_stackable_discount_sources(sources: list[Entity]) -> bool:
+        """Only the ordinary compatible-subtraction, unlimited-use subset.
+
+        The Viewer keeps mutable per-Score discount states for arbitrary
+        competing sources. A fully stackable list with no quotas or floors
+        uses the simple associative subtraction path; do not extend this
+        shortcut to mixed sources or limited coupons.
+        """
+        return all(
+            cfg.get('stackableDiscount')
+            and str(cfg.get('discountOperator', '')) == '1'
+            and not cfg.get('discountLowLimitIsOn')
+            and not cfg.get('useDiscountCount')
+            and not cfg.get('countPerSelection')
+            and not cfg.get('isSelectableMultiple')
+            and isinstance(cfg.get('discountValue'), (int, float))
+            and not isinstance(cfg.get('discountValue'), bool)
+            and math.isfinite(float(cfg['discountValue']))
+            and cfg['discountValue'] >= 0
+            for source in sources
+            for cfg in (source.value,)
+        )
+
     def _unsupported_discount_cases(self, ent: Entity) -> list[str]:
         """Report structural discount parity gaps, without changing prices.
 
@@ -1679,7 +1703,7 @@ class Simulator:
                     and isinstance(raw, (int, float)) and not isinstance(raw, bool)
                     and math.isfinite(float(raw)) and not float(raw).is_integer()):
                 reasons.add('discount:fractional_score_integer_point')
-            if len(relevant) > 3:
+            if len(relevant) > 3 and not self._extended_stackable_discount_sources(relevant):
                 reasons.add('discount:four_or_more_providers')
             if len(relevant) > 1 and any(
                 str(source.value.get('discountOperator', '')) != '1'
@@ -1732,7 +1756,7 @@ class Simulator:
             or not source.value['discountPointTypes']
             or str(score.get('id', '')) in source.value['discountPointTypes']
         ]
-        if not sources or len(sources) > 3:
+        if not sources or (len(sources) > 3 and not self._extended_stackable_discount_sources(sources)):
             return None
 
         # The two- and three-provider differential fixtures establish the upstream
