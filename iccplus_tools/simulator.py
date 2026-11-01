@@ -1668,6 +1668,17 @@ class Simulator:
             ]
             if not relevant:
                 continue
+            # In the pinned Viewer, the initial Point charge is floored but
+            # subsequent dynamic-discount deltas can use the raw fractional
+            # Score as their baseline. Local's fixed-cost repricer does not
+            # reproduce this integer-Point transition (2.10.16 source).
+            point = self.index.one(str(score.get('id', '')), 'point')
+            raw = score.get('value')
+            if (point is not None and not point.value.get('allowFloat')
+                    and not score.get('discountIsOn')
+                    and isinstance(raw, (int, float)) and not isinstance(raw, bool)
+                    and math.isfinite(float(raw)) and not float(raw).is_integer()):
+                reasons.add('discount:fractional_score_integer_point')
             if len(relevant) > 3:
                 reasons.add('discount:four_or_more_providers')
             if len(relevant) > 1 and any(

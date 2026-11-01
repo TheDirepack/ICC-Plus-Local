@@ -98,3 +98,45 @@ def test_multi_provider_nonfinite_offer_is_reported_not_crashed():
     assert Simulator(project).choice_status(target).unsupported_effects == [
         'discount:multi_provider_nonstandard_offer'
     ]
+
+
+def test_fractional_score_integer_point_discrepancy_is_diagnostic_only():
+    """Native 2.10.16 uses an unfloored Score in later discount deltas.
+
+    Do not mistake the locally floored fixed-cost repricing for Viewer parity.
+    The supported float-enabled example has a separate official action trace.
+    """
+    project, target = make_project(1, operator='2')
+    score = project['rows'][0]['objects'][0]['scores'][0]
+    score['value'] = 8.9
+    source = project['rows'][0]['objects'][-1]
+    source['discountValue'] = 0.5
+    sim = Simulator(project)
+    before = sim.snapshot()
+    assert sim.choice_status(target).unsupported_effects == [
+        'discount:fractional_score_integer_point'
+    ]
+    assert sim.snapshot() == before
+    assert 'discount:fractional_score_integer_point' not in json.dumps(sim.player_view())
+
+    # No warning on a floating Point Type; that path has Chromium coverage.
+    project['pointTypes'][0]['allowFloat'] = True
+    assert Simulator(project).choice_status(target).unsupported_effects == []
+
+    # A discount provider targeting a different Point Type cannot influence it.
+    project['pointTypes'][0]['allowFloat'] = False
+    source['discountPointTypes'] = ['not_budget']
+    assert Simulator(project).choice_status(target).unsupported_effects == []
+
+    # Integer Scores have no raw-versus-floored discrepancy.
+    source['discountPointTypes'] = ['budget']
+    score['value'] = 8
+    assert Simulator(project).choice_status(target).unsupported_effects == []
+
+
+def test_fractional_score_flag_does_not_override_static_discount():
+    project, target = make_project(1)
+    score = project['rows'][0]['objects'][0]['scores'][0]
+    score.update(value=8.9, discountIsOn=True, appliedDiscount=True,
+                 discountScore=7)
+    assert Simulator(project).choice_status(target).unsupported_effects == []
