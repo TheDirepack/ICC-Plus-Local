@@ -11,6 +11,6 @@ ICC Plus Local **0.10.0rc17** targets ICC Plus **2.10.16**, source commit `2bba0
 
 The field catalog and type metadata are checked against the pinned `types.ts`. The Viewer store and related components are used to audit game-state behavior. Creator source remains authoritative for authoring/import/export functionality and Svelte user-interface interactions.
 
-The strongest returned external **Creator GUI** Save-to-Disk artifact is still the historical 2.10.6 C01 round-trip fixture. The pinned Chromium differential is an official **Viewer runtime** test, not a replacement for Creator GUI import/export validation. Dynamic discount stacks, separate omission probes, audio/media, site hosting and browser layout need their own coverage.
+The strongest returned external **Creator GUI** Save-to-Disk artifact is still the historical 2.10.6 C01 round-trip fixture. The pinned Chromium differential is an official **Viewer runtime** test, not a replacement for Creator GUI import/export validation. Unsupported discount configurations (four or more competing providers, mixed operators across providers, competing quotas, repeatable discounted purchases), unverified omission cases, audio/media, site hosting and browser layout need their own coverage.
 
 ICC Plus Local is an independent Python command-line tool; it does not ship a patched Svelte Viewer or implement hosting fixes itself. Use the official 2.10.16 Viewer distribution for Neocities deployment.
