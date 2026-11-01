@@ -37,6 +37,15 @@ def test_all_live_discovery_and_build_targets_match_upstream_pin():
     assert ICCPLUS_COMMIT in ' '.join(guide('parity')['rules'])
 
 
+def test_active_documentation_tracks_pinned_target_and_discount_boundary():
+    for path in ('COVERAGE.md', 'SOURCE_NOTES.md', 'docs/SOURCE_NOTES.md',
+                 'docs/ICCPLUS_FIELD_REFERENCE.md', 'docs/SPARSE_RUNTIME_SERIALIZATION.md'):
+        assert ICCPLUS_VERSION in (ROOT / path).read_text(), path
+    coverage = (ROOT / 'COVERAGE.md').read_text()
+    assert 'four or more' in coverage
+    assert 'more than two sources' not in coverage
+
+
 def test_manifest_tracks_pinned_source_and_exact_default_export():
     manifest = json.loads((ROOT / 'PACKAGE_MANIFEST.json').read_text())
     exported = default_export_text().encode('utf-8')

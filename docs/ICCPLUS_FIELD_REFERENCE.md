@@ -99,7 +99,7 @@ isCountDisabled
 deselectWhenNoAddon
 ```
 
-`isSelectableMultiple` only enables the repeatable UI path. A working counter also needs a mode. `isMultipleUseVariable: true` uses the signed `multipleUseVariable` count. `multipleScoreId` uses a Point Type-backed count. If neither mode is present, ICC Plus 2.10.15 leaves the counter inert.
+`isSelectableMultiple` only enables the repeatable UI path. A working counter also needs a mode. `isMultipleUseVariable: true` uses the signed `multipleUseVariable` count. `multipleScoreId` uses a Point Type-backed count. If neither mode is present, the pinned ICC Plus 2.10.16 Viewer leaves the counter inert.
 
 Activation:
 
