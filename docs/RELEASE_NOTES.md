@@ -1,3 +1,7 @@
+# Historical release notes mirror
+
+> Releases after rc15 are recorded in the canonical [`../RELEASE_NOTES.md`](../RELEASE_NOTES.md). The entries below are retained as historical rc13–rc15 provenance.
+
 ## 0.10.0rc15
 
 - Made sparse `project.json` the normal authoring representation across generation, phased edits, low-level apply, hydration, formatting, exports, and Viewer packaging. Use `--not-sparse` / `--not_sparse` only when a materialized full-project artifact is specifically required.

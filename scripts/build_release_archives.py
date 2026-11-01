@@ -13,9 +13,10 @@ ROOT = Path(__file__).resolve().parents[1]
 FULL_EXCLUDE_PARTS = {
     ".git", ".github", ".pytest_cache", ".mypy_cache", ".ruff_cache", "__pycache__",
     "tests", "cli_tests", "compression_tests", "online_tests", "dist", "build",
+    "release-dist",
 }
 FULL_EXCLUDE_SUFFIXES = {".pyc", ".pyo"}
-FULL_EXCLUDE_NAMES = {"run-tests", "run-compression-tests", "run-upstream-parity-tests"}
+FULL_EXCLUDE_NAMES = {"run-tests", "run-compression-tests", "run-upstream-parity-tests", "RELEASE_MANIFEST.json"}
 FULL_EXECUTABLES = {"iccplus-local", "cyoa-compress", "install.sh"}
 
 VIEWER_CODE = [

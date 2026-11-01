@@ -1,6 +1,6 @@
 # External upstream verification
 
-> Historical verification record. This document describes the earlier 2.10.6 browser-verification campaign. The current package is rc13 targeting ICC Plus 2.10.7; do not treat the candidate/version labels below as current release instructions.
+> Historical verification record. This document describes the earlier 2.10.6 browser-verification campaign. The active rc17 package targets ICC Plus 2.10.16; do not treat the historical candidate/version labels below as current release instructions. Refer to `../PACKAGE_MANIFEST.json` and `SOURCE_NOTES.md` for current pins and evidence.
 
 Version 0.10.0rc7 is the current verification candidate for ICC Plus 2.10.6. It incorporates the usable evidence from the first official-browser run and repairs flaws in the first test package. It still does not claim complete official Viewer parity because the first runtime automation did not produce reliable observations for every case.
 

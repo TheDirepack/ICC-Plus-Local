@@ -10,12 +10,12 @@
 - Add native Chromium restoration fixtures and continue discount parity regression coverage; see PR #20 and issue #21.
 
 
-## 0.10.0rc17 — ICC Plus 2.10.15 compatibility candidate
+## Superseded 2.10.15 synchronization candidate (October 29, 2026; not a separate rc17 release)
 
 - Pinned to official ICC Plus 2.10.15 at source commit `128c05799b6df2574fd870449d15a37e410fe3e6`, released October 29, 2026, with the independent Python authoring and simulator capabilities preserved.
 - Upstream 2.10.15 changes are concentrated in Viewer deployment / Neocities compatibility, build tooling and packaging; its Viewer runtime store changes the version string only from 2.10.14. The official Svelte Viewer distribution, rather than the headless Local simulator, owns those deployment fixes.
-- Re-run the Chromium differential and TypeScript model/source checks against the new pinned official Viewer, including the 35 prior runtime scenarios, while retaining the historical R01–R32 browser-verification kit.
-- Preserve the 2.10.14-discovered discount refund fields and protected-selection behavior. Exact dynamic discount-stack and sparse omission behavior still require independent specialized browser tests.
+- At that point the planned verification was to rerun the Chromium differential and TypeScript checks; the final 2.10.16 rc17 candidate above subsequently completed its own pinned Viewer parity suite.
+- This transitional 2.10.15 candidate retained the 2.10.14-discovered refund fields and protected-selection behavior. The verified 2.10.16 scope and unsupported cases are documented above and in `COVERAGE.md`.
 
 ## 0.10.0rc16 — ICC Plus 2.10.14 compatibility candidate
 
@@ -26,7 +26,7 @@
 - Added regression tests for the new field, requirement protection, row-cap replacement, and newly runtime-sensitive sparse fields.
 - Maintained the Python CLI and native authoring skill API. Official Svelte UI, delay cancellation, CSS and browser runtime remain outside this headless port. GitHub Actions core/CLI/example tests and the official pinned-source Chromium differential (35/35 gameplay cases plus TypeScript required-field checks) passed. The headless port still does not claim full visual, animation, media, or untested sparse-omission parity.
 
-## Unreleased
+## Included in rc17 — CI, release tooling and runtime performance
 
 - Unified normal CI and manual-release test dependencies through the `test` optional dependency set so image and schema tests cannot be skipped by one workflow. This fixes manual-release failures caused by Pillow not being installed.
 

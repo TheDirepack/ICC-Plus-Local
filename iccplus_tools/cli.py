@@ -2408,7 +2408,7 @@ def add_creator_namespace(sub: argparse._SubParsersAction) -> None:
     r = ct.add_parser('commands', help='List every advertised CLI command recursively, including nested second- and third-level paths')
     add_output_flags(r); r.set_defaults(func=cmd_command_tree)
 
-    r = ct.add_parser('parity', help='Report ICC Plus 2.10.7 Creator actions and scripting equivalents')
+    r = ct.add_parser('parity', help='Report historical Creator action audit and current scripting equivalents')
     r.add_argument('--gaps', action='store_true', help='Return only remaining first-class scripting gaps in features.')
     add_output_flags(r); r.set_defaults(func=cmd_gui_parity)
 
@@ -2568,7 +2568,7 @@ def parser() -> argparse.ArgumentParser:
     q = sub.add_parser('describe', help='List the complete recursive command tree or describe one command path'); q.add_argument('command_name', nargs='*', help='Optional command path, for example: creator style-template apply. Omit to list every advertised command at every depth.'); q.set_defaults(func=cmd_describe)
     q = sub.add_parser('doctor', help='Check local optional tooling, including image encoders'); q.set_defaults(func=cmd_doctor)
     q = sub.add_parser('fields', help='List pinned native ICC Plus fields and optionally their value types'); q.add_argument('kind', choices=catalog_kinds()); q.add_argument('--contains', help='Case-insensitive substring filter for field names'); q.add_argument('--style-group', choices=sorted(STYLE_FIELD_GROUPS), help='Limit kind=styling to one styling subgroup'); q.add_argument('--details', action='store_true', help='Include the pinned TypeScript value shape and default when known.'); q.set_defaults(func=cmd_fields)
-    q = sub.add_parser('schema', help='Emit native ICC Plus or automation protocol JSON Schemas'); q.add_argument('kind', choices=['list', *catalog_kinds(), *protocol_schema_names()]); q.add_argument('--mode', choices=['patch','native'], default='patch', help='For native kinds: patch allows partial updates; native preserves pinned TypeScript requiredness.'); q.add_argument('--allow-unknown', action='store_true', help='For native kinds only, allow fields outside the pinned 2.10.7 catalog.'); q.set_defaults(func=cmd_schema)
+    q = sub.add_parser('schema', help='Emit native ICC Plus or automation protocol JSON Schemas'); q.add_argument('kind', choices=['list', *catalog_kinds(), *protocol_schema_names()]); q.add_argument('--mode', choices=['patch','native'], default='patch', help='For native kinds: patch allows partial updates; native preserves pinned TypeScript requiredness.'); q.add_argument('--allow-unknown', action='store_true', help='For native kinds only, allow fields outside the pinned source catalog.'); q.set_defaults(func=cmd_schema)
     q = sub.add_parser('types', help='Generate type-safe declarations from the pinned field catalog'); q.add_argument('--format', choices=['typescript','python'], default='typescript'); q.add_argument('--mode', choices=['patch','native'], default='patch', help='patch generates partial-update types; native preserves pinned TypeScript requiredness.'); q.add_argument('--kind', action='append', choices=catalog_kinds(), help='Limit output to a kind. Repeat or comma-separate.'); q.add_argument('-o','--output', help='Write declarations to a file instead of stdout.'); q.set_defaults(func=cmd_types)
     q = sub.add_parser('guide', help='Print a compact machine-readable workflow guide'); q.add_argument('topic', nargs='?', choices=guide_topics()); q.set_defaults(func=cmd_guide)
     add_reference_namespace(sub)
@@ -2578,7 +2578,7 @@ def parser() -> argparse.ArgumentParser:
     # Retired grouped surfaces remain parseable for compatibility but are hidden.
     add_creator_namespace(sub)
     add_test_namespace(sub)
-    q = sub.add_parser('gui-parity', help='Report ICC Plus 2.10.7 Creator actions and their scripting equivalents'); q.add_argument('--gaps', action='store_true', help='Return only remaining first-class scripting gaps in features.'); q.set_defaults(func=cmd_gui_parity)
+    q = sub.add_parser('gui-parity', help='Report historical Creator action audit and current scripting equivalents'); q.add_argument('--gaps', action='store_true', help='Return only remaining first-class scripting gaps in features.'); q.set_defaults(func=cmd_gui_parity)
     q = sub.add_parser('clean-private-styling', help='Mirror Creator Clean All Private Styling'); q.add_argument('project'); q.add_argument('-o','--output'); add_safe_write_flags(q); q.set_defaults(func=cmd_clean_private_styling)
     q = sub.add_parser('style-template', help='List, inspect, or apply the eight pinned ICC Plus Creator style templates')
     st = q.add_subparsers(dest='style_action', required=True)
@@ -2709,7 +2709,7 @@ def parser() -> argparse.ArgumentParser:
     q = sub.add_parser('build-summary', help='Render the Creator Build Form human-readable selected-choice summary')
     q.add_argument('project'); q.add_argument('--state', help='Portable runtime-state/session-response JSON to summarize.'); q.add_argument('--separate-rows', action='store_true', help='Group selections under Row headings like the Creator switch.'); q.add_argument('-o','--output'); q.add_argument('--seed', type=int, default=0); q.add_argument('--allow-project-mismatch', action='store_true'); q.set_defaults(func=cmd_build_summary)
 
-    q = sub.add_parser('build-string', help='Import or export ICC Plus 2.10.7 native Build Form strings')
+    q = sub.add_parser('build-string', help='Import or export native ICC Plus Build Form strings')
     q.add_argument('project')
     q.add_argument('action', choices=['export', 'import'])
     q.add_argument('value', nargs='?', help='For import: raw Build Form string, @file, file path, or - for stdin.')

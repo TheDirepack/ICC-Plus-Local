@@ -53,7 +53,7 @@ A non-selectable Addon is a structural child and the Creator normally leaves its
 
 Use multiple selection when quantity is the decision.
 
-In ICC Plus 2.10.7, `isSelectableMultiple` alone does not define a working quantity mechanic. Use one of the real repeat modes. `isMultipleUseVariable` gives a signed variable count. `multipleScoreId` gives a Point Type-backed count. If neither is present, the Viewer counter action is a no-op.
+In the pinned ICC Plus 2.10.16 Viewer, `isSelectableMultiple` alone does not define a working quantity mechanic. Use one of the real repeat modes. `isMultipleUseVariable` gives a signed variable count. `multipleScoreId` gives a Point Type-backed count. If neither is present, the Viewer counter action is a no-op.
 
 Plan:
 

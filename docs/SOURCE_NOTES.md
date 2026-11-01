@@ -4,10 +4,10 @@ ICC Plus Local **0.10.0rc17** targets ICC Plus **2.10.16**, source commit `2bba0
 
 - Distribution: `wahaha303/ICCPlus` (official Viewer release v2.10.16).
 - Creator and Viewer source: `wahaha303/ICC-Plus-Svelte`, pinned as above.
-- Previous pinned Viewer parity verification on commit `630185fa` (October 30, 2026): 99 gameplay cases and 62 action traces in official Chromium, plus 13 full-versus-sparse comparisons, exact blank default export and TypeScript schema/required-field comparisons. This evidence does not verify subsequent commits.
+- Final merged rc17 runtime parity verification on commit `7b690393e95c54da1e127dc625705ccb6752b50e` (October 31, 2026): 99 gameplay cases and 62 action traces in official Chromium, plus 13 full-versus-sparse comparisons, exact blank default export and TypeScript schema/required-field comparisons. Core, CLI, and example checks also passed at that head. Later documentation/packaging-only changes require their own CI runs.
 - The preceding 2.10.14 synchronization implemented protected Choices/selectable Addons and retained discount-refund Score state in sparse project saves.
 - The 2.10.16 update fixes Build Form restoration of an allowed-to-deselect forced Choice; the previous 2.10.15 update addressed Viewer hosting/packaging for Neocities.
-- That `630185fa` Chromium run: 99 gameplay cases, 62 action checkpoints, 13 sparse-equivalence cases with zero differences. The native discount subset includes one finite-use provider and up to three ordinary fixed nonnegative subtraction providers, with the source-verified stale full-price refund transition preserved through portable runtime state.
+- That `7b690393` Chromium run: 99 gameplay cases, 62 action checkpoints, 13 sparse-equivalence cases with zero differences. The native discount subset includes one finite-use provider and up to three ordinary fixed nonnegative subtraction providers, with the source-verified stale full-price refund transition preserved through portable runtime state.
 
 The field catalog and type metadata are checked against the pinned `types.ts`. The Viewer store and related components are used to audit game-state behavior. Creator source remains authoritative for authoring/import/export functionality and Svelte user-interface interactions.
 

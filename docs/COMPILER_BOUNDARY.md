@@ -50,7 +50,7 @@ Creator-eager/default fields are native authoring structure used for hydration a
 
 The player-facing runtime payload is a different serialization target. ICC Plus Local may omit a native field there only when its absence is proven behavior-equivalent in the pinned Viewer. This is native serialization, not source-level normalization. Schema optionality, matching a Creator construction default, or saving bytes is not enough evidence on its own.
 
-The default runtime serializer therefore strips the pinned 2.10.7 omission whitelist automatically while retaining unproven fields. Read `SPARSE_RUNTIME_SERIALIZATION.md` for the current rules and the generated browser-verification kit.
+The default runtime serializer therefore strips the pinned 2.10.16 omission whitelist automatically while retaining unproven fields. Read `SPARSE_RUNTIME_SERIALIZATION.md` for the current rules and the generated browser-verification kit.
 
 ### Local simulation versus browser proof
 

@@ -1,16 +1,16 @@
 # Source notes
 
-ICC Plus Local 0.10.0rc13 targets ICC Plus 2.10.7.
+ICC Plus Local **0.10.0rc17** targets ICC Plus **2.10.16**, source commit `2bba0cf9ebc2e54241c2390794e95e1c5091b293` (October 30, 2026).
 
-- Distribution repository: `wahaha303/ICCPlus`.
-- Creator and Viewer source: `wahaha303/ICC-Plus-Svelte`.
-- Pinned source commit: `1ea9db888cde2286d18d0d5de50933cb8773b739`.
-- Current audit date: 2026-09-25.
+- Distribution: `wahaha303/ICCPlus` (official Viewer release v2.10.16).
+- Creator and Viewer source: `wahaha303/ICC-Plus-Svelte`, pinned as above.
+- Final merged rc17 runtime parity verification on commit `7b690393e95c54da1e127dc625705ccb6752b50e` (October 31, 2026): 99 gameplay cases and 62 action traces in official Chromium, plus 13 full-versus-sparse comparisons, exact blank default export and TypeScript schema/required-field comparisons. Core, CLI, and example checks also passed at that head. Later documentation/packaging-only changes require their own CI runs.
+- The preceding 2.10.14 synchronization implemented protected Choices/selectable Addons and retained discount-refund Score state in sparse project saves.
+- The 2.10.16 update fixes Build Form restoration of an allowed-to-deselect forced Choice; the previous 2.10.15 update addressed Viewer hosting/packaging for Neocities.
+- That `7b690393` Chromium run: 99 gameplay cases, 62 action checkpoints, 13 sparse-equivalence cases with zero differences. The native discount subset includes one finite-use provider and up to three ordinary fixed nonnegative subtraction providers, with the source-verified stale full-price refund transition preserved through portable runtime state.
 
-The field catalog and generated type metadata are checked against the pinned `types.ts`. Runtime behavior is checked against the Viewer store and related Viewer components. Creator source is used for factory defaults, copy/clone behavior, style/design import rules, categories, Build Form serialization, Row buttons, project export, and other authoring actions.
+The field catalog and type metadata are checked against the pinned `types.ts`. The Viewer store and related components are used to audit game-state behavior. Creator source remains authoritative for authoring/import/export functionality and Svelte user-interface interactions.
 
-The strongest returned official-GUI Creator artifact remains the earlier 2.10.6 C01 Save to Disk round-trip match. The 2.10.7 upgrade is source-audited against its single upstream commit: the blank project shape is unchanged apart from the version, while Score gains optional `removeSpace` and the Point Type load migration is narrowed to projects without `appVersion`. A fresh 2.10.7 browser round-trip remains a separate release-verification item. The rc12 engine baseline passed 327 tests and all checked-in examples. The rc13 compressed skill/documentation package passed 332 tests and all checked-in examples.
+The strongest returned external **Creator GUI** Save-to-Disk artifact is still the historical 2.10.6 C01 round-trip fixture. The pinned Chromium differential is an official **Viewer runtime** test, not a replacement for Creator GUI import/export validation. Dynamic discount stacks, separate omission probes, audio/media, site hosting and browser layout need their own coverage.
 
-rc11 adds a normalized player-safe hierarchy to `play`. Visible Rows, direct Choices, and Addons are returned as separate entity lists with explicit parent/child IDs. This changes how an agent can inspect the player surface, but it does not weaken the visibility boundary. Hidden content and private runtime state remain excluded.
-
-This package is an independent local command-line implementation. It does not bundle the ICC Plus browser application or claim that browser-only rendering, media playback, IndexedDB, screenshots, and modal behavior have been reproduced by the headless runner. The official Creator and Viewer remain the authority for final browser behavior and release verification.
+ICC Plus Local is an independent Python command-line tool; it does not ship a patched Svelte Viewer or implement hosting fixes itself. Use the official 2.10.16 Viewer distribution for Neocities deployment.

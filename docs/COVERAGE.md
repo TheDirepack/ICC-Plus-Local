@@ -1,6 +1,8 @@
-# Simulation coverage
+# Historical simulation coverage — Viewer 2.10.7 baseline
 
-The simulator is meant for logic testing, not pixel-perfect browser emulation.
+> This is the retained 2.10.7 baseline. The **current** rc17 / Viewer 2.10.16 coverage, discount boundaries, and pinned Chromium evidence live in [`../COVERAGE.md`](../COVERAGE.md).
+
+The simulator is meant for logic testing, not pixel-perfect browser emulation. The list below records the original baseline, not the complete current feature set.
 
 ## Modeled directly
 

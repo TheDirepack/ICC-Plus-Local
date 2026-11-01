@@ -27,4 +27,4 @@ A useful audit checks Point balances, selections, availability, unlocks, Row lim
 
 A release candidate should verify the canonical command list, recursive `reference commands` discovery, phase schemas, blank generation, normal write validation, project hydration/completeness, Design Group styling, automatic image compression, progressive `play`, repeatable builds, checked-in examples, and installed-wheel smoke tests.
 
-Official Creator/Viewer browser verification remains a separate release gate. The retained exact browser round-trip evidence is from 2.10.6; rc13 does not claim a fresh 2.10.7 browser round-trip.
+The pinned **Viewer** Chromium differential is separately tested by `.github/workflows/upstream-parity.yml` and passed on the merged rc17 head (99 gameplay cases, 62 action traces, 13 full/sparse comparisons). This is not a Creator GUI import/export or visual/hosting test. The strongest retained exact Creator GUI round-trip evidence is the historical 2.10.6 C01 fixture; future Creator changes still require their own browser validation.
