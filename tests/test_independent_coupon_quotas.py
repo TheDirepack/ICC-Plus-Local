@@ -35,7 +35,8 @@ def test_independent_coupons_resume_and_refund():
     sim = Simulator(case['project'])
     actions = case['actions']
     for action in actions[:5]:
-        assert sim.select(action['id']).ok
+        event = sim.select(action['id']) if action['op'] == 'select' else sim.deselect(action['id'])
+        assert event.ok
     restored = Simulator.from_state(case['project'], sim.export_state())
     for action in actions[5:]:
         for instance in (sim, restored):
