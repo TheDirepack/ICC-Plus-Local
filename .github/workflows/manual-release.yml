@@ -28,6 +28,12 @@ jobs:
         with:
           python-version: "3.11"
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install pinned TypeScript compiler
+        run: npm install --global typescript@5.9.3
+
       - name: Run maintained tests
         run: |
           python -m pip install --upgrade pip
