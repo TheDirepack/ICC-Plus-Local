@@ -1667,6 +1667,38 @@ class Simulator:
             for cfg in (source.value,)
         )
 
+    @staticmethod
+    def _quota_eligible_score_count(target: Entity, provider: Entity) -> int | None:
+        """Count fixed eligible Scores, not all Scores on the purchase.
+
+        Upstream quota accounting walks Score entries; a coupon limited to one
+        eligible Score can safely coexist with unrelated Scores on the Choice.
+        A target with two eligible Scores still needs the general per-Score
+        allocation state machine and is intentionally unsupported.
+        """
+        scores = target.value.get('scores')
+        if target.value.get('isSelectableMultiple') or not isinstance(scores, list):
+            return None
+        point_filter = provider.value.get('discountPointTypes', [])
+        if not isinstance(point_filter, list):
+            return None
+        eligible = 0
+        for score in scores:
+            if not isinstance(score, dict):
+                return None
+            if (score.get('isRandom') or score.get('useExpression')
+                    or score.get('multiplyByTimes') or score.get('requireds')):
+                return None
+            raw = score.get('value')
+            if isinstance(raw, bool) or not isinstance(raw, (int, float)) or not math.isfinite(float(raw)):
+                return None
+            if score.get('isNotDiscountable'):
+                continue
+            if point_filter and str(score.get('id', '')) not in point_filter:
+                continue
+            eligible += 1
+        return eligible
+
     def _unsupported_discount_cases(self, ent: Entity) -> list[str]:
         """Report structural discount parity gaps, without changing prices.
 
@@ -1721,7 +1753,12 @@ class Simulator:
                 reasons.add('discount:competing_quota_or_provider')
             if any(source.value.get('isSelectableMultiple') or source.value.get('countPerSelection') for source in relevant):
                 reasons.add('discount:repeatable_or_per_selection_quota')
-            if quota_sources and (ent.value.get('isSelectableMultiple') or len(scores) != 1):
+            if quota_sources and (
+                ent.value.get('isSelectableMultiple')
+                or len(relevant) != 1
+                or len(quota_sources) != 1
+                or self._quota_eligible_score_count(ent, quota_sources[0]) != 1
+            ):
                 reasons.add('discount:quota_on_repeat_or_multi_score_target')
             if (ent.value.get('isSelectableMultiple') or score.get('isRandom')
                     or score.get('useExpression') or score.get('multiplyByTimes')
@@ -1820,24 +1857,11 @@ class Simulator:
                 target = self.index.one(choice_id, 'choice')
                 if target is None:
                     continue
-                scores = target.value.get('scores')
-                if target.value.get('isSelectableMultiple') or not isinstance(scores, list):
+                eligible = self._quota_eligible_score_count(target, source)
+                if eligible is None or eligible > 1:
                     return None
-                if not scores:
-                    continue  # display-only Choice cannot consume a coupon
-                if len(scores) != 1:
-                    return None
-                sc = scores[0]
-                if (not isinstance(sc, dict) or sc.get('isRandom')
-                        or sc.get('useExpression') or sc.get('multiplyByTimes')
-                        or sc.get('requireds')):
-                    return None
-                if sc.get('isNotDiscountable'):
-                    continue
-                point_filter = cfg.get('discountPointTypes', [])
-                if isinstance(point_filter, list) and point_filter and str(sc.get('id')) not in point_filter:
-                    continue
-                quota_eligible_ids.add(choice_id)
+                if eligible == 1:
+                    quota_eligible_ids.add(choice_id)
 
         def apply_offer(amount: float, cfg: dict[str, Any]) -> float | None:
             raw_value = cfg.get('discountValue')
