@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import re
 from pathlib import Path
 
@@ -11,6 +12,10 @@ CURRENT_DOCS = [
     ROOT / "skills/iccplus-local/SKILL.md",
     ROOT / "START_HERE.md",
     ROOT / "docs/CLI_REFERENCE.md",
+    ROOT / "docs/PACKAGE_README.md",
+    ROOT / "docs/README.md",
+    ROOT / "docs/PLAY_STRUCTURE.md",
+    ROOT / "skills/cyoa-ship/SKILL.md",
 ]
 
 
@@ -48,6 +53,18 @@ def set_version(version: str) -> None:
             text = path.read_text(encoding="utf-8")
             if old in text:
                 path.write_text(text.replace(old, version), encoding="utf-8")
+
+        # Current release metadata is part of the version contract too.
+        manifest_path = ROOT / "PACKAGE_MANIFEST.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if manifest.get("tool_version") != old:
+            raise RuntimeError("package manifest version does not match VERSION")
+        manifest["tool_version"] = version
+        old_rc = re.search(r"rc\\d+", old)
+        new_rc = re.search(r"rc\\d+", version)
+        if old_rc and new_rc and isinstance(manifest.get("package"), str):
+            manifest["package"] = manifest["package"].replace(old_rc.group(), new_rc.group(), 1)
+        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
 
 
 def main() -> int:
