@@ -76,3 +76,29 @@ Example:
 ```
 
 `row_choices` compares the complete visible Choice order for each named Row. `choice_rows` checks the visible parent Row of each named Choice. Every step returns the sanitized action result plus the player-visible view after that action. Failed expectations make the audit fail without exposing hidden state.
+
+
+## Viewer-style card clicks (2.10.16)
+
+The headless simulator exposes `Simulator.click(id, ...)` and the scripted
+`{"action":"click","id":"choice_id"}` action. This dispatches the same
+*card click* category used by the official Viewer, rather than always
+requesting selection. Explicit `select` and `deselect` operations remain
+available and unchanged for mechanical testing and forced-state work.
+
+- Inactive ordinary cards select; active ordinary cards deselect.
+- A selected `selectOnce` or forced-active card ignores a player click; this
+  is the official Viewer behavior, not a simulator error.
+- Most multi-select *card surface* clicks do nothing. Use the counter
+  operations for increments/decrements; `allowSelectByClick` only increments
+  at an initially zero count.
+- For a selected custom-word card, a click with `word` edits the custom word
+  without deselecting; `dialog_action` can instead choose `accept`,
+  `deselect` or `cancel`.
+
+Ignored clicks return `ok: true` and `code: "interaction.click_ignored"`
+with `details.ignored: true`, since the Viewer intentionally does nothing.
+The new action does not emulate DOM pointer targets, confirmation presentation,
+or official browser save/load. The pinned 2.10.16 Viewer remains authoritative.
+For changing a starting preset, *remove inappropriate `selectOnce` from the
+project's starter choices* instead of weakening the simulator rule.
