@@ -1,4 +1,4 @@
-# Play structure in ICC Plus Local 0.10.0rc17
+# Play structure in ICC Plus Local 0.10.0rc18
 
 This file describes the player-visible hierarchy returned by `iccplus-local play`.
 
