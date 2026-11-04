@@ -4,6 +4,7 @@ import os
 import shutil
 import subprocess
 from pathlib import Path
+from iccplus_tools.version import __version__
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -20,7 +21,7 @@ def test_symlinked_iccplus_launcher_resolves_real_repository_root(tmp_path: Path
         check=False,
     )
     assert result.returncode == 0, result.stderr
-    assert "0.10.0rc17" in result.stdout
+    assert result.stdout.strip() == __version__
 
 
 def test_symlinked_installer_links_real_launchers_and_marks_them_executable(tmp_path: Path):
