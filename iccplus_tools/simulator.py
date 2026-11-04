@@ -906,6 +906,7 @@ class Simulator:
             raise ValueError(f'action {index}.action must be a non-empty string')
         allowed_by_kind = {
             'select': {'action', 'id', 'times', 'force', 'source', 'word', 'image', 'confirm', 'dialogs'},
+            'click': {'action', 'id', 'word', 'image', 'confirm', 'dialog_action'},
             'deselect': {'action', 'id', 'reason', 'dialog_action', 'word', 'image'},
             'row_button': {'action', 'id', 'dialogs'},
             'status': {'action', 'id'},
@@ -918,7 +919,7 @@ class Simulator:
         unknown = sorted(set(action) - allowed_by_kind[kind])
         if unknown:
             raise ValueError(f'action {index} {kind} has unknown field(s): {", ".join(unknown)}')
-        if kind in {'select', 'deselect', 'row_button', 'status'}:
+        if kind in {'select', 'click', 'deselect', 'row_button', 'status'}:
             ident = action.get('id')
             if not isinstance(ident, str) or not ident:
                 raise ValueError(f'action {index} {kind} requires non-empty string id')
@@ -936,6 +937,14 @@ class Simulator:
             if 'confirm' in action and action['confirm'] is not None and not isinstance(action['confirm'], bool):
                 raise ValueError(f'action {index}.confirm must be a boolean or null')
             cls._validate_dialog_responses(action.get('dialogs'), label=f'action {index}.dialogs')
+        elif kind == 'click':
+            for key in ('word', 'image'):
+                if key in action and action[key] is not None and not isinstance(action[key], str):
+                    raise ValueError(f'action {index}.{key} must be a string or null')
+            if 'confirm' in action and action['confirm'] is not None and not isinstance(action['confirm'], bool):
+                raise ValueError(f'action {index}.confirm must be a boolean or null')
+            if action.get('dialog_action', 'deselect') not in {'deselect', 'accept', 'cancel'}:
+                raise ValueError(f'action {index}.dialog_action must be deselect, accept, or cancel')
         elif kind == 'deselect':
             if 'reason' in action and action['reason'] is not None and not isinstance(action['reason'], str):
                 raise ValueError(f'action {index}.reason must be a string or null')
@@ -972,6 +981,15 @@ class Simulator:
                     image=action.get('image'),
                     confirm=action.get('confirm'),
                     dialogs=action.get('dialogs'),
+                )
+                results.append({'index': index, 'action': kind, 'event': event.to_dict()})
+                if not event.ok:
+                    break
+            elif kind == 'click':
+                ident = action['id']
+                event = self.click(
+                    ident, word=action.get('word'), image=action.get('image'),
+                    confirm=action.get('confirm'), dialog_action=action.get('dialog_action'),
                 )
                 results.append({'index': index, 'action': kind, 'event': event.to_dict()})
                 if not event.ok:
@@ -3303,6 +3321,61 @@ class Simulator:
         event = Event('row_button', row_id, True, 'row button made no state change', {}, 'row_button.no_effect')
         self.state.events.append(event)
         return event
+
+    def click(
+        self,
+        ident: str,
+        *,
+        word: str | None = None,
+        image: str | None = None,
+        confirm: bool | None = None,
+        dialog_action: str | None = None,
+    ) -> Event:
+        """Simulate a click on a Viewer Choice or selectable Addon card.
+
+        This is deliberately distinct from ``select`` and ``deselect``: the
+        official 2.10.16 AppObject/ObjectAddon components ignore active
+        ``selectOnce`` cards, ignore card clicks on most multiple-selection
+        counters, and route an active custom-word card through its dialog.
+        Use explicit select/deselect for programmatic forced-state operations.
+        """
+        if dialog_action is not None and dialog_action not in {'deselect', 'accept', 'cancel'}:
+            raise ValueError('dialog_action must be deselect, accept, or cancel')
+        ent = self._entity(ident)
+        if not ent:
+            return Event('click', ident, False, 'choice/selectable addon not found or ambiguous', code='entity.not_found')
+        row = self._row(ent)
+        parent = self.index.parent_choice(ent) if ent.kind == 'selectable_addon' else None
+        blocked = (
+            (row is not None and row.value.get('isInfoRow'))
+            or not self.entity_visible(ent.id)
+            or (parent is not None and not self._requirements_met(parent.value.get('requireds', []), parent.path + '/requireds')[0])
+            or (ent.kind == 'selectable_addon' and self.state.forced_by.get(ent.id))
+        )
+        if blocked:
+            return Event('click', ident, True, 'Viewer card click ignored (not interactable)',
+                         {'ignored': True}, 'interaction.click_ignored')
+        if ent.value.get('isSelectableMultiple'):
+            # The card is not the + button. In upstream 2.10.16 it only
+            # increments when allowSelectByClick is enabled and the current
+            # variable-backed count is exactly zero.
+            if ent.value.get('allowSelectByClick') and self._count(ent.id) == 0:
+                return self.select(ident, word=word, image=image, confirm=confirm)
+            return Event('click', ident, True, 'Viewer counter card click ignored',
+                         {'ignored': True}, 'interaction.click_ignored')
+        if self._active(ent.id):
+            if ent.value.get('selectOnce') or self.state.forced_by.get(ent.id):
+                return Event('click', ident, True, 'Viewer active card is locked; click ignored',
+                             {'ignored': True, 'select_once': bool(ent.value.get('selectOnce'))},
+                             'interaction.click_ignored')
+            return self.deselect(
+                ident,
+                dialog_action=dialog_action or ('accept' if word is not None else 'deselect'),
+                word=word, image=image,
+            )
+        if dialog_action not in (None, 'deselect'):
+            raise ValueError('dialog_action is only available when clicking an active card')
+        return self.select(ident, word=word, image=image, confirm=confirm)
 
     def select(
         self,
