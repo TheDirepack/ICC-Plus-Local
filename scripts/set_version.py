@@ -60,11 +60,11 @@ def set_version(version: str) -> None:
         if manifest.get("tool_version") != old:
             raise RuntimeError("package manifest version does not match VERSION")
         manifest["tool_version"] = version
-        old_rc = re.search(r"rc\\d+", old)
-        new_rc = re.search(r"rc\\d+", version)
+        old_rc = re.search(r"rc\d+", old)
+        new_rc = re.search(r"rc\d+", version)
         if old_rc and new_rc and isinstance(manifest.get("package"), str):
             manifest["package"] = manifest["package"].replace(old_rc.group(), new_rc.group(), 1)
-        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 def main() -> int:
