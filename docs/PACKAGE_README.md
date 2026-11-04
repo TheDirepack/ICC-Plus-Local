@@ -1,6 +1,6 @@
 # ICC Plus Local CLI
 
-Version 0.10.0rc17 targets ICC Plus 2.10.16 and pins official ICC Plus Svelte commit `2bba0cf9ebc2e54241c2390794e95e1c5091b293`.
+Version 0.10.0rc18 targets ICC Plus 2.10.16 and pins official ICC Plus Svelte commit `2bba0cf9ebc2e54241c2390794e95e1c5091b293`.
 
 The canonical top-level interface has 11 commands:
 
