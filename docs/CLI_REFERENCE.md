@@ -1,6 +1,6 @@
 # CLI reference
 
-The canonical ICC Plus Local 0.10.0rc17 surface has 11 top-level commands.
+The canonical ICC Plus Local 0.10.0rc18 surface has 11 top-level commands.
 
 ## `generate`
 
