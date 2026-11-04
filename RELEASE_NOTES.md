@@ -1,5 +1,13 @@
 # ICC Plus Local release notes
 
+## 0.10.0rc18 — Viewer card-click simulator parity (November 4, 2026)
+
+- Adds `Simulator.click()` and scripted `action: click` for player-style choice and selectable-add-on card interactions, distinct from explicit programmatic select/deselect.
+- Preserves upstream 2.10.16 `selectOnce`/forced-choice protection; models no-op clicks, counter-card rules and selected custom-word editing without silently changing the official Viewer semantics.
+- Includes five new click-interaction regression cases and related gameplay documentation.
+- Verified PR #30 Tests and Pinned upstream Viewer parity CI on the code change. The official Viewer remains authoritative for DOM/browser behavior; full click-path Chromium comparison is still pending.
+- The official ICC Plus target and pinned source commit remain 2.10.16 / `2bba0cf9ebc2e54241c2390794e95e1c5091b293`. This is a Local patch release, not a new upstream ICC Plus release.
+
 ## 0.10.0rc17 — ICC Plus 2.10.16 source sync (October 30, 2026)
 
 - Source pin updated to official `2bba0cf9ebc2e54241c2390794e95e1c5091b293`.
