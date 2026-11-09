@@ -1117,8 +1117,8 @@ class Simulator:
                 return style
         return None
 
-    def _effective_filter_style(self, ent: Entity) -> dict[str, Any]:
-        row = self._row(ent)
+    def _effective_filter_style(self, ent: Entity, display_row: Entity | None = None) -> dict[str, Any]:
+        row = display_row if display_row is not None else self._row(ent)
         if ent.kind in {'choice', 'selectable_addon'}:
             choice = ent if ent.kind == 'choice' else self.index.parent_choice(ent)
             if choice:
@@ -1175,22 +1175,22 @@ class Simulator:
             return False
         return bool(row.value.get(name) or name in self.state.hidden_content.get(row.id, set()))
 
-    def _choice_visible(self, ent: Entity) -> bool:
-        row = self._row(ent)
+    def _choice_visible(self, ent: Entity, display_row: Entity | None = None) -> bool:
+        row = display_row if display_row is not None else self._row(ent)
         if not self._row_visible(row):
             return False
         met, _ = self._requirements_met(ent.value.get('requireds', []), ent.path + '/requireds')
-        style = self._effective_filter_style(ent)
+        style = self._effective_filter_style(ent, display_row)
         if self._active(ent.id):
             return not bool(style.get('selFilterVisibleIsOn'))
         if not met:
             return not bool(style.get('reqFilterVisibleIsOn'))
         return not bool(style.get('unselFilterVisibleIsOn'))
 
-    def _addon_visible(self, ent: Entity) -> bool:
-        row = self._row(ent)
+    def _addon_visible(self, ent: Entity, display_row: Entity | None = None) -> bool:
+        row = display_row if display_row is not None else self._row(ent)
         parent = self.index.parent_choice(ent)
-        if not row or not parent or not self._choice_visible(parent):
+        if not row or not parent or not self._choice_visible(parent, display_row):
             return False
         addon_req_met, _ = self._requirements_met(ent.value.get('requireds', []), ent.path + '/requireds')
         addon_met = self._active(ent.id) or addon_req_met
@@ -1211,11 +1211,76 @@ class Simulator:
             return False
         return True
 
+    def _display_row_choices(self, row: Entity) -> list[Entity]:
+        """Cards mounted by AppRow (2.10.16), not merely authored row.objects.
+
+        Result Rows project active Choices; Group Rows project Group members,
+        mapping selectable-Addon members to the parent Choice. Keep repeated
+        parent cards when different Group members resolve to the same parent:
+        upstream's Set stores fresh {choice, row} objects, not Choice IDs.
+        """
+        if row.value.get('isResultRow'):
+            group_id = row.value.get('resultGroupId')
+            choices = []
+            for ident in self.state.activations:
+                choice = self.index.one(ident, 'choice')
+                if not choice or choice.value.get('isNotResult'):
+                    continue
+                source = self._row(choice)
+                if not source:
+                    continue
+                if (not group_id or group_id == source.value.get('resultGroupId')
+                        or group_id in (choice.value.get('groups') or [])):
+                    choices.append(choice)
+        elif row.value.get('isGroupRow'):
+            choices = []
+            for ident in self.index.group_members(str(row.value.get('resultGroupId') or '')):
+                choice = self.index.one(ident, 'choice')
+                if not choice:
+                    addon = self.index.one(ident, 'selectable_addon')
+                    choice = self.index.parent_choice(addon) if addon else None
+                if choice:
+                    choices.append(choice)
+        else:
+            return self.index.row_choices(row.id)
+
+        def source_order(choice: Entity) -> tuple[float, float]:
+            source = self._row(choice)
+            # Valid Creator data has numeric indices; missing indices compare
+            # equal (JS subtraction yields NaN), retaining stable source order.
+            ri = source.value.get('index') if source else None
+            ci = choice.value.get('index')
+            return (float(ri) if isinstance(ri, (int, float)) else 0.0,
+                    float(ci) if isinstance(ci, (int, float)) else 0.0)
+
+        return sorted(choices, key=source_order)
+
+    def _visible_in_display_row(self, ent: Entity, row: Entity) -> bool:
+        if ent.kind == 'choice':
+            return self._choice_visible(ent, row)
+        return self._addon_visible(ent, row)
+
+    def _visible_display_rows(self, ent: Entity):
+        """Yield native AppRow contexts that actually mount this entity's card."""
+        source_row = self._row(ent)
+        parent = ent if ent.kind == 'choice' else self.index.parent_choice(ent)
+        if not parent:
+            return
+        if source_row and not (source_row.value.get('isResultRow') or source_row.value.get('isGroupRow')):
+            if self._visible_in_display_row(ent, source_row):
+                yield source_row
+        for kind in ('row', 'backpack_row'):
+            for row in self.index.by_kind.get(kind, []):
+                if (row.value.get('isResultRow') or row.value.get('isGroupRow')) and self._row_visible(row):
+                    if parent in self._display_row_choices(row) and self._visible_in_display_row(ent, row):
+                        yield row
+
     def entity_visible(self, ident: str) -> bool:
         ent = self._entity(ident)
-        if not ent:
-            return False
-        return self._choice_visible(ent) if ent.kind == 'choice' else self._addon_visible(ent)
+        return bool(ent and next(self._visible_display_rows(ent), None) is not None)
+
+    def _entity_interactable(self, ent: Entity) -> bool:
+        return any(not row.value.get('isInfoRow') for row in self._visible_display_rows(ent))
 
     def export_build_summary(self, *, separate_rows: bool = False) -> str:
         """Mirror Creator AppBuildForm ``getSelectedObjectName()`` text output."""
@@ -1510,6 +1575,8 @@ class Simulator:
 
             if not internal and not visible:
                 fail('visibility.hidden', f'{ent.id} is not visible to the player in the current state', id=ent.id, row_id=ent.row_id)
+            if not internal and visible and not self._entity_interactable(ent):
+                fail('row.info', 'all visible cards are in information-only rows')
             if not internal and ent.value.get('isNotSelectable'):
                 fail('selection.not_selectable', 'isNotSelectable is true; the Viewer does not allow direct player selection')
             if row and row.value.get('isInfoRow'):
@@ -2895,8 +2962,11 @@ class Simulator:
         if not self._active(ent.id) and not can_cross_zero:
             errors.append(self._semantic('deselection.not_active', f'{ent.id} is not active'))
             return False, errors
-        if not internal and not self.entity_visible(ent.id):
-            errors.append(self._semantic('visibility.hidden', f'{ent.id} is not visible to the player in the current state', id=ent.id))
+        if not internal:
+            if not self.entity_visible(ent.id):
+                errors.append(self._semantic('visibility.hidden', f'{ent.id} is not visible to the player in the current state', id=ent.id))
+            elif not self._entity_interactable(ent):
+                errors.append(self._semantic('row.info', 'all visible cards are in information-only rows'))
         if not internal and ent.value.get('selectOnce'):
             errors.append(self._semantic('deselection.select_once', 'selectOnce prevents player deselection'))
         providers = self.state.forced_by.get(ent.id, set())
@@ -2935,9 +3005,9 @@ class Simulator:
         if ent.kind == 'selectable_addon':
             status = self._cached_choice_status(ent.id, status_cache)
             out['count'] = self._count(ent.id)
-            out['can_select'] = status.selectable
+            out['can_select'] = status.selectable and not row.value.get('isInfoRow')
             can_deselect, de_errors = self._deselect_status(ent)
-            out['can_deselect'] = can_deselect
+            out['can_deselect'] = can_deselect and not row.value.get('isInfoRow')
             if verbose:
                 if status.semantic_errors:
                     out['selection_errors'] = self._player_semantic_errors(status.semantic_errors)
@@ -2970,12 +3040,12 @@ class Simulator:
             'row_id': row.id,
             'active': self._active(ent.id),
             'count': self._count(ent.id),
-            'can_select': status.selectable,
+            'can_select': status.selectable and not row.value.get('isInfoRow'),
         }
         if position is not None:
             out['index'] = int(position)
         can_deselect, de_errors = self._deselect_status(ent)
-        out['can_deselect'] = can_deselect
+        out['can_deselect'] = can_deselect and not row.value.get('isInfoRow')
         if not self._row_flag(row, 'objectTitleRemoved'):
             title = self._replace_text(value.get('title', ''))
             if title:
@@ -2986,7 +3056,7 @@ class Simulator:
                 out['description'] = description
         addons: list[dict[str, Any]] = []
         for addon in self.index.choice_addons(ent.id):
-            if self._addon_visible(addon):
+            if self._addon_visible(addon, row):
                 addons.append(self._view_addon(
                     addon, row, ent, verbose=verbose, position=len(addons), status_cache=status_cache,
                 ))
@@ -3082,8 +3152,8 @@ class Simulator:
                     if description:
                         row_out['description'] = description
                 choices: list[dict[str, Any]] = []
-                for choice in self.index.row_choices(row.id):
-                    if self._choice_visible(choice):
+                for choice in self._display_row_choices(row):
+                    if self._choice_visible(choice, row):
                         choice_view = self._view_choice(
                             choice,
                             row,
@@ -3108,7 +3178,11 @@ class Simulator:
         rows = rows_of('row')
         backpack_rows = rows_of('backpack_row') if include_backpack else []
 
-        visible_selectables = [ent for ent in self.index.selectables(include_backpack=include_backpack) if self.entity_visible(ent.id)]
+        presented: dict[str, list[dict[str, Any]]] = {}
+        for item in [*flat_choices, *flat_addons]:
+            presented.setdefault(item['id'], []).append(item)
+        visible_selectables = [ent for ent in self.index.selectables(include_backpack=include_backpack)
+                               if ent.id in presented]
         available_selection_ids: list[str] = []
         deselectable_selection_ids: list[str] = []
         available_direct_choice_ids: list[str] = []
@@ -3117,21 +3191,21 @@ class Simulator:
         deselectable_selectable_addon_ids: list[str] = []
         for ent in visible_selectables:
             status = self._cached_choice_status(ent.id, status_cache)
-            if status.visible and status.selectable:
+            if status.visible and any(item.get('can_select') for item in presented[ent.id]):
                 available_selection_ids.append(ent.id)
                 if ent.kind == 'choice':
                     available_direct_choice_ids.append(ent.id)
                 elif ent.kind == 'selectable_addon':
                     available_selectable_addon_ids.append(ent.id)
             can_deselect, _ = self._deselect_status(ent)
-            if can_deselect:
+            if can_deselect and any(item.get('can_deselect') for item in presented[ent.id]):
                 deselectable_selection_ids.append(ent.id)
                 if ent.kind == 'choice':
                     deselectable_direct_choice_ids.append(ent.id)
                 elif ent.kind == 'selectable_addon':
                     deselectable_selectable_addon_ids.append(ent.id)
 
-        selected_ids = [x for x in self.state.selected_order if self._active(x) and self.entity_visible(x)]
+        selected_ids = [x for x in self.state.selected_order if self._active(x) and x in presented]
         visible_choice_ids = [choice['id'] for choice in flat_choices]
         visible_addon_ids = [addon['id'] for addon in flat_addons]
         visible_selectable_addon_ids = [addon['id'] for addon in flat_addons if addon.get('kind') == 'selectable_addon']
@@ -3347,7 +3421,7 @@ class Simulator:
         row = self._row(ent)
         parent = self.index.parent_choice(ent) if ent.kind == 'selectable_addon' else None
         blocked = (
-            (row is not None and row.value.get('isInfoRow'))
+            not self._entity_interactable(ent)
             or not self.entity_visible(ent.id)
             or (parent is not None and not self._requirements_met(parent.value.get('requireds', []), parent.path + '/requireds')[0])
             or (ent.kind == 'selectable_addon' and self.state.forced_by.get(ent.id))
