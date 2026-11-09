@@ -1,0 +1,201 @@
+#!/usr/bin/env python3
+"""Compare external ICC Plus Viewer race captures with ICC Plus Local replay.
+
+Use matching inputs.zip and races-XXXX.zip archives from one capture run.
+Checks observed Viewer row visibility and native Build Form exports, not
+screenshots or the correctness of authored prerequisites. Newer captures
+may also provide independent main-choice DOM identities.
+
+A match cannot certify uncaptured interactions, Creator GUI behavior,
+layout, or an overall race run whose own status is failed/incomplete.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import sys
+from pathlib import Path
+from zipfile import BadZipFile, ZipFile
+
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from iccplus_tools.simulator import Simulator  # noqa: E402
+
+
+class EvidenceError(ValueError):
+    """Missing, inconsistent, or corrupted evidence (not an engine mismatch)."""
+
+
+def checked_member(archive: ZipFile, manifest: dict, path: str) -> bytes:
+    """Only trust files declared in the run's package manifest."""
+    entry = (manifest.get('files') or {}).get(path)
+    if not isinstance(entry, dict) or 'sha256' not in entry or 'size' not in entry:
+        raise EvidenceError(f'undeclared member: {path}')
+    try:
+        data = archive.read(path)
+    except KeyError as exc:
+        raise EvidenceError(f'missing member: {path}') from exc
+    if len(data) != entry['size'] or hashlib.sha256(data).hexdigest() != entry['sha256']:
+        raise EvidenceError(f'checksum/size mismatch: {path}')
+    return data
+
+
+def json_member(archive: ZipFile, manifest: dict, path: str) -> dict:
+    value = json.loads(checked_member(archive, manifest, path))
+    if not isinstance(value, dict):
+        raise EvidenceError(f'expected JSON object: {path}')
+    return value
+
+
+def package_manifest(archive: ZipFile, kind: str) -> dict:
+    try:
+        manifest = json.loads(archive.read('PACKAGE_MANIFEST.json'))
+    except (KeyError, ValueError) as exc:
+        raise EvidenceError('missing or invalid PACKAGE_MANIFEST.json') from exc
+    if manifest.get('kind') != kind or not manifest.get('run_id'):
+        raise EvidenceError(f'wrong package kind/run ID: expected {kind}')
+    return manifest
+
+
+def compare_race(archive: ZipFile, manifest: dict, key: str, project: dict,
+                 *, source_sha256: str, require_choice_cards: bool = False) -> dict:
+    prefix = f'results/roster/races/{key}/'
+    result = {'race': key, 'status': 'pass', 'mismatches': [],
+              'choice_card_coverage': 'not_recorded'}
+    try:
+        state = json_member(archive, manifest, prefix + 'build/normalized_profile.state.json')
+        sim = Simulator.from_state(project, state)
+        proof = json_member(archive, manifest, prefix + 'viewer_attempt_001/import_verification.json')
+        summary = json_member(archive, manifest, prefix + 'viewer_attempt_001/select_scroll_summary.json')
+        frames_text = checked_member(archive, manifest, prefix + 'viewer_attempt_001/scroll_frames.jsonl')
+        viewer_build = checked_member(archive, manifest, prefix + 'viewer_attempt_001/viewer_build_form_after_scroll.txt').decode('utf-8')
+        frames = [json.loads(line) for line in frames_text.decode('utf-8').splitlines() if line.strip()]
+        if not frames or summary.get('state') != 'finished' or not summary.get('scroll_reached_end'):
+            raise EvidenceError('Viewer scroll is missing or unfinished')
+        if summary.get('project_sha256') != source_sha256:
+            raise EvidenceError('Viewer capture project SHA-256 differs from inputs')
+        if not all(frame.get('status') == 'captured' for frame in frames):
+            raise EvidenceError('failed/uncaptured scroll frame')
+        if 'native Viewer' not in str(proof.get('verified_by', '')):
+            raise EvidenceError('no official Viewer Build Form provenance')
+        if not isinstance(proof.get('viewer_native_export'), dict) or not isinstance(proof.get('expected_build_form'), dict):
+            raise EvidenceError('missing native and expected Build Form data')
+        if proof['viewer_native_export'] != proof['expected_build_form']:
+            result['mismatches'].append('native Viewer export differs from headless expected Build Form')
+        for field in ('missing_after_import', 'extra_after_import', 'count_mismatches',
+                      'text_mismatches', 'missing_requested_after_import'):
+            if proof.get(field):
+                result['mismatches'].append(f'official Viewer import: {field}')
+        if viewer_build.rstrip('\r\n') != sim.export_build_string().rstrip('\r\n'):
+            result['mismatches'].append('local Build Form export differs from official Viewer')
+        observed_rows = {ident for f in frames for ident in f.get('visible_row_ids', [])}
+        expected_rows = set(sim.visible_row_ids())
+        result['visible_row_count'] = len(observed_rows)
+        result['missing_rows'] = sorted(expected_rows - observed_rows)
+        result['unexpected_rows'] = sorted(observed_rows - expected_rows)
+        if result['missing_rows'] or result['unexpected_rows']:
+            result['mismatches'].append('Viewer DOM row IDs differ from local replay')
+        if any('dom_choice_cards' in f for f in frames):
+            result['choice_card_coverage'] = 'observed'
+            cards = [card for f in frames for card in f.get('dom_choice_cards', [])]
+            rendered = {c['choice_id'] for c in cards if c.get('rendered')}
+            expected_choices = {
+                ent.id for row in sim.index.by_kind.get('row', []) if row.id in expected_rows
+                for ent in sim.index.row_choices(row.id) if sim.entity_visible(ent.id)
+            }
+            result['missing_choice_cards'] = sorted(expected_choices - rendered)
+            result['unexpected_choice_cards'] = sorted(rendered - expected_choices)
+            if result['missing_choice_cards'] or result['unexpected_choice_cards']:
+                result['mismatches'].append('Viewer DOM main-choice IDs differ from local replay')
+            for card in cards:
+                if card.get('rendered') and card.get('selected') != sim._active(card['choice_id']):
+                    result['mismatches'].append(f'selected state differs: {card["choice_id"]}')
+                    break
+        elif require_choice_cards:
+            raise EvidenceError('per-card DOM capture missing; cannot certify choice visibility')
+    except (EvidenceError, KeyError, TypeError, ValueError, RuntimeError, BadZipFile) as exc:
+        result['status'] = 'incomplete'
+        result['reason'] = str(exc)
+        return result
+    if result['mismatches']:
+        result['status'] = 'mismatch'
+    return result
+
+
+def compare_archives(inputs: Path, races: list[Path], *, require_choice_cards: bool = False) -> dict:
+    result = {'source': str(inputs), 'races': [str(x) for x in races],
+              'passed': 0, 'mismatched': 0, 'incomplete': 0, 'details': [],
+              'warnings': [], 'overall_capture_run_passed': True}
+    seen: set[str] = set()
+    with ZipFile(inputs) as archive:
+        manifest = package_manifest(archive, 'inputs')
+        project_bytes = checked_member(archive, manifest, 'inputs/project.json')
+        project = json.loads(project_bytes)
+        source_sha = hashlib.sha256(project_bytes).hexdigest()
+        result['run_id'], result['source_sha256'] = manifest['run_id'], source_sha
+        if manifest.get('source_project_sha256') not in (None, source_sha):
+            raise EvidenceError('inputs package source hash mismatch')
+    for path in races:
+        with ZipFile(path) as archive:
+            manifest = package_manifest(archive, 'races')
+            if manifest['run_id'] != result['run_id']:
+                raise EvidenceError(f'{path}: mismatched run ID')
+            pinned_source = manifest.get('source_project_sha256')
+            if pinned_source is not None and pinned_source != source_sha:
+                raise EvidenceError(f'{path}: mismatched source project SHA-256')
+            if pinned_source is None:
+                result['warnings'].append(f'{path}: legacy archive has no per-part source pin')
+            run_status = (manifest.get('notes') or {}).get('status', {}).get('all_passed')
+            if run_status is not True:
+                result['overall_capture_run_passed'] = False
+                if run_status is None:
+                    result['warnings'].append(f'{path}: overall run status not recorded')
+            keys = sorted({name.split('/')[3] for name in manifest.get('files', {})
+                           if name.startswith('results/roster/races/') and len(name.split('/')) > 4})
+            if not keys:
+                raise EvidenceError(f'{path}: no declared race evidence')
+            for key in keys:
+                if key in seen:
+                    raise EvidenceError(f'{path}: duplicate race key {key}')
+                seen.add(key)
+                row = compare_race(archive, manifest, key, project,
+                                   source_sha256=source_sha, require_choice_cards=require_choice_cards)
+                result['details'].append(row)
+                result[{'pass': 'passed', 'mismatch': 'mismatched', 'incomplete': 'incomplete'}[row['status']]] += 1
+    result['checked_dimensions_passed'] = bool(result['passed'] and not result['mismatched']
+                                                and not result['incomplete'])
+    result['fully_verified'] = bool(result['checked_dimensions_passed']
+                                    and result['overall_capture_run_passed']
+                                    and not result['warnings']
+                                    and all(d['choice_card_coverage'] == 'observed'
+                                            for d in result['details']))
+    return result
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--inputs', type=Path, required=True, help='matching inputs.zip')
+    parser.add_argument('races', nargs='+', type=Path, help='one or more races-XXXX.zip')
+    parser.add_argument('--require-choice-cards', action='store_true',
+                        help='mark legacy row-only captures incomplete')
+    parser.add_argument('--output', type=Path, help='write full JSON including race-level failures')
+    args = parser.parse_args()
+    try:
+        result = compare_archives(args.inputs, args.races,
+                                  require_choice_cards=args.require_choice_cards)
+    except (EvidenceError, OSError, BadZipFile, ValueError) as exc:
+        print(json.dumps({'error': str(exc)}, indent=2), file=sys.stderr)
+        return 2
+    if args.output:
+        args.output.write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8')
+    print(json.dumps({key: result[key] for key in ('run_id', 'source_sha256', 'passed',
+         'mismatched', 'incomplete', 'checked_dimensions_passed', 'fully_verified',
+         'overall_capture_run_passed', 'warnings')}, indent=2))
+    return 0 if result['fully_verified'] else 1
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
