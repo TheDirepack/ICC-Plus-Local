@@ -280,7 +280,7 @@ def compare_archives(inputs: Path, races: list[Path], *, require_choice_cards: b
                                     and result['overall_capture_run_passed']
                                     and result['race_inventory_verified']
                                     and not result['warnings']
-                                    and all(d['choice_card_coverage'] == 'observed'
+                                    and all(d['choice_card_coverage'] == 'observed_all_frames'
                                             for d in result['details']))
     return result
 
