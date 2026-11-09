@@ -18,24 +18,24 @@ Creator verification kit. It replays saved states against the current ICC Plus
 Local simulator and compares recorded official Viewer rows, Build Form strings,
 and—when the capture actually includes them—main Choice DOM cards.
 
-\`\`\`bash
+```bash
 python verification/scripts/check_race_capture_parity.py \
   --inputs final_outputs/RUN_ID/inputs.zip \
   --package-index final_outputs/RUN_ID/PACKAGE_INDEX.json \
   --require-choice-cards \
   --output final_outputs/RUN_ID/race_parity_report.json \
   final_outputs/RUN_ID/races-*.zip
-\`\`\`
+```
 
-The \`--package-index\` file is the **source-created Dev220 v3 inventory**: its
+The `--package-index` file is the **source-created Dev220 v3 inventory**: its
 run/source pins, complete race-shard list, exact archive SHA-256s, and
 race-to-part membership must match the supplied ZIPs. Without it, the tool
-still reports any matching race observations, but \`fully_verified\` is **false**
+still reports any matching race observations, but `fully_verified` is **false**
 because missing shards cannot be ruled out. It also verifies every consumed
 ZIP member against that ZIP's internal manifest. A mismatch in archive
 identity or completeness is an evidence error, **not** a gameplay failure.
 
-\`--require-choice-cards\` marks older row-only captures incomplete instead of
+`--require-choice-cards` marks older row-only captures incomplete instead of
 misrepresenting them as complete Choice-card differentials. The complete-card
 check requires a DOM inventory in *every* frame, and verifies Choice identity
 together with the displayed Row. Dynamic Result/Group Row card inventories are
@@ -47,4 +47,4 @@ Dev220 or any newer project.
 A fully verified race comparison is not a complete package-evidence audit,
 visual/layout acceptance, Creator GUI test, or proof that the complete capture
 run passed. For whole-bundle integrity including the regular capture shards,
-run Dev220's \`verify_evidence_bundle.py\` on the same directory.
+run Dev220's `verify_evidence_bundle.py` on the same directory.
