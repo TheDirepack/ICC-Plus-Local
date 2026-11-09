@@ -166,22 +166,43 @@ def compare_race(archive: ZipFile, manifest: dict, key: str, project: dict,
         result['unexpected_rows'] = sorted(observed_rows - expected_rows)
         if result['missing_rows'] or result['unexpected_rows']:
             result['mismatches'].append('Viewer DOM row IDs differ from local replay')
-        if any('dom_choice_cards' in f for f in frames):
-            result['choice_card_coverage'] = 'observed'
-            cards = [card for f in frames for card in f.get('dom_choice_cards', [])]
-            rendered = {c['choice_id'] for c in cards if c.get('rendered')}
-            expected_choices = {
-                ent.id for row in sim.index.by_kind.get('row', []) if row.id in expected_rows
-                for ent in sim.index.row_choices(row.id) if sim.entity_visible(ent.id)
+        if any('dom_choice_cards' in frame for frame in frames):
+            if not all(isinstance(frame.get('dom_choice_cards'), list) for frame in frames):
+                raise EvidenceError('partial per-card DOM coverage: some captured frames lack card arrays')
+            # Source-only replay on this branch does not model dynamic Result/Group Row
+            # card projection. Do not mislabel such displays as a Viewer mismatch.
+            if any(row.value.get('isResultRow') or row.value.get('isGroupRow')
+                   for row in sim.index.by_kind.get('row', [])):
+                raise EvidenceError('dynamic Result/Group Row card projection not available in this checker')
+            result['choice_card_coverage'] = 'observed_all_frames'
+            observed_pairs: set[tuple[str, str]] = set()
+            for frame in frames:
+                rendered_here = []
+                for card in frame['dom_choice_cards']:
+                    if not isinstance(card, dict) or not isinstance(card.get('rendered'), bool):
+                        raise EvidenceError('malformed per-card DOM record')
+                    if not card['rendered']:
+                        continue
+                    row_id, choice_id = card.get('row_id'), card.get('choice_id')
+                    if not isinstance(row_id, str) or not isinstance(choice_id, str):
+                        raise EvidenceError('missing DOM row/choice identity')
+                    rendered_here.append((row_id, choice_id))
+                    if card.get('selected') != sim._active(choice_id):
+                        result['mismatches'].append(f'selected state differs: {choice_id}')
+                if len(rendered_here) != len(set(rendered_here)):
+                    result['mismatches'].append('duplicate mounted Choice card in one DOM frame')
+                observed_pairs.update(rendered_here)
+            expected_pairs = {
+                (row.id, choice.id)
+                for row in sim.index.by_kind.get('row', []) if row.id in expected_rows
+                for choice in sim.index.row_choices(row.id) if sim.entity_visible(choice.id)
             }
-            result['missing_choice_cards'] = sorted(expected_choices - rendered)
-            result['unexpected_choice_cards'] = sorted(rendered - expected_choices)
+            result['missing_choice_cards'] = sorted(
+                f'{row_id}/{choice_id}' for row_id, choice_id in expected_pairs - observed_pairs)
+            result['unexpected_choice_cards'] = sorted(
+                f'{row_id}/{choice_id}' for row_id, choice_id in observed_pairs - expected_pairs)
             if result['missing_choice_cards'] or result['unexpected_choice_cards']:
-                result['mismatches'].append('Viewer DOM main-choice IDs differ from local replay')
-            for card in cards:
-                if card.get('rendered') and card.get('selected') != sim._active(card['choice_id']):
-                    result['mismatches'].append(f'selected state differs: {card["choice_id"]}')
-                    break
+                result['mismatches'].append('Viewer DOM row/Choice pairs differ from local replay')
         elif require_choice_cards:
             raise EvidenceError('per-card DOM capture missing; cannot certify choice visibility')
     except (EvidenceError, KeyError, TypeError, ValueError, RuntimeError, BadZipFile) as exc:
