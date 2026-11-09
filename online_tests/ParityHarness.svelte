@@ -1,5 +1,6 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+    import { onMount, tick } from 'svelte';
+    import AppRow from '$lib/viewer/AppRow.svelte';
     import {
         app,
         appVersion,
@@ -20,6 +21,7 @@
     } from '$lib/store/store.svelte';
 
     let output = $state('running');
+    let projectedRows = $state<any[]>([]);
 
     const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value));
     const options = () => ({ linkedObjects: [] as string[] });
@@ -104,6 +106,23 @@
         throw new Error(`unsupported action ${action.op}`);
     }
 
+    function captureProjectedRows(rowIds: string[]): Record<string, string[]> {
+        const selectableIds = new Set(selectableEntries().map(([id]) => id));
+        const rows: Record<string, string[]> = {};
+        for (const rowId of rowIds) {
+            const container = document.querySelector('[data-projection-row="' + rowId + '"]');
+            if (!container) throw new Error('missing official AppRow DOM: ' + rowId);
+            rows[rowId] = Array.from(container.querySelectorAll('.choice')).map((card) => {
+                const klass = Array.from(card.classList).find(
+                    (value) => value.startsWith('choice-') && selectableIds.has(value.slice(7))
+                );
+                if (!klass) throw new Error('rendered Choice ID not found: ' + rowId);
+                return klass.slice(7);
+            });
+        }
+        return rows;
+    }
+
     onMount(async () => {
         try {
             localStorage.clear();
@@ -158,6 +177,22 @@
                 }
                 sparseResults[testCase.name] = runs;
             }
+            const projectedResults: Record<string, any> = {};
+            for (const testCase of payload.projected_cases || []) {
+                localStorage.clear();
+                await initializeApp(clone(testCase.project));
+                projectedRows = [...app.rows];
+                await tick();
+                const checkpoints = [captureProjectedRows(testCase.row_ids)];
+                for (const action of testCase.actions || []) {
+                    await act(action);
+                    await tick();
+                    checkpoints.push(captureProjectedRows(testCase.row_ids));
+                }
+                projectedResults[testCase.name] = checkpoints;
+                projectedRows = [];
+                await tick();
+            }
             output = JSON.stringify({
                 commit: payload.commit,
                 appVersion,
@@ -167,6 +202,7 @@
                 actionTraces,
                 discountDebug,
                 sparseResults,
+                projectedResults,
             });
             document.title = 'ICCPLUS_PARITY_DONE';
         } catch (error) {
@@ -177,3 +213,10 @@
 </script>
 
 <pre id="parity-results">{output}</pre>
+<div id="projected-row-evidence">
+    {#each projectedRows as row (row.id)}
+        <div data-projection-row={row.id}>
+            <AppRow row={row} windowWidth={1280} />
+        </div>
+    {/each}
+</div>
