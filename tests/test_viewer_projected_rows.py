@@ -130,6 +130,25 @@ class ViewerProjectedRowTest(unittest.TestCase):
         self.assertNotIn('sword', sim.player_view()['available_direct_choice_ids'])
         self.assertEqual(sim.click('sword').code, 'interaction.click_ignored')
 
+    def test_backpack_choice_projected_into_normal_group_is_available(self):
+        project = make_project()
+        backpack = copy.deepcopy(project['rows'][0])
+        backpack['id'] = 'bag_source'
+        backpack['isBackpack'] = True
+        backpack['objects'] = [{
+            **copy.deepcopy(project['rows'][0]['objects'][1]),
+            'id': 'bag_item', 'title': 'Bag item', 'scores': [], 'groups': ['weapons'],
+        }]
+        project['backpack'] = [backpack]
+        project['groups'][0]['elements'] = ['bag_item']
+        sim = Simulator(project)
+        view = sim.player_view(include_backpack=False)
+        self.assertNotIn('bag_source', view['row_ids'])
+        self.assertEqual(next(row for row in view['rows'] if row['id'] == 'group_display')['choice_ids'], ['bag_item'])
+        self.assertIn('bag_item', view['available_direct_choice_ids'])
+        self.assertTrue(sim.select('bag_item').ok)
+        self.assertIn('bag_item', sim.player_view()['selected_choice_ids'])
+
     def test_result_row_addons_use_destination_row_flags(self):
         project = make_project()
         sim = Simulator(project)
