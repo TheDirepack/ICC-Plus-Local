@@ -3181,7 +3181,7 @@ class Simulator:
         presented: dict[str, list[dict[str, Any]]] = {}
         for item in [*flat_choices, *flat_addons]:
             presented.setdefault(item['id'], []).append(item)
-        visible_selectables = [ent for ent in self.index.selectables(include_backpack=include_backpack)
+        visible_selectables = [ent for ent in self.index.selectables(include_backpack=True)
                                if ent.id in presented]
         available_selection_ids: list[str] = []
         deselectable_selection_ids: list[str] = []
