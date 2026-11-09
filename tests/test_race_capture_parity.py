@@ -39,7 +39,8 @@ class RaceCaptureParityTest(unittest.TestCase):
             archive.writestr('PACKAGE_MANIFEST.json', json.dumps(manifest))
 
     def write_archives(self, *, wrong_row=False, wrong_build=False, wrong_run=False,
-                       card_capture=False, failed_run=False, scroll_finished=True):
+                       card_capture=False, failed_run=False, scroll_finished=True,
+                       partial_card_frame=False, wrong_card_row=False, duplicate_card=False):
         inputs = self.root / 'inputs.zip'
         races = self.root / 'races-0001.zip'
         self._package(inputs, 'inputs', {'inputs/project.json': self.project_bytes}, source=self.sha)
@@ -54,6 +55,12 @@ class RaceCaptureParityTest(unittest.TestCase):
                  'selected': self.sim._active(c.id)}
                 for c in self.sim.index.by_kind.get('choice', []) if self.sim.entity_visible(c.id)
             ]
+            if wrong_card_row:
+                frames[0]['dom_choice_cards'][0]['row_id'] = 'wrong_display_row'
+            if duplicate_card:
+                frames[0]['dom_choice_cards'].append(copy.deepcopy(frames[0]['dom_choice_cards'][0]))
+            if partial_card_frame:
+                frames.append({'status': 'captured', 'visible_row_ids': rows})
         export = self.sim.export_build_string()
         if wrong_build:
             export += '/not_official'
@@ -129,7 +136,39 @@ class RaceCaptureParityTest(unittest.TestCase):
         self.assertTrue(report['race_inventory_verified'])
         self.assertTrue(report['fully_verified'])
 
+    def test_partial_dom_inventory_is_not_counted_complete(self):
+        inputs, races = self.write_archives(card_capture=True, partial_card_frame=True)
+        report = compare_archives(inputs, [races], require_choice_cards=True)
+        self.assertEqual(report['incomplete'], 1)
+        self.assertIn('partial per-card', report['details'][0]['reason'])
+
+    def test_card_row_misplacement_is_detected(self):
+        inputs, races = self.write_archives(card_capture=True, wrong_card_row=True)
+        report = compare_archives(inputs, [races])
+        self.assertEqual(report['mismatched'], 1)
+        self.assertTrue(report['details'][0]['unexpected_choice_cards'])
+        self.assertTrue(report['details'][0]['missing_choice_cards'])
+
+    def test_duplicate_card_in_single_frame_is_detected(self):
+        inputs, races = self.write_archives(card_capture=True, duplicate_card=True)
+        report = compare_archives(inputs, [races])
+        self.assertEqual(report['mismatched'], 1)
+        self.assertIn('duplicate mounted', str(report['details'][0]['mismatches']))
+
+    def test_unmodeled_result_row_card_differential_is_incomplete_not_mismatch(self):
+        row = copy.deepcopy(self.project['rows'][0])
+        row.update(id='result_summary', title='Results', objects=[], isResultRow=True)
+        self.project['rows'].append(row)
+        self.project_bytes = json.dumps(self.project).encode()
+        self.sha = hashlib.sha256(self.project_bytes).hexdigest()
+        self.sim = Simulator(self.project)
+        inputs, races = self.write_archives(card_capture=True)
+        report = compare_archives(inputs, [races])
+        self.assertEqual(report['incomplete'], 1)
+        self.assertIn('Result/Group Row', report['details'][0]['reason'])
+
     def test_indexed_missing_race_shard_cannot_pass(self):
+
         inputs, races = self.write_archives(card_capture=True)
         index = self.write_index(inputs, races, extra_race=True)
         with self.assertRaisesRegex(EvidenceError, 'incomplete or noncontiguous'):
