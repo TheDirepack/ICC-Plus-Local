@@ -38,8 +38,14 @@ def projected_cases() -> list[dict[str, Any]]:
     hidden = copy.deepcopy(proj)
     hidden['rows'][0]['requireds'] = [_req('id', reqId='fire')]
     # A Group Row mounts a card even when the original Row fails Requirements.
+    cross = copy.deepcopy(proj)
+    cross['backpack'] = [_row('bag_source', [_choice('bag_item', groups=['weapons'])])]
+    cross['groups'][0]['elements'] = ['bag_item']
+    # The main Viewer Group Row can project a Choice whose source is Backpack.
     return [selected, {'name': 'group_row_hidden_source', 'project': hidden,
-                       'row_ids': captured, 'actions': []}]
+                       'row_ids': captured, 'actions': []},
+            {'name': 'group_row_backpack_source', 'project': cross,
+             'row_ids': captured, 'actions': []}]
 
 
 def local_projected_traces() -> dict[str, list[dict[str, list[str]]]]:
