@@ -75,6 +75,26 @@ class RaceCaptureParityTest(unittest.TestCase):
                       source=self.sha, good=not failed_run)
         return inputs, races
 
+    def write_index(self, inputs, races, *, extra_race=False, bad_members=False, all_passed=True):
+        def archive_record(path):
+            data = path.read_bytes()
+            return {'file': path.name, 'sha256': hashlib.sha256(data).hexdigest(),
+                    'bytes': len(data), 'files': 1}
+        records = {'inputs': archive_record(inputs), 'races-0001': archive_record(races),
+                   'regular': {'file': 'regular.zip', 'sha256': '0' * 64, 'bytes': 0}}
+        if extra_race:
+            records['races-0002'] = {
+                'file': 'races-0002.zip', 'sha256': 'f' * 64, 'bytes': 100}
+        index = {
+            'format': 'cyra-sharded-package-v3', 'run_id': 'official-run',
+            'source_project_sha256': self.sha,
+            'run_status': {'all_passed': all_passed}, 'archives': records,
+            'races': {'wrong_key' if bad_members else 'test_race': ['races-0001.zip']},
+        }
+        path = self.root / 'PACKAGE_INDEX.json'
+        path.write_text(json.dumps(index))
+        return path
+
     def test_complete_observed_rows_and_native_export(self):
         inputs, races = self.write_archives()
         report = compare_archives(inputs, [races])
@@ -103,7 +123,46 @@ class RaceCaptureParityTest(unittest.TestCase):
         inputs, races = self.write_archives(card_capture=True)
         report = compare_archives(inputs, [races], require_choice_cards=True)
         self.assertEqual(report['passed'], 1)
+        self.assertFalse(report['fully_verified'])  # a single provided ZIP is not proof of all shards
+        index = self.write_index(inputs, races)
+        report = compare_archives(inputs, [races], require_choice_cards=True, package_index=index)
+        self.assertTrue(report['race_inventory_verified'])
         self.assertTrue(report['fully_verified'])
+
+    def test_indexed_missing_race_shard_cannot_pass(self):
+        inputs, races = self.write_archives(card_capture=True)
+        index = self.write_index(inputs, races, extra_race=True)
+        with self.assertRaisesRegex(EvidenceError, 'incomplete or noncontiguous'):
+            compare_archives(inputs, [races], package_index=index)
+
+    def test_indexed_archive_hash_mismatch_cannot_pass(self):
+        inputs, races = self.write_archives(card_capture=True)
+        index = self.write_index(inputs, races)
+        with races.open('ab') as archive:
+            archive.write(b'tampered after archive manifest')
+        with self.assertRaisesRegex(EvidenceError, 'whole-archive size/SHA-256 mismatch'):
+            compare_archives(inputs, [races], package_index=index)
+
+    def test_indexed_wrong_race_membership_cannot_pass(self):
+        inputs, races = self.write_archives(card_capture=True)
+        index = self.write_index(inputs, races, bad_members=True)
+        with self.assertRaisesRegex(EvidenceError, 'race-to-ZIP inventory differs'):
+            compare_archives(inputs, [races], package_index=index)
+
+    def test_index_run_status_blocks_full_verification(self):
+        inputs, races = self.write_archives(card_capture=True)
+        index = self.write_index(inputs, races, all_passed=False)
+        report = compare_archives(inputs, [races], package_index=index)
+        self.assertTrue(report['race_inventory_verified'])
+        self.assertFalse(report['fully_verified'])
+        self.assertFalse(report['overall_capture_run_passed'])
+
+    def test_unlisted_zip_member_rejected(self):
+        inputs, races = self.write_archives()
+        with ZipFile(races, 'a') as archive:
+            archive.writestr('unlisted.txt', 'this was added after the manifest')
+        with self.assertRaisesRegex(EvidenceError, 'unlisted'):
+            compare_archives(inputs, [races])
 
     def test_source_run_mismatch_is_blocking_not_a_parity_fail(self):
         inputs, races = self.write_archives(wrong_run=True)
