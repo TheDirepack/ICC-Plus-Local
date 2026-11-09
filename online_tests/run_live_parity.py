@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from iccplus_tools.live_parity import live_cases, local_results, run_local_case_trace, sparse_equivalence_cases
+from iccplus_tools.projected_parity import projected_cases, local_projected_traces
 from iccplus_tools.upstream_2106 import ICCPLUS_COMMIT, ICCPLUS_VERSION, default_export_text
 from online_tests.source_format_check import compare_type_catalog
 
@@ -146,6 +147,21 @@ def compare(upstream: dict) -> list[str]:
                 f'baseline={json.dumps(runs.get("baseline"), sort_keys=True)} '
                 f'candidate={json.dumps(runs.get("candidate"), sort_keys=True)}'
             )
+    local_projected = local_projected_traces()
+    remote_projected = upstream.get('projectedResults', {})
+    if set(local_projected) != set(remote_projected):
+        errors.append(
+            f'projected DOM case inventory differs: local={sorted(local_projected)} '
+            f'upstream={sorted(remote_projected)}'
+        )
+    for name, checkpoints in sorted(local_projected.items()):
+        observed = remote_projected.get(name)
+        if checkpoints != observed:
+            errors.append(
+                f'projected DOM/{name}: local and official AppRow cards differ '
+                f'local={json.dumps(checkpoints, sort_keys=True)} '
+                f'upstream={json.dumps(observed, sort_keys=True)}'
+            )
     return errors
 
 
@@ -162,7 +178,8 @@ def main() -> int:
         viewer = checkout / 'ICCPlus_Viewer'
         harness = ROOT / 'online_tests' / 'ParityHarness.svelte'
         shutil.copy2(harness, viewer / 'src' / 'App.svelte')
-        fixtures = {'commit': ICCPLUS_COMMIT, 'cases': live_cases(), 'sparse_cases': sparse_equivalence_cases()}
+        fixtures = {'commit': ICCPLUS_COMMIT, 'cases': live_cases(), 'sparse_cases': sparse_equivalence_cases(),
+                    'projected_cases': projected_cases()}
         (viewer / 'public' / 'parity-fixtures.json').write_text(json.dumps(fixtures, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
 
         install = run(['npm', 'ci', '--no-audit', '--no-fund'], cwd=viewer, check=False, timeout=900)
@@ -203,6 +220,7 @@ def main() -> int:
             'cases': len(live_cases()),
             'action_trace_cases': sum(bool(c.get('check_action_trace')) for c in live_cases()),
             'sparse_equivalence_cases': len(sparse_equivalence_cases()),
+            'projected_dom_cases': len(projected_cases()),
             'errors': errors,
         }
         print(json.dumps(report, indent=2))
